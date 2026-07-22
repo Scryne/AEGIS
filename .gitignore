@@ -1,0 +1,60 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.python-version
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# --- uv ---
+# uv.lock IS committed (deterministic builds); caches are not.
+
+# --- Node / Next.js ---
+node_modules/
+.pnpm-store/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+.vercel/
+next-env.d.ts
+
+# --- Environment & secrets ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# --- Editors / OS ---
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+*.log
+
+# --- Docker / data volumes ---
+.docker-data/
+pgdata/
+esdata/
+miniodata/
+
+# --- Project artifacts ---
+/tmp/
+scratch/
+*.local
+
+# --- KVKK: gerçek müşteri verisi / dosyaları ASLA commit edilmez ---
+data/private/

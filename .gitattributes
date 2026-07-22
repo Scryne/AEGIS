@@ -1,0 +1,14 @@
+# Depoda tüm metin dosyaları LF ile saklanır (çapraz-platform tutarlılık;
+# CI Linux ↔ yerel Windows format farkını önler).
+* text=auto eol=lf
+
+# İkili dosyalar dönüştürülmez.
+*.pdf binary
+*.docx binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary

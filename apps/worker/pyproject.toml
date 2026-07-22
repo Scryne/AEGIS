@@ -1,0 +1,19 @@
+[project]
+name = "aegis-worker"
+version = "0.0.0"
+description = "AEGIS Celery worker'ları — tarama, senkron, belge işleme (asenkron)."
+requires-python = ">=3.12"
+dependencies = [
+    "aegis-core",
+    "celery[redis]>=5.4.0",
+]
+
+[tool.uv.sources]
+aegis-core = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/aegis_worker"]

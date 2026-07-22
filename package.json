@@ -1,0 +1,32 @@
+{
+  "name": "aegis",
+  "version": "0.0.0",
+  "private": true,
+  "description": "AEGIS — KYB / kurumsal due diligence platformu (monorepo)",
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "lint:py": "uv run ruff check .",
+    "format:py": "uv run ruff format .",
+    "format:py:check": "uv run ruff format --check .",
+    "typecheck:py": "uv run mypy -p aegis_core -p aegis_api -p aegis_worker",
+    "test:py": "uv run pytest",
+    "test:py:integration": "uv run pytest -m integration",
+    "api:dev": "uv run uvicorn aegis_api.main:app --reload --host 0.0.0.0 --port 8000",
+    "worker:dev": "uv run celery -A aegis_worker.celery_app:celery_app worker --loglevel=info -B",
+    "openapi:export": "uv run python scripts/export_openapi.py",
+    "web:dev": "pnpm --filter @aegis/web dev",
+    "web:build": "pnpm --filter @aegis/web build",
+    "web:lint": "pnpm --filter @aegis/web lint",
+    "web:typecheck": "pnpm --filter @aegis/web typecheck",
+    "lint": "pnpm run lint:py",
+    "typecheck": "pnpm run typecheck:py",
+    "test": "pnpm run test:py",
+    "up": "docker compose -f infra/compose/docker-compose.yml up -d",
+    "down": "docker compose -f infra/compose/docker-compose.yml down",
+    "logs": "docker compose -f infra/compose/docker-compose.yml logs -f"
+  }
+}

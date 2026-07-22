@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/*
+ * AEGIS tasarım token'ları (Revision R7): renk/aralık/tipografi CSS değişkenleriyle
+ * tanımlanır — hiçbir marka değeri kod içine gömülmez. Beyaz etiket (özel alan/logo)
+ * BU FAZDA yapılmaz; token'lar yalnızca ileride temayı bounded tutmak içindir.
+ */
+@theme {
+  --color-bg: oklch(0.99 0 0);
+  --color-surface: oklch(1 0 0);
+  --color-border: oklch(0.92 0.004 260);
+  --color-fg: oklch(0.22 0.02 260);
+  --color-muted: oklch(0.55 0.02 260);
+  --color-primary: oklch(0.52 0.13 245);
+  --color-primary-fg: oklch(0.99 0 0);
+  --color-danger: oklch(0.55 0.19 25);
+  --color-warning: oklch(0.72 0.15 75);
+  --color-success: oklch(0.6 0.13 150);
+
+  --radius-card: 0.625rem;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}

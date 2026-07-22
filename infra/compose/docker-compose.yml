@@ -1,0 +1,180 @@
+name: aegis
+
+# api/worker: RLS'ye TABİ non-superuser rol (aegis_app).
+# migrate: ayrıcalıklı owner/superuser rol (aegis). Bkz. ADR-0002.
+x-app-env: &app-env
+  DATABASE_URL: postgresql+psycopg://aegis_app:aegis_app@postgres:5432/aegis
+  REDIS_URL: redis://redis:6379/0
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: aegis
+      POSTGRES_PASSWORD: aegis
+      POSTGRES_DB: aegis
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegis -d aegis"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # S3-uyumlu nesne depolama (E1.4 belge yükleme). Konsol: http://localhost:9001
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: aegis
+      MINIO_ROOT_PASSWORD: aegis-minio-dev
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Migration'ları çalıştırıp çıkan tek seferlik servis (ayrıcalıklı rol).
+  migrate:
+    build:
+      context: ../..
+      dockerfile: infra/docker/api.Dockerfile
+    command: ["alembic", "upgrade", "head"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://aegis:aegis@postgres:5432/aegis
+      DATABASE_ADMIN_URL: postgresql+psycopg://aegis:aegis@postgres:5432/aegis
+      REDIS_URL: redis://redis:6379/0
+    env_file:
+      - path: ../../.env
+        required: false
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build:
+      context: ../..
+      dockerfile: infra/docker/api.Dockerfile
+    environment:
+      <<: *app-env
+      # Web istekleri Next proxy'sinden gelir; X-Forwarded-For'un sondan 1 girdisi güvenilir.
+      TRUSTED_PROXY_COUNT: "1"
+    env_file:
+      - path: ../../.env
+        required: false
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz', timeout=3)"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  worker:
+    build:
+      context: ../..
+      dockerfile: infra/docker/worker.Dockerfile
+    environment:
+      <<: *app-env
+    env_file:
+      - path: ../../.env
+        required: false
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  # NEXT_PUBLIC_API_URL build anında gömülür (tarayıcı host'tan erişir → localhost).
+  # API_URL çalışma anında sunucu tarafı proxy (/api/v1/[...path]) içindir.
+  web:
+    build:
+      context: ../..
+      dockerfile: infra/docker/web.Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    environment:
+      API_URL: http://api:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  # ── Tarama motoru (E1.3) — `--profile screening` ile başlatılır ──────────────
+  # E1.1'de varsayılan `up` bunları BAŞLATMAZ: ağır (ES ~4GB heap) ve dataset
+  # bağlama işi E1.3'tedir. Erken footprint ölçümü için bilinçle dahil edildi
+  # (bkz. CLAUDE.md — 4–16GB RAM + 10–30GB disk). Sürümler yente 5.5.0'ın kendi
+  # compose'undan pinlendi.
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.2
+    profiles: ["screening"]
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms4g -Xmx4g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s --fail http://localhost:9200/_cluster/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  yente:
+    image: ghcr.io/opensanctions/yente:5.5.0
+    profiles: ["screening"]
+    environment:
+      YENTE_INDEX_TYPE: elasticsearch
+      YENTE_INDEX_URL: http://elasticsearch:9200
+      # E1.3: OpenSanctions dataset senkron mekanizması + (gerekirse) ticari lisans
+      # teslim token'ı burada bağlanır. KVKK: veri kendi ortamımızda kalır.
+    ports:
+      - "8001:8000"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  miniodata:
+  esdata:

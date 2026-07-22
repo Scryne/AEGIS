@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_FROZEN: "1"
+
+jobs:
+  backend:
+    name: Backend — lint · tip · test · izolasyon kapısı
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: aegis
+          POSTGRES_PASSWORD: aegis
+          POSTGRES_DB: aegis
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U aegis -d aegis"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://aegis:aegis@localhost:5432/aegis
+      DATABASE_ADMIN_URL: postgresql+psycopg://aegis:aegis@localhost:5432/aegis
+      REDIS_URL: redis://localhost:6379/0
+    steps:
+      - uses: actions/checkout@v4
+      - name: uv kurulumu
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - name: Bağımlılıklar
+        run: uv sync --frozen
+      - name: Ruff (lint)
+        run: uv run ruff check .
+      - name: Ruff (format)
+        run: uv run ruff format --check .
+      - name: Mypy (strict)
+        run: uv run mypy -p aegis_core -p aegis_api -p aegis_worker
+      - name: Migration (upgrade head)
+        run: uv run alembic upgrade head
+      - name: Birim testleri (pytest)
+        run: uv run pytest
+      - name: KİRACI İZOLASYON KAPISI (testcontainers — BLOKE EDİCİ)
+        # Invariant 1: iki kiracı, her uçta + app rolü altında doğrudan SQL ile SIFIR
+        # sızıntı. Kırmızıya düşerse merge engellenir.
+        run: uv run pytest -m integration
+
+  contract:
+    name: OpenAPI sözleşme drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: uv kurulumu
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - run: uv sync --frozen
+      - name: OpenAPI şemasını üret
+        run: uv run python scripts/export_openapi.py
+      - name: Drift kontrolü (şema commit'lenenle aynı olmalı)
+        run: git diff --exit-code -- docs/openapi.json
+
+  frontend:
+    name: Frontend — lint · tip · build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: pnpm kurulumu
+        uses: pnpm/action-setup@v4
+      - name: Node kurulumu
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Bağımlılıklar
+        run: pnpm install --frozen-lockfile
+      - name: Lint (eslint)
+        run: pnpm --filter @aegis/web lint
+      - name: Tip denetimi (tsc)
+        run: pnpm --filter @aegis/web typecheck
+      - name: Build (Next.js)
+        run: pnpm --filter @aegis/web build
+
+  security:
+    name: Güvenlik taraması
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Gitleaks (sır taraması)
+        run: >-
+          docker run --rm -v "${{ github.workspace }}:/repo"
+          ghcr.io/gitleaks/gitleaks:latest detect --source=/repo --no-banner --redact
+      - name: uv kurulumu
+        uses: astral-sh/setup-uv@v4
+      - name: Bağımlılık denetimi (pip-audit)
+        run: |
+          uv export --frozen --no-dev --no-emit-workspace -o /tmp/req.txt \
+            || uv export --frozen --no-dev -o /tmp/req.txt
+          uvx pip-audit -r /tmp/req.txt || true

@@ -1,0 +1,12 @@
+packages:
+  - "apps/web"
+
+# Kurulum (postinstall) script'lerine izin verilen paketler (pnpm 11 varsayılan
+# olarak hepsini bloklar).
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+
+# NOT: OpenAPI→TS tip-güvenli istemci (packages/api-client) ve sözleşme-drift kapısı
+# API yüzeyi büyüdüğünde (E1.3+) eklenecektir; E1.1 web kabuğu aynı-origin /api/v1
+# proxy'si üzerinden düz fetch kullanır.

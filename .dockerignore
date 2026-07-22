@@ -1,0 +1,39 @@
+# Sanal ortamlar / bağımlılıklar (imaj içinde yeniden kurulur)
+.venv/
+**/.venv/
+node_modules/
+**/node_modules/
+.pnpm-store/
+
+# VCS & CI
+.git/
+.github/
+
+# Python önbellekleri
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+**/.mypy_cache/
+**/.ruff_cache/
+**/.coverage
+**/htmlcov/
+
+# Frontend build
+**/.next/
+**/out/
+
+# Ortam & sırlar
+.env
+.env.*
+!.env.example
+
+# Veri & geçici
+pgdata/
+esdata/
+miniodata/
+.docker-data/
+scratch/
+
+# Dokümanlar (imaja gerek yok)
+*.docx
+docs/

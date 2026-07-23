@@ -1,5 +1,12 @@
-"""Güvenlik yardımcıları: parola özetleme ve JWT token'ları."""
+"""Güvenlik yardımcıları: parola özetleme, JWT token'ları ve alan-düzeyi şifreleme."""
 
+from aegis_core.security.encryption import (
+    DecryptionError,
+    EncryptedString,
+    SecretBox,
+    generate_key,
+    get_secret_box,
+)
 from aegis_core.security.passwords import hash_password, verify_password
 from aegis_core.security.tokens import (
     TYPE_ACCESS,
@@ -16,11 +23,16 @@ __all__ = [
     "TYPE_ACCESS",
     "TYPE_REFRESH",
     "TYPE_RESET",
+    "DecryptionError",
+    "EncryptedString",
+    "SecretBox",
     "create_access_token",
     "create_password_reset_token",
     "create_refresh_token",
     "decode_reset_token",
     "decode_token",
+    "generate_key",
+    "get_secret_box",
     "hash_password",
     "verify_password",
 ]

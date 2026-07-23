@@ -11,6 +11,7 @@ GRANT USAGE ON SCHEMA public TO aegis_app;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO aegis_app;
 
 -- Migration'ların (aegis) oluşturacağı GELECEK tablolar için varsayılan yetkiler.
--- E1.2'de audit_events için UPDATE/DELETE bu rolden REVOKE edilecektir (append-only).
+-- audit_event için UPDATE/DELETE, migration 0002'de bu rolden REVOKE edilir
+-- (append-only, Invariant 2) — ayrıca bir BEFORE trigger'ı rolden bağımsız reddeder.
 ALTER DEFAULT PRIVILEGES FOR ROLE aegis IN SCHEMA public
     GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO aegis_app;

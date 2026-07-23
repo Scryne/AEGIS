@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 from enum import StrEnum
 from functools import lru_cache
 from typing import Annotated, Self
@@ -10,6 +11,15 @@ from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 MIN_AUTH_SECRET_LENGTH = 32  # HS256 için RFC 7518 §3.2 önerisi
+FIELD_ENCRYPTION_KEY_BYTES = 32  # AES-256 (bkz. security/encryption.py)
+
+
+def _is_valid_field_encryption_key(value: str) -> bool:
+    """32 baytlık (AES-256) base64 anahtar mı."""
+    try:
+        return len(base64.b64decode(value, validate=True)) == FIELD_ENCRYPTION_KEY_BYTES
+    except ValueError:
+        return False
 
 
 class Environment(StrEnum):
@@ -57,8 +67,19 @@ class Settings(BaseSettings):
     # KVKK: self-host; müşteri PII'si asla dış tarama API'sine gitmez.
     yente_url: str = "http://localhost:8001"
 
+    # ── Saklama süresi (KVKK, Invariant 4) — E1.2 ────────────────────────────
+    # Belge/dosya saklama süresi (yıl); ilişki bitiminden itibaren ≥5 yıl. İmha
+    # job'ı (aegis_worker.tasks.retention) şimdilik kuru çalışır; E3.7'de silmeye döner.
+    document_retention_years: int = 5
+
     # ── Gözlemlenebilirlik ────────────────────────────────────────────────────
     sentry_dsn: str | None = None
+
+    # ── Alan-düzeyi şifreleme (KVKK, Invariant 3) — E1.2 ─────────────────────
+    # Hassas kolonlar (TCKN/vergi no; E1.4'te bağlanır) için AES-256-GCM anahtarı.
+    # base64(32 bayt); `python -c "from aegis_core.security.encryption import
+    # generate_key; print(generate_key())"`. Production'da zorunlu; asla git'e girmez.
+    field_encryption_key: str | None = None
 
     # ── Kimlik ────────────────────────────────────────────────────────────────
     auth_secret: str | None = None
@@ -91,6 +112,13 @@ class Settings(BaseSettings):
                     "Production'da AUTH_SECRET zorunludur ve en az "
                     f"{MIN_AUTH_SECRET_LENGTH} karakter olmalıdır "
                     "(`openssl rand -base64 32` ile üretin)."
+                )
+            if not self.field_encryption_key or not _is_valid_field_encryption_key(
+                self.field_encryption_key
+            ):
+                raise ValueError(
+                    "Production'da FIELD_ENCRYPTION_KEY zorunludur ve 32 baytlık base64 "
+                    "olmalıdır (aegis_core.security.encryption.generate_key ile üretin)."
                 )
             if self.debug:
                 raise ValueError("Production'da DEBUG=true olamaz.")

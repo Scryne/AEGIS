@@ -147,8 +147,19 @@ Apache AGE, Kubernetes). If a Phase 1 task tempts toward one, stop and note it f
 
 ## Epic status
 
-- [~] **E1.1** Platform skeleton — *in progress* (this change)
-- [ ] E1.2 Compliance foundation (audit trail + hash chain, retention, encryption, KVKK)
+- [x] **E1.1** Platform skeleton — RLS multi-tenancy, auth, CI, cross-tenant isolation gate
+- [~] **E1.2** Compliance foundation — *core complete; ops-bound items deferred*
+  - [x] Append-only `audit_event` (REVOKE + BEFORE trigger) + per-tenant hash chain +
+    `verify_chain` verifier + `/audit/verify`; wired into settings mutation (ADR-0004)
+  - [x] Retention scaffolding: `RetentionMixin` + `document_retention_years` + daily
+    disposal job **stub** (dry-run; real deletion activates E3.7)
+  - [x] Field encryption: app-level AES-256-GCM (`SecretBox`/`EncryptedString`) instead of
+    pgcrypto (ADR-0005); `FIELD_ENCRYPTION_KEY` prod fail-fast. Mechanism ready; applied to
+    national-ID columns in E1.4
+  - [x] KVKK artifacts v1 (`docs/kvkk/`: aydınlatma metni, processing inventory, VERBİS
+    prep) + DPA + pilot agreement with decision-support liability clause (`docs/legal/`)
+  - [ ] *Deferred to E1.6 (ops/deploy):* TLS everywhere, at-rest encrypted volumes,
+    secrets via SOPS/age or Docker secrets, VERBİS filing (legal review + fill placeholders)
 - [ ] E1.3 Screening service (yente + ES, Turkish normalization, recall floor)
 - [ ] E1.4 Entity registry + verification (FtM schema, Docling, Sicil Gazetesi, ER v1)
 - [ ] E1.5 Reports & dossier (rule-based summary, PDF+Word, audit viewer)

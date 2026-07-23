@@ -7,10 +7,11 @@ E1.3'te günlük OpenSanctions senkron job'ı beat programına eklenir.
 from __future__ import annotations
 
 from celery import Celery
+from celery.schedules import crontab
 
 from aegis_core.config import get_settings
 from aegis_core.observability import init_sentry
-from aegis_core.queueing import QUEUE_DEFAULT
+from aegis_core.queueing import QUEUE_DEFAULT, TASK_RETENTION_DISPOSE
 
 
 def create_celery_app() -> Celery:
@@ -21,7 +22,7 @@ def create_celery_app() -> Celery:
         "aegis",
         broker=settings.redis_url,
         backend=settings.redis_url,
-        include=["aegis_worker.tasks.system"],
+        include=["aegis_worker.tasks.system", "aegis_worker.tasks.retention"],
     )
     app.conf.update(
         task_acks_late=True,
@@ -32,8 +33,14 @@ def create_celery_app() -> Celery:
         result_expires=3600,
         timezone="UTC",
         enable_utc=True,
-        # E1.3'te günlük yaptırım-veri senkron job'ı buraya eklenir.
-        beat_schedule={},
+        beat_schedule={
+            # E1.2 saklama süresi imhası (şimdilik kuru çalışma). E1.3'te günlük
+            # yaptırım-veri senkron job'ı da buraya eklenir.
+            "retention-dispose-daily": {
+                "task": TASK_RETENTION_DISPOSE,
+                "schedule": crontab(hour=3, minute=30),
+            },
+        },
     )
     return app
 

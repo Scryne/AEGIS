@@ -14,7 +14,8 @@ from pydantic import BaseModel
 
 from aegis_api.dependencies import Principal, PrincipalDep, TenantSessionDep, require_role
 from aegis_api.errors import NotFoundError
-from aegis_core.models import Role
+from aegis_core.models import AuditAction, Role
+from aegis_core.services import audit as audit_service
 from aegis_core.services import tenant_settings as settings_service
 
 router = APIRouter(prefix="/settings", tags=["settings"])
@@ -65,8 +66,22 @@ async def upsert_setting(
     principal: RequireSettingsWrite,
     session: TenantSessionDep,
 ) -> SettingResponse:
-    """Ayarı oluşturur veya günceller (Owner + Compliance Officer)."""
+    """Ayarı oluşturur veya günceller (Owner + Compliance Officer).
+
+    Risk eşiği gibi ayarlar risk-etkileyendir → aynı transaction içinde bir denetim
+    olayı yayılır (Invariant 2); ayar değişikliği ve denetim izi atomik olarak commit olur.
+    """
     row = await settings_service.upsert_setting(
         session, tenant_id=principal.tenant_id, key=key, value=body.value
+    )
+    await audit_service.record_event(
+        session,
+        tenant_id=principal.tenant_id,
+        actor_user_id=principal.user_id,
+        actor_role=principal.role.value,
+        action=AuditAction.TENANT_SETTING_UPDATE,
+        object_type="tenant_setting",
+        object_id=key,
+        payload={"value": body.value},
     )
     return SettingResponse(key=row.key, value=row.value)

@@ -64,6 +64,11 @@ def app_database_url() -> Iterator[str]:
                     f"ON ALL TABLES IN SCHEMA public TO {APP_ROLE}"
                 )
             )
+            # Append-only denetim izi: production'da initdb blanket verir, migration
+            # 0002 audit_event için UPDATE/DELETE geri alır. Testte rol migration'dan
+            # SONRA yaratıldığından revoke'u burada yansıtırız (yoksa blanket grant
+            # migration'ın revoke'unu ezerdi). Trigger katmanı rolden bağımsızdır.
+            conn.execute(text(f"REVOKE UPDATE, DELETE ON audit_event FROM {APP_ROLE}"))
         admin_engine.dispose()
 
         host = postgres.get_container_host_ip()
@@ -75,6 +80,13 @@ def app_database_url() -> Iterator[str]:
             for key in ("DATABASE_URL", "DATABASE_ADMIN_URL"):
                 os.environ.pop(key, None)
             get_settings.cache_clear()
+
+
+@pytest.fixture
+def admin_database_url(app_database_url: str) -> str:
+    """Ayrıcalıklı (superuser ``aegis``) bağlantı URL'i — trigger devre dışı bırakma /
+    kurcalama simülasyonu gibi DBA-düzeyi senaryoları için (bkz. hash zinciri testi)."""
+    return os.environ["DATABASE_ADMIN_URL"]
 
 
 @pytest.fixture(scope="session")

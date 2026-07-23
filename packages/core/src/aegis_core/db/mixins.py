@@ -1,10 +1,11 @@
-"""Ortak ORM mixin'leri: UUID birincil anahtar ve kiracı (tenant) kolonu."""
+"""Ortak ORM mixin'leri: UUID birincil anahtar, kiracı kolonu ve saklama süresi."""
 
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 
-from sqlalchemy import ForeignKey, Uuid, func
+from sqlalchemy import DateTime, ForeignKey, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 
@@ -33,4 +34,18 @@ class TenantMixin:
         ForeignKey("organization.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
+    )
+
+
+class RetentionMixin:
+    """Saklama süresi (``retention_until``) — KVKK ≥5 yıl (Invariant 4).
+
+    Belge/dosya tabloları (E1.4/E1.5) bu kolonu **doğuşundan** taşır; süresi geçmiş
+    kayıtları, E3.7'de gerçek silmeye dönüşecek zamanlanmış imha job'ı (şimdilik kuru
+    çalışma; bkz. ``aegis_worker.tasks.retention``) temizler. NULL = süre işletilmemiş
+    (ör. henüz aktif ilişki). Saklama süresi ``document_retention_years`` ile hesaplanır.
+    """
+
+    retention_until: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True, index=True
     )

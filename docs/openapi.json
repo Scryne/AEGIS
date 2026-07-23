@@ -20,6 +20,47 @@
         "title": "AccessTokenResponse",
         "type": "object"
       },
+      "ChainVerificationResponse": {
+        "description": "Hash zinciri doğrulama sonucu.",
+        "properties": {
+          "broken_seq": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Broken Seq"
+          },
+          "events_checked": {
+            "title": "Events Checked",
+            "type": "integer"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "required": [
+          "ok",
+          "events_checked"
+        ],
+        "title": "ChainVerificationResponse",
+        "type": "object"
+      },
       "Environment": {
         "description": "Çalışma ortamları.",
         "enum": [
@@ -471,6 +512,56 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/audit/verify": {
+      "get": {
+        "description": "Aktif kiracının denetim izi hash zincirini doğrular (kurcalama tespiti).",
+        "operationId": "verify_audit_chain_api_v1_audit_verify_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChainVerificationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verify Audit Chain",
+        "tags": [
+          "audit"
+        ]
+      }
+    },
     "/api/v1/auth/login": {
       "post": {
         "description": "Kimlik doğrular ve erişim + yenileme token'ı döndürür.",
@@ -891,7 +982,7 @@
         ]
       },
       "put": {
-        "description": "Ayarı oluşturur veya günceller (Owner + Compliance Officer).",
+        "description": "Ayarı oluşturur veya günceller (Owner + Compliance Officer).\n\nRisk eşiği gibi ayarlar risk-etkileyendir → aynı transaction içinde bir denetim\nolayı yayılır (Invariant 2); ayar değişikliği ve denetim izi atomik olarak commit olur.",
         "operationId": "upsert_setting_api_v1_settings__key__put",
         "parameters": [
           {

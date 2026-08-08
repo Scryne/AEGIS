@@ -20,6 +20,143 @@
         "title": "AccessTokenResponse",
         "type": "object"
       },
+      "AttributeResponse": {
+        "description": "Bir öznitelik gözlemi (provenansıyla).",
+        "properties": {
+          "document_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_current": {
+            "title": "Is Current",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "observed_at": {
+            "format": "date-time",
+            "title": "Observed At",
+            "type": "string"
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ref"
+          },
+          "source_type": {
+            "title": "Source Type",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "value",
+          "source_type",
+          "source_ref",
+          "document_id",
+          "observed_at",
+          "is_current"
+        ],
+        "title": "AttributeResponse",
+        "type": "object"
+      },
+      "Body_upload_document_api_v1_documents_post": {
+        "properties": {
+          "doc_type": {
+            "default": "other",
+            "enum": [
+              "imza_sirkuleri",
+              "faaliyet_belgesi",
+              "ticaret_sicil_gazetesi",
+              "other"
+            ],
+            "title": "Doc Type",
+            "type": "string"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          },
+          "gazette_issue_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gazette Issue Date"
+          },
+          "gazette_issue_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gazette Issue Number"
+          },
+          "gazette_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gazette Url"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_document_api_v1_documents_post",
+        "type": "object"
+      },
       "ChainVerificationResponse": {
         "description": "Hash zinciri doğrulama sonucu.",
         "properties": {
@@ -174,6 +311,701 @@
         "title": "DatasetStateResponse",
         "type": "object"
       },
+      "DiscrepancyDecisionRequest": {
+        "description": "Tutarsızlık kararı (gerekçe zorunlu).",
+        "properties": {
+          "note": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Note",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "accepted",
+              "resolved"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "note"
+        ],
+        "title": "DiscrepancyDecisionRequest",
+        "type": "object"
+      },
+      "DiscrepancyResponse": {
+        "description": "Beyan ile gözlem arasındaki fark.",
+        "properties": {
+          "attribute_name": {
+            "title": "Attribute Name",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "declared_source_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Declared Source Ref"
+          },
+          "declared_value": {
+            "title": "Declared Value",
+            "type": "string"
+          },
+          "document_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id"
+          },
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "observed_source_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observed Source Ref"
+          },
+          "observed_source_type": {
+            "title": "Observed Source Type",
+            "type": "string"
+          },
+          "observed_value": {
+            "title": "Observed Value",
+            "type": "string"
+          },
+          "resolution_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resolution Note"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "severity": {
+            "title": "Severity",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "entity_id",
+          "attribute_name",
+          "declared_value",
+          "declared_source_ref",
+          "observed_value",
+          "observed_source_type",
+          "observed_source_ref",
+          "document_id",
+          "severity",
+          "status",
+          "resolution_note",
+          "reviewed_at",
+          "created_at"
+        ],
+        "title": "DiscrepancyResponse",
+        "type": "object"
+      },
+      "DocumentDownloadResponse": {
+        "description": "Kısa ömürlü indirme bağlantısı.",
+        "properties": {
+          "expires_in_seconds": {
+            "title": "Expires In Seconds",
+            "type": "integer"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "expires_in_seconds"
+        ],
+        "title": "DocumentDownloadResponse",
+        "type": "object"
+      },
+      "DocumentResponse": {
+        "description": "Belge kaydı.",
+        "properties": {
+          "content_type": {
+            "title": "Content Type",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "doc_type": {
+            "title": "Doc Type",
+            "type": "string"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "extracted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extracted At"
+          },
+          "extraction_engine": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraction Engine"
+          },
+          "extraction_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraction Error"
+          },
+          "extraction_status": {
+            "title": "Extraction Status",
+            "type": "string"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "page_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Count"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          },
+          "size_bytes": {
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ref"
+          }
+        },
+        "required": [
+          "id",
+          "entity_id",
+          "doc_type",
+          "filename",
+          "content_type",
+          "size_bytes",
+          "sha256",
+          "source_ref",
+          "extraction_status",
+          "extraction_error",
+          "extraction_engine",
+          "page_count",
+          "extracted_at",
+          "created_at"
+        ],
+        "title": "DocumentResponse",
+        "type": "object"
+      },
+      "EntityCreateRequest": {
+        "description": "Yeni varlık (şirket ya da kişi).",
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "birth_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Date"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "maxLength": 8,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "incorporation_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Incorporation Date"
+          },
+          "lei_code": {
+            "anyOf": [
+              {
+                "maxLength": 32,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lei Code"
+          },
+          "mersis_number": {
+            "anyOf": [
+              {
+                "maxLength": 32,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mersis Number"
+          },
+          "name": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "national_id": {
+            "anyOf": [
+              {
+                "maxLength": 32,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "National Id"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "schema_type": {
+            "default": "Company",
+            "enum": [
+              "Person",
+              "Company"
+            ],
+            "title": "Schema Type",
+            "type": "string"
+          },
+          "tax_number": {
+            "anyOf": [
+              {
+                "maxLength": 32,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Number"
+          },
+          "trade_registry_number": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trade Registry Number"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "EntityCreateRequest",
+        "type": "object"
+      },
+      "EntityListResponse": {
+        "description": "Sayfalanmış varlık listesi.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/EntityResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "items"
+        ],
+        "title": "EntityListResponse",
+        "type": "object"
+      },
+      "EntityResponse": {
+        "description": "Varlık kaydı (kimlik numarası maskeli).",
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "birth_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Date"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "incorporation_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Incorporation Date"
+          },
+          "lei_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lei Code"
+          },
+          "merged_into_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Merged Into Id"
+          },
+          "mersis_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mersis Number"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "name_normalized": {
+            "title": "Name Normalized",
+            "type": "string"
+          },
+          "national_id_masked": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "National Id Masked"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "schema_type": {
+            "title": "Schema Type",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "tax_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Number"
+          },
+          "trade_registry_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trade Registry Number"
+          }
+        },
+        "required": [
+          "id",
+          "schema_type",
+          "name",
+          "name_normalized",
+          "tax_number",
+          "mersis_number",
+          "lei_code",
+          "trade_registry_number",
+          "national_id_masked",
+          "country",
+          "address",
+          "incorporation_date",
+          "birth_date",
+          "notes",
+          "status",
+          "merged_into_id",
+          "created_at"
+        ],
+        "title": "EntityResponse",
+        "type": "object"
+      },
+      "EntityUpdateRequest": {
+        "description": "Varlık güncelleme — FtM öznitelik adlarıyla.",
+        "properties": {
+          "changes": {
+            "additionalProperties": true,
+            "title": "Changes",
+            "type": "object"
+          },
+          "promote_to_current": {
+            "default": true,
+            "title": "Promote To Current",
+            "type": "boolean"
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "maxLength": 1024,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ref"
+          },
+          "source_type": {
+            "default": "declared",
+            "enum": [
+              "declared",
+              "document",
+              "registry",
+              "gleif",
+              "screening"
+            ],
+            "title": "Source Type",
+            "type": "string"
+          }
+        },
+        "title": "EntityUpdateRequest",
+        "type": "object"
+      },
+      "EntityWriteResponse": {
+        "description": "Yazma sonucu: kayıt + uyarılar (uyarı, hata değildir).",
+        "properties": {
+          "discrepancies_created": {
+            "default": 0,
+            "title": "Discrepancies Created",
+            "type": "integer"
+          },
+          "entity": {
+            "$ref": "#/components/schemas/EntityResponse"
+          },
+          "identifier_warnings": {
+            "items": {
+              "$ref": "#/components/schemas/IdentifierWarningResponse"
+            },
+            "title": "Identifier Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "entity"
+        ],
+        "title": "EntityWriteResponse",
+        "type": "object"
+      },
       "Environment": {
         "description": "Çalışma ortamları.",
         "enum": [
@@ -183,6 +1015,90 @@
         ],
         "title": "Environment",
         "type": "string"
+      },
+      "GleifEnrichResponse": {
+        "description": "GLEIF zenginleştirme sonucu.",
+        "properties": {
+          "address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "discrepancies_created": {
+            "title": "Discrepancies Created",
+            "type": "integer"
+          },
+          "legal_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Legal Name"
+          },
+          "lei": {
+            "title": "Lei",
+            "type": "string"
+          },
+          "registration_authority_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Registration Authority Id"
+          },
+          "source_url": {
+            "title": "Source Url",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "lei",
+          "legal_name",
+          "country",
+          "address",
+          "status",
+          "registration_authority_id",
+          "source_url",
+          "discrepancies_created"
+        ],
+        "title": "GleifEnrichResponse",
+        "type": "object"
       },
       "HTTPValidationError": {
         "properties": {
@@ -207,6 +1123,30 @@
           }
         },
         "title": "HealthResponse",
+        "type": "object"
+      },
+      "IdentifierWarningResponse": {
+        "description": "Kimlik numarası uyarısı (kayıt yapıldı, dikkat çekiliyor).",
+        "properties": {
+          "field": {
+            "title": "Field",
+            "type": "string"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "field",
+          "value",
+          "message"
+        ],
+        "title": "IdentifierWarningResponse",
         "type": "object"
       },
       "LoginRequest": {
@@ -439,6 +1379,33 @@
         "title": "MemberResponse",
         "type": "object"
       },
+      "MergeRequest": {
+        "description": "Birleştirme: ``source_entity_id`` kaydı bu varlığa katılır.",
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "source_entity_id": {
+            "format": "uuid",
+            "title": "Source Entity Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_entity_id"
+        ],
+        "title": "MergeRequest",
+        "type": "object"
+      },
       "PasswordResetConfirm": {
         "description": "Parola sıfırlama onayı (token + yeni parola).",
         "properties": {
@@ -496,6 +1463,165 @@
           }
         },
         "title": "PasswordResetResponse",
+        "type": "object"
+      },
+      "ProposalDecisionRequest": {
+        "description": "Öneri kararı.",
+        "properties": {
+          "decision": {
+            "enum": [
+              "accepted",
+              "rejected"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "link_entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Link Entity Id"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "title": "ProposalDecisionRequest",
+        "type": "object"
+      },
+      "ProposalResponse": {
+        "description": "Belgeden çıkan, onay bekleyen öneri.",
+        "properties": {
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "document_id": {
+            "format": "uuid",
+            "title": "Document Id",
+            "type": "string"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "evidence_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Text"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "page_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Number"
+          },
+          "payload": {
+            "additionalProperties": true,
+            "title": "Payload",
+            "type": "object"
+          },
+          "resulting_entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resulting Entity Id"
+          },
+          "review_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Note"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "document_id",
+          "entity_id",
+          "kind",
+          "payload",
+          "confidence",
+          "evidence_text",
+          "page_number",
+          "status",
+          "review_note",
+          "reviewed_at",
+          "resulting_entity_id"
+        ],
+        "title": "ProposalResponse",
         "type": "object"
       },
       "ReadinessComponent": {
@@ -616,6 +1742,394 @@
           "password"
         ],
         "title": "RegisterRequest",
+        "type": "object"
+      },
+      "RelationshipCreateRequest": {
+        "description": "İki varlık arasında bağ.",
+        "properties": {
+          "end_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "ownership_percent": {
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ownership Percent"
+          },
+          "rel_type": {
+            "enum": [
+              "officer",
+              "shareholder",
+              "ubo",
+              "family",
+              "control",
+              "representative"
+            ],
+            "title": "Rel Type",
+            "type": "string"
+          },
+          "role_title": {
+            "anyOf": [
+              {
+                "maxLength": 255,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role Title"
+          },
+          "source_entity_id": {
+            "format": "uuid",
+            "title": "Source Entity Id",
+            "type": "string"
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "maxLength": 1024,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ref"
+          },
+          "source_type": {
+            "default": "declared",
+            "enum": [
+              "declared",
+              "document",
+              "registry",
+              "gleif",
+              "screening"
+            ],
+            "title": "Source Type",
+            "type": "string"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          }
+        },
+        "required": [
+          "source_entity_id",
+          "rel_type"
+        ],
+        "title": "RelationshipCreateRequest",
+        "type": "object"
+      },
+      "RelationshipResponse": {
+        "description": "İlişki kaydı.",
+        "properties": {
+          "document_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "ownership_percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ownership Percent"
+          },
+          "rel_type": {
+            "title": "Rel Type",
+            "type": "string"
+          },
+          "role_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role Title"
+          },
+          "source_entity_id": {
+            "format": "uuid",
+            "title": "Source Entity Id",
+            "type": "string"
+          },
+          "source_entity_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Entity Name"
+          },
+          "source_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Ref"
+          },
+          "source_type": {
+            "title": "Source Type",
+            "type": "string"
+          },
+          "start_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Date"
+          },
+          "target_entity_id": {
+            "format": "uuid",
+            "title": "Target Entity Id",
+            "type": "string"
+          },
+          "target_entity_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Entity Name"
+          }
+        },
+        "required": [
+          "id",
+          "source_entity_id",
+          "source_entity_name",
+          "target_entity_id",
+          "target_entity_name",
+          "rel_type",
+          "role_title",
+          "ownership_percent",
+          "start_date",
+          "end_date",
+          "source_type",
+          "source_ref",
+          "document_id"
+        ],
+        "title": "RelationshipResponse",
+        "type": "object"
+      },
+      "ResolutionCandidateResponse": {
+        "description": "Çözümleme adayı.",
+        "properties": {
+          "conflicting_identifier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conflicting Identifier"
+          },
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "schema_type": {
+            "title": "Schema Type",
+            "type": "string"
+          },
+          "similarity": {
+            "title": "Similarity",
+            "type": "number"
+          }
+        },
+        "required": [
+          "entity_id",
+          "name",
+          "schema_type",
+          "similarity",
+          "reason",
+          "conflicting_identifier"
+        ],
+        "title": "ResolutionCandidateResponse",
+        "type": "object"
+      },
+      "ResolutionRequest": {
+        "description": "Çözümleme sorgusu (kayıt oluşturmaz — yalnız sorar).",
+        "properties": {
+          "lei_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lei Code"
+          },
+          "mersis_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mersis Number"
+          },
+          "name": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "national_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "National Id"
+          },
+          "schema_type": {
+            "default": "Company",
+            "enum": [
+              "Person",
+              "Company"
+            ],
+            "title": "Schema Type",
+            "type": "string"
+          },
+          "tax_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tax Number"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "ResolutionRequest",
+        "type": "object"
+      },
+      "ResolutionResponse": {
+        "description": "Çözümleme sonucu.",
+        "properties": {
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/ResolutionCandidateResponse"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "matched_entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Matched Entity Id"
+          },
+          "outcome": {
+            "title": "Outcome",
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome",
+          "matched_entity_id",
+          "candidates"
+        ],
+        "title": "ResolutionResponse",
         "type": "object"
       },
       "Role": {
@@ -1553,6 +3067,1372 @@
         ]
       }
     },
+    "/api/v1/documents": {
+      "get": {
+        "description": "Belgeleri listeler (isteğe bağlı varlık süzgeciyle).",
+        "operationId": "list_documents_api_v1_documents_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "entity_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Id"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentResponse"
+                  },
+                  "title": "Response List Documents Api V1 Documents Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Documents",
+        "tags": [
+          "documents"
+        ]
+      },
+      "post": {
+        "description": "Belge yükler; çıkarılabilir türse çıkarımı kuyruğa alır.\n\nTicaret Sicil Gazetesi için (Revizyon R1: otomatik sorgu YOK) kullanıcı sayı/tarih/\nbağlantı verir; bunlar kanıt referansı olarak saklanır ve raporda görünür.",
+        "operationId": "upload_document_api_v1_documents_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_document_api_v1_documents_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload Document",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}": {
+      "get": {
+        "description": "Tek bir belgeyi döndürür.",
+        "operationId": "get_document_api_v1_documents__document_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Document",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}/download": {
+      "get": {
+        "description": "Belge için kısa ömürlü imzalı indirme bağlantısı üretir.",
+        "operationId": "download_document_api_v1_documents__document_id__download_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentDownloadResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Document",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}/proposals": {
+      "get": {
+        "description": "Belgeden çıkan önerileri döndürür (güveni yüksek olan önce).",
+        "operationId": "list_proposals_api_v1_documents__document_id__proposals_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pending_only",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Pending Only",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProposalResponse"
+                  },
+                  "title": "Response List Proposals Api V1 Documents  Document Id  Proposals Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Proposals",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}/proposals/{proposal_id}/decision": {
+      "post": {
+        "description": "Öneriyi kabul eder (kütüğe uygular) ya da reddeder.\n\nKişi önerisinde kütükte birden çok benzer kayıt varsa **409** döner ve adayları\nlisteler; kullanıcı ``link_entity_id`` ile hangisine bağlanacağını seçer. Otomatik\nbirleştirme yapılmaz.",
+        "operationId": "decide_proposal_api_v1_documents__document_id__proposals__proposal_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "proposal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Proposal Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposalDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProposalResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decide Proposal",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/entities": {
+      "get": {
+        "description": "Varlıkları listeler / adına göre arar.",
+        "operationId": "list_entities_api_v1_entities_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 512,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "schema_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "Person",
+                    "Company"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Schema Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Entities",
+        "tags": [
+          "entities"
+        ]
+      },
+      "post": {
+        "description": "Yeni varlık oluşturur (her alan beyan gözlemi olarak provenansla kaydedilir).",
+        "operationId": "create_entity_api_v1_entities_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntityCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityWriteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Entity",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/v1/entities/discrepancies": {
+      "get": {
+        "description": "Kiracının tüm tutarsızlıklarını listeler (panel için).",
+        "operationId": "list_all_discrepancies_api_v1_entities_discrepancies_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "open_only",
+            "required": false,
+            "schema": {
+              "default": true,
+              "title": "Open Only",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DiscrepancyResponse"
+                  },
+                  "title": "Response List All Discrepancies Api V1 Entities Discrepancies Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List All Discrepancies",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/v1/entities/resolve": {
+      "post": {
+        "description": "Bir varlık tanımının kütükte karşılığı var mı — **kayıt oluşturmaz**.\n\nArayüz bunu \"yeni dosya\" formunda kullanır: kullanıcı unvanı yazarken aynı şirketin\nzaten kayıtlı olup olmadığını görür ve mükerrer kayıt açmaz.",
+        "operationId": "resolve_api_v1_entities_resolve_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolutionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResolutionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resolve",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/v1/entities/{entity_id}": {
+      "get": {
+        "description": "Tek bir varlığı döndürür.",
+        "operationId": "get_entity_api_v1_entities__entity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Entity",
+        "tags": [
+          "entities"
+        ]
+      },
+      "patch": {
+        "description": "Varlığı günceller; beyanla çelişen gözlem tutarsızlık üretir.",
+        "operationId": "update_entity_api_v1_entities__entity_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntityUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityWriteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Entity",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/v1/entities/{entity_id}/attributes": {
+      "get": {
+        "description": "Varlığın öznitelik gözlemlerini kaynaklarıyla döndürür (provenans görünümü).",
+        "operationId": "list_attributes_api_v1_entities__entity_id__attributes_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AttributeResponse"
+                  },
+                  "title": "Response List Attributes Api V1 Entities  Entity Id  Attributes Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Attributes",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/v1/entities/{entity_id}/discrepancies": {
+      "get": {
+        "description": "Bir varlığın tutarsızlıklarını döndürür.",
+        "operationId": "list_entity_discrepancies_api_v1_entities__entity_id__discrepancies_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "open_only",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Open Only",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DiscrepancyResponse"
+                  },
+                  "title": "Response List Entity Discrepancies Api V1 Entities  Entity Id  Discrepancies Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Entity Discrepancies",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/v1/entities/{entity_id}/discrepancies/{discrepancy_id}/decision": {
+      "post": {
+        "description": "Tutarsızlığı karara bağlar (gerekçe zorunlu, denetim olayı yazılır).",
+        "operationId": "decide_discrepancy_api_v1_entities__entity_id__discrepancies__discrepancy_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "discrepancy_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Discrepancy Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiscrepancyDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DiscrepancyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decide Discrepancy",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/v1/entities/{entity_id}/enrich/gleif": {
+      "post": {
+        "description": "Varlığın LEI kodunu kamuya açık GLEIF kütüğünde sorgular.\n\n**KVKK:** dışarı çıkan tek şey LEI kodudur (kamuya açık tanımlayıcı); ad, adres,\nvergi no ya da TCKN gönderilmez. Sorgu bir denetim olayı yazar.\n\nGelen değerler beyanın üstüne **yazılmaz**: ``gleif`` kaynaklı gözlem olarak\nkaydedilir; beyanla çelişirse tutarsızlık üretir.",
+        "operationId": "enrich_gleif_api_v1_entities__entity_id__enrich_gleif_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GleifEnrichResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Enrich Gleif",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/v1/entities/{entity_id}/merge": {
+      "post": {
+        "description": "``source_entity_id`` kaydını bu varlığa birleştirir (kaynak kayıt silinmez).",
+        "operationId": "merge_api_v1_entities__entity_id__merge_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MergeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Merge",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/v1/entities/{entity_id}/relationships": {
+      "get": {
+        "description": "Varlığa bağlı ilişkileri (her iki yön) döndürür.",
+        "operationId": "list_relationships_api_v1_entities__entity_id__relationships_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RelationshipResponse"
+                  },
+                  "title": "Response List Relationships Api V1 Entities  Entity Id  Relationships Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Relationships",
+        "tags": [
+          "entities"
+        ]
+      },
+      "post": {
+        "description": "Varlığa bir bağ ekler (yönetici, ortak, UBO …).",
+        "operationId": "create_relationship_api_v1_entities__entity_id__relationships_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RelationshipCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RelationshipResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Relationship",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
+    "/api/v1/entities/{entity_id}/relationships/{relationship_id}": {
+      "delete": {
+        "description": "Bir bağı kaldırır (denetim izinde kalır).",
+        "operationId": "delete_relationship_api_v1_entities__entity_id__relationships__relationship_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "relationship_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Relationship Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Relationship",
+        "tags": [
+          "entities"
+        ]
+      }
+    },
     "/api/v1/members": {
       "get": {
         "description": "Çağıran kullanıcının kiracısındaki üyeleri listeler (yalnız kendi kiracısı).",
@@ -1843,6 +4723,66 @@
           }
         },
         "summary": "Queue Deep Screening",
+        "tags": [
+          "screenings"
+        ]
+      }
+    },
+    "/api/v1/screenings/from-entity/{entity_id}": {
+      "post": {
+        "description": "Kütükteki bir varlığı **bağlı kişileriyle birlikte** tarar (E1.3 × E1.4).\n\nROADMAP E1.3: *\"yente match (entity + directors/UBOs)\"*. Özneler kütükten okunur:\nşirketin kendisi + ona bağlı yönetici/ortak/UBO kayıtları. Böylece kullanıcı adları\nyeniden yazmaz ve tarama, dosyada kayıtlı olanla birebir aynı kişiler üzerinde koşar.\n\nKimlik numaraları kütükte şifrelidir ve buradan yente'ye **gönderilmez**: eşleştirme\nad üzerinden yapılır (yaptırım listeleri TCKN taşımaz).",
+        "operationId": "screen_entity_api_v1_screenings_from_entity__entity_id__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScreeningDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Screen Entity",
         "tags": [
           "screenings"
         ]

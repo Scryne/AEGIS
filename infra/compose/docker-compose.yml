@@ -9,6 +9,13 @@ x-app-env: &app-env
   # `aegis_all`, manifest'te tanımlı birleşik kapsamdır (OpenSanctions + MASAK).
   YENTE_URL: http://yente:8000
   YENTE_DATASET: aegis_all
+  # Belge deposu (E1.4): belgeler veritabanında DEĞİL, nesne deposunda tutulur —
+  # DB yedeği PII taşıyan PDF'leri sürüklemesin, saklama süresi imhası dosyayı ayrı
+  # silebilsin (Invariant 4).
+  OBJECT_STORAGE_ENDPOINT_URL: http://minio:9000
+  OBJECT_STORAGE_BUCKET: aegis-documents
+  OBJECT_STORAGE_ACCESS_KEY_ID: aegis
+  OBJECT_STORAGE_SECRET_ACCESS_KEY: aegis-minio-dev
 
 services:
   postgres:
@@ -102,6 +109,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      minio:
+        condition: service_healthy
       migrate:
         condition: service_completed_successfully
 
@@ -123,6 +132,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      minio:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully

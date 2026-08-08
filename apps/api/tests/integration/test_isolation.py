@@ -95,7 +95,20 @@ def test_cross_tenant_isolation_api_and_direct_sql(
     # E1.3'te gelen tarama tabloları da aynı iddiaya tabidir: kiracıya-özel HER veri
     # tablosu bu listeye eklenir (CLAUDE.md: "tablo eklemek = tenant_id + RLS +
     # izolasyon iddiası, aynı değişiklikte").
-    rls_tables = ("tenant_setting", "screening", "match_candidate", "audit_event")
+    rls_tables = (
+        "tenant_setting",
+        "audit_event",
+        # E1.3 tarama
+        "screening",
+        "match_candidate",
+        # E1.4 varlık kütüğü
+        "entity",
+        "entity_attribute",
+        "relationship",
+        "document",
+        "extraction_proposal",
+        "discrepancy",
+    )
     engine = create_engine(app_database_url)
     try:
         for table in rls_tables:

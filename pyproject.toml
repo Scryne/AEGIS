@@ -22,6 +22,13 @@ aegis-api = { workspace = true }
 aegis-worker = { workspace = true }
 
 [dependency-groups]
+# Belge çıkarımı (E1.4/R2) — YALNIZ worker imajına kurulur:
+#   uv sync --group extraction
+# Ayrı grup olmasının nedeni PyTorch dahil ~2 GB'lık bağımlılık ağacıdır; CI ve API
+# imajı bunu taşımaz. Kurulu değilse belge saklanır, çıkarım "skipped" olur.
+extraction = [
+    "docling>=2.15.0",
+]
 dev = [
     "ruff>=0.15.0",
     "mypy>=1.13.0",
@@ -70,6 +77,13 @@ mypy_path = ["packages/core/src", "apps/api/src", "apps/worker/src"]
 [[tool.mypy.overrides]]
 module = [
     "celery.*",
+    # boto3/botocore tip bilgisi yayınlamıyor (ayrı boto3-stubs paketi gerekir; tek
+    # kullanım noktası documents/storage.py olduğu için o bağımlılık eklenmedi).
+    "boto3.*",
+    "botocore.*",
+    # docling OPSİYONEL bir kurulumdur (extraction extra); tip denetimi onu bulamaz.
+    # Tembel import edilir ve kurulu değilse akış "skipped" ile devam eder.
+    "docling.*",
 ]
 ignore_missing_imports = true
 

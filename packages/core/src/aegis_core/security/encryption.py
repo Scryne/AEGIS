@@ -5,14 +5,17 @@ anahtarı SQL metnine taşır (pg_stat_statements/loglara sızabilir); uygulama-
 AES-256-GCM anahtarı süreç içinde (secrets'tan) tutar ve kimlik-doğrulamalı şifreleme
 (kurcalama tespiti) sağlar. Anahtar asla git'e girmez (``FIELD_ENCRYPTION_KEY``, .env).
 
-Şu an hiçbir kolon şifreli değildir; kimlik-no gibi hassas kolonlar E1.4'te
-``EncryptedString`` tipini kullanır. Mekanizma şimdi kilitlenir — canlı PII'ye sonradan
-şifreleme eklemek, RLS/audit gibi pahalıdır (Invariant 3/4, KVKK).
+E1.4'te ``entity.national_id`` (TCKN) bu tiple şifrelenir. Şifreli değer deterministik
+olmadığından üzerinde SQL araması yapılamaz; eşitlik araması gereken yerde ADR-0005'in
+öngördüğü **kör indeks** (``blind_index``) kullanılır: anahtarlı HMAC, aynı numara için
+aynı parmak izini üretir ama parmak izinden numara geri getirilemez.
 """
 
 from __future__ import annotations
 
 import base64
+import hashlib
+import hmac
 import os
 from functools import lru_cache
 from typing import Any
@@ -80,13 +83,40 @@ def _box_for_key(b64_key: str) -> SecretBox:
 
 def get_secret_box() -> SecretBox:
     """Ayarlardaki anahtardan (önbellekli) ``SecretBox`` döndürür; anahtar yoksa hata."""
+    return _box_for_key(_require_key())
+
+
+def blind_index(value: str, *, domain: str) -> str:
+    """Şifreli bir alanda eşitlik araması için anahtarlı parmak izi (HMAC-SHA256).
+
+    ``EncryptedString`` her yazımda farklı ciphertext üretir (rastgele nonce), bu yüzden
+    "bu TCKN kayıtlı mı" sorusu SQL ile sorulamaz. Kör indeks bu boşluğu kapatır: aynı
+    girdi hep aynı hex çıktıyı verir, indekslenebilir ve eşitlikle sorgulanabilir; ama
+    anahtar olmadan tersine çevrilemez.
+
+    ``domain`` alan ayrımı sağlar: aynı rakam dizisi TCKN kolonunda ve vergi no
+    kolonunda farklı parmak izi üretir, böylece bir kolondaki değerin diğerinde arama
+    yapmak için kullanılması engellenir (şahıs işletmelerinde bu iki numara aynı olabilir).
+
+    **Uyarı:** kör indeks, düşük entropili değerlerde sözlük saldırısına açıktır — 11
+    haneli TCKN uzayı sonludur. Bu yüzden parmak izi de en az ciphertext kadar gizli
+    kabul edilir (aynı DB, aynı RLS, aynı erişim kısıtları); güvenliği anahtarın
+    gizliliğine dayanır, uzayın büyüklüğüne değil.
+    """
+    key = base64.b64decode(_require_key(), validate=True)
+    message = f"{domain}:{value}".encode()
+    return hmac.new(key, message, hashlib.sha256).hexdigest()
+
+
+def _require_key() -> str:
+    """Yapılandırılmış alan-şifreleme anahtarını döndürür; yoksa açık hata verir."""
     key = get_settings().field_encryption_key
     if not key:
         raise RuntimeError(
             "FIELD_ENCRYPTION_KEY ayarlı değil — hassas alan şifrelemesi kullanılamaz "
             "(aegis_core.security.encryption.generate_key ile üretin)."
         )
-    return _box_for_key(key)
+    return key
 
 
 class EncryptedString(TypeDecorator[str]):

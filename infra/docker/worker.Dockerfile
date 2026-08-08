@@ -13,14 +13,16 @@ COPY pyproject.toml uv.lock ./
 COPY packages/core/pyproject.toml packages/core/pyproject.toml
 COPY apps/api/pyproject.toml apps/api/pyproject.toml
 COPY apps/worker/pyproject.toml apps/worker/pyproject.toml
+# --group extraction: Docling (belge çıkarımı, E1.4/R2). PyTorch dahil ~2 GB'lık ağaç
+# YALNIZ bu imaja kurulur; API imajı ve CI onu taşımaz.
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-workspace --no-dev
+    uv sync --frozen --no-install-workspace --no-dev --group extraction
 
 # 2) Kaynak kod + kurulum.
 COPY packages ./packages
 COPY apps ./apps
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev
+    uv sync --frozen --no-dev --group extraction
 
 ENV PATH="/app/.venv/bin:$PATH"
 

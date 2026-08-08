@@ -16,3 +16,5 @@ TASK_RETENTION_DISPOSE = "retention.dispose"
 TASK_SCREENING_RUN = "screening.run"
 # E1.3 günlük yaptırım verisi senkronu + tazelik metriği + bayatlık alarmı.
 TASK_SANCTIONS_SYNC = "sanctions.sync"
+# E1.4 belge çıkarımı (Docling) — yükleme isteğini bekletmemek için asenkron.
+TASK_DOCUMENT_EXTRACT = "document.extract"

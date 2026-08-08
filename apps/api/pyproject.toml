@@ -8,6 +8,8 @@ dependencies = [
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
     "email-validator>=2.2.0",
+    # multipart/form-data — belge yükleme ucu (E1.4).
+    "python-multipart>=0.0.20",
     # Yalnız ÜRETİCİ olarak: API, derin tarama gibi işleri ada göre kuyruğa atar
     # (``send_task``) — worker kodunu asla import etmez (bkz. aegis_core.queueing).
     "celery[redis]>=5.4.0",

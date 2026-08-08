@@ -39,6 +39,7 @@ from aegis_api.dependencies import (
 )
 from aegis_api.errors import NotFoundError, ValidationFailedError
 from aegis_api.queue import dispatch
+from aegis_core.entities import service as entity_service
 from aegis_core.models import (
     MatchCandidate,
     Role,
@@ -483,6 +484,86 @@ async def decide_candidate(
     except ValueError as exc:
         raise ValidationFailedError(str(exc)) from exc
     return _candidate_response(updated)
+
+
+@router.post(
+    "/from-entity/{entity_id}",
+    response_model=ScreeningDetailResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def screen_entity(
+    entity_id: uuid.UUID,
+    principal: RequireScreeningRun,
+    session: TenantSessionDep,
+    settings: SettingsDep,
+    yente: YenteClientDep,
+    response: Response,
+) -> ScreeningDetailResponse:
+    """Kütükteki bir varlığı **bağlı kişileriyle birlikte** tarar (E1.3 × E1.4).
+
+    ROADMAP E1.3: *"yente match (entity + directors/UBOs)"*. Özneler kütükten okunur:
+    şirketin kendisi + ona bağlı yönetici/ortak/UBO kayıtları. Böylece kullanıcı adları
+    yeniden yazmaz ve tarama, dosyada kayıtlı olanla birebir aynı kişiler üzerinde koşar.
+
+    Kimlik numaraları kütükte şifrelidir ve buradan yente'ye **gönderilmez**: eşleştirme
+    ad üzerinden yapılır (yaptırım listeleri TCKN taşımaz).
+    """
+    entity = await entity_service.get_entity(session, entity_id)
+    if entity is None:
+        raise NotFoundError("Varlık bulunamadı.")
+
+    thresholds = await _load_thresholds(session)
+    pairs = await entity_service.screening_subjects_for(session, entity)
+    subjects = [
+        ScreeningSubject(
+            name=item.name,
+            subject_type=(
+                SubjectType.PERSON if item.schema_type == "Person" else SubjectType.COMPANY
+            ),
+            role=SubjectRole(role)
+            if role in {r.value for r in SubjectRole}
+            else SubjectRole.OFFICER,
+            country=item.country,
+            identifiers=(
+                {"taxNumber": item.tax_number} if item.tax_number and role == "self" else {}
+            ),
+        )
+        for item, role in pairs
+    ]
+    if len(subjects) > settings.screening_sync_subject_limit:
+        raise ValidationFailedError(
+            f"Bu dosyada {len(subjects)} özne var; senkron tarama en fazla "
+            f"{settings.screening_sync_subject_limit} alır. Derin koşuyu kullanın."
+        )
+
+    try:
+        screening = await screening_service.run_screening(
+            session,
+            yente,
+            tenant_id=principal.tenant_id,
+            subjects=subjects,
+            thresholds=thresholds,
+            dataset=settings.yente_dataset,
+            algorithm=settings.yente_algorithm,
+            requested_by_user_id=principal.user_id,
+            requested_by_role=principal.role.value,
+            entity_id=entity.id,
+            retention_years=settings.document_retention_years,
+            limit=settings.screening_candidate_limit,
+        )
+    except ScreeningInputError as exc:
+        raise ValidationFailedError(str(exc)) from exc
+
+    _mask_persisted_identifiers(screening)
+    await session.flush()
+    summary = await screening_service.summarize_screening(session, screening.id)
+    if screening.status == "failed":
+        response.status_code = status.HTTP_502_BAD_GATEWAY
+    candidates = await screening_service.list_candidates(session, screening.id)
+    return ScreeningDetailResponse(
+        **_screening_response(screening, summary).model_dump(),
+        candidates=[_candidate_response(candidate) for candidate in candidates],
+    )
 
 
 @router.post("/deep", response_model=ScreeningResponse, status_code=status.HTTP_202_ACCEPTED)

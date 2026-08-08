@@ -4,11 +4,22 @@ from __future__ import annotations
 
 from fastapi import APIRouter
 
-from aegis_api.routers.v1 import audit, auth, members, screenings, settings, system
+from aegis_api.routers.v1 import (
+    audit,
+    auth,
+    documents,
+    entities,
+    members,
+    screenings,
+    settings,
+    system,
+)
 
 api_v1_router = APIRouter()
 api_v1_router.include_router(audit.router)
 api_v1_router.include_router(auth.router)
+api_v1_router.include_router(documents.router)
+api_v1_router.include_router(entities.router)
 api_v1_router.include_router(members.router)
 api_v1_router.include_router(screenings.router)
 api_v1_router.include_router(settings.router)

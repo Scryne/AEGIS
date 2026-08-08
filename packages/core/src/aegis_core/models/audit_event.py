@@ -36,12 +36,24 @@ class AuditAction(StrEnum):
     """
 
     TENANT_SETTING_UPDATE = "tenant_setting.update"
-    # E1.3+ risk-etkileyen eylemler (CLAUDE.md Invariant 2) — geldikçe yayılacak:
+    # E1.3 tarama
     SCREENING_RUN = "screening.run"
     MATCH_CONFIRM = "match.confirm"
     MATCH_DISMISS = "match.dismiss"
-    REPORT_EXPORT = "report.export"
+    # E1.4 varlık kütüğü — kütüğü değiştiren her eylem risk-etkileyendir: dosyanın
+    # kimin hakkında olduğu ve hangi bağların kurulduğu, tarama sonucunu belirler.
     ENTITY_EDIT = "entity.edit"
+    ENTITY_MERGE = "entity.merge"
+    RELATIONSHIP_EDIT = "relationship.edit"
+    DOCUMENT_UPLOAD = "document.upload"
+    PROPOSAL_ACCEPT = "proposal.accept"
+    PROPOSAL_REJECT = "proposal.reject"
+    DISCREPANCY_DECISION = "discrepancy.decision"
+    ENRICHMENT_LOOKUP = "enrichment.lookup"
+    """Dış kütük sorgusu (GLEIF) — hangi tanımlayıcının dışarı gittiği izde durur."""
+
+    # E1.5 raporlama
+    REPORT_EXPORT = "report.export"
 
 
 class AuditEvent(UUIDPKMixin, TenantMixin, Base):

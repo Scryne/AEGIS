@@ -63,6 +63,19 @@ class Settings(BaseSettings):
     object_storage_secret_access_key: str | None = None
     object_storage_region: str = "auto"
 
+    # ── Belge yükleme / çıkarım — E1.4 ───────────────────────────────────────
+    # Azami belge boyutu (MB). Sınır hem depoyu hem çıkarım süresini korur.
+    max_document_size_mb: int = 25
+    # İndirme bağlantısı ömrü (saniye) — kısa tutulur, kalıcı erişim kapısı bırakmaz.
+    document_download_url_ttl_seconds: int = 300
+
+    # ── Dış zenginleştirme (GLEIF) — E1.4 ────────────────────────────────────
+    # KVKK: yalnız LEI kodu (kamuya açık tanımlayıcı) dışarı çıkar; ad/adres/TCKN asla.
+    # Her sorgu denetim olayı yazar. Kapatmak isteyen kurulum bunu false yapar.
+    gleif_enabled: bool = True
+    gleif_api_url: str = "https://api.gleif.org/api/v1"
+    gleif_timeout_seconds: float = 15.0
+
     # ── Tarama motoru (yente) — E1.3 ─────────────────────────────────────────
     # KVKK: self-host; müşteri PII'si asla dış tarama API'sine gitmez.
     yente_url: str = "http://localhost:8001"

@@ -4,6 +4,7 @@ from aegis_core.security.encryption import (
     DecryptionError,
     EncryptedString,
     SecretBox,
+    blind_index,
     generate_key,
     get_secret_box,
 )
@@ -26,6 +27,7 @@ __all__ = [
     "DecryptionError",
     "EncryptedString",
     "SecretBox",
+    "blind_index",
     "create_access_token",
     "create_password_reset_token",
     "create_refresh_token",

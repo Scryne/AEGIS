@@ -124,6 +124,29 @@ A **recall floor of 100%** gates screening in CI, in two layers (see `evals/READ
 collapse different entities. Ruff `RUF001-003` (ambiguous-unicode) are intentionally
 **off**: project language is Turkish.
 
+## Entity registry invariants (E1.4 — see ADR-0007)
+
+- **Every value is an observation.** `entity` holds the currently-accepted value;
+  `entity_attribute` holds each observation with its source and timestamp. Data from
+  documents/registries is recorded with `promote_to_current=False` — it never silently
+  overwrites the customer's declaration; a conflict becomes a `discrepancy`.
+- **Discrepancies are decided, not closed.** A reason is mandatory (MASAK audit asks
+  "why was this accepted"); the record stays for the dossier.
+- **Extraction never writes to the registry.** Docling output becomes
+  `extraction_proposal` rows awaiting human confirmation (R2). Rejected proposals persist.
+- **Identifier checksums are advisory.** A number that fails its check digit is still
+  saved, with a warning — refusing to record what the customer's document says is not
+  acceptable. The same checks are used *strictly* as a precision filter during extraction.
+- **TCKN is encrypted** (`EncryptedString`) with a keyed `blind_index` for equality
+  search. Attribute rows, discrepancies, proposal evidence and audit payloads carry only
+  the **masked** form. Tax/MERSİS/LEI stay plain — public company identifiers that ER
+  matches on.
+- **ER never auto-merges.** Deterministic identifier → conflict guard (similar name but
+  different tax number is *not* a match) → `pg_trgm` fuzzy → ambiguity goes to a human.
+  Merging marks the source `merged`; it never deletes.
+- **Docling is an optional install** (`uv sync --group extraction`, worker image only).
+  Not installed ⇒ document is stored and marked `skipped`; upload still succeeds.
+
 ## Screening invariants (E1.3 — see ADR-0006)
 
 - **No auto-confirm.** A high score flags a candidate; it never confirms it. Confirmation
@@ -218,6 +241,26 @@ Apache AGE, Kubernetes). If a Phase 1 task tempts toward one, stop and note it f
     against `COLUMN_ALIASES`, (b) manifest `datasets:` collection (`aegis_all`) together
     with the OpenSanctions catalog, (c) the `/updatez` contract — each isolated to one
     file, and (b)/(c) are non-blocking (the sync job warns rather than fails)
-- [ ] E1.4 Entity registry + verification (FtM schema, Docling, Sicil Gazetesi, ER v1)
+- [~] **E1.4** Entity registry + verification — *core complete; PDF path needs pilot docs*
+  - [x] FtM-aligned `entity` / `entity_attribute` / `relationship` + **provenance as
+    observations** (every value carries source + timestamp; ADR-0007)
+  - [x] Company/person CRUD with Turkish identifier checks (TCKN · VKN · MERSİS · LEI) —
+    **advisory, never blocking**; TCKN encrypted (`EncryptedString`) + blind index
+    (closes E1.2's deferred "apply field encryption to national-ID columns")
+  - [x] Document upload → MinIO → Turkish extraction (imza sirküleri / faaliyet belgesi /
+    gazette) → `extraction_proposal` requiring **human confirmation** (R2)
+  - [x] Discrepancy flagging: declared vs. document/registry, severity-ranked, decided
+    with a mandatory reason (never silently closed)
+  - [x] ER v1 (R4): deterministic identifiers → **conflict guard** → `pg_trgm` fuzzy →
+    merge-or-create, ambiguity goes to a human; merge preserves the source record
+  - [x] GLEIF enrichment sending **only the LEI** outward, audited, never overwriting
+    the declaration
+  - [x] Ticaret Sicil Gazetesi as guided manual attach with source reference (R1 — no
+    automated lookup until E0.3 produces a verdict)
+  - [x] `POST /screenings/from-entity/{id}` — screens the company **with its officers/UBOs**
+    from the registry (E1.3 × E1.4)
+  - [ ] *Needs verification with real files:* Docling PDF path (optional `extraction`
+    dependency group; the plain-text path is covered end-to-end in tests), and the VKN
+    checksum against the official specification
 - [ ] E1.5 Reports & dossier (rule-based summary, PDF+Word, audit viewer)
 - [ ] E1.6 Production deploy + pilot onboarding

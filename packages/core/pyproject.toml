@@ -15,9 +15,15 @@ dependencies = [
     "redis>=5.2.0",
     "sentry-sdk>=2.19.0",
     "cryptography>=44",
-    # yente (tarama motoru) istemcisi — async (API) + senkron (worker) aynı kütüphane.
+    # yente (tarama motoru) + GLEIF istemcisi — async (API) + senkron (worker).
     "httpx>=0.28.0",
+    # S3-uyumlu nesne deposu (MinIO) — belge saklama (E1.4).
+    "boto3>=1.35.0",
 ]
+# Not: Docling (belge çıkarımı) bilinçli olarak BURADA DEĞİLDİR. PyTorch dahil ~2 GB'lık
+# bir ağaç getirir; zorunlu bağımlılık olsaydı CI her koşuda onu çözerdi. Kök
+# pyproject'teki `extraction` bağımlılık grubundadır ve yalnız worker imajına kurulur
+# (bkz. aegis_core/documents/docling_adapter.py modül başlığı).
 
 [build-system]
 requires = ["hatchling"]

@@ -27,6 +27,7 @@ def create_celery_app() -> Celery:
             "aegis_worker.tasks.retention",
             "aegis_worker.tasks.sanctions",
             "aegis_worker.tasks.screening",
+            "aegis_worker.tasks.documents",
         ],
     )
     app.conf.update(

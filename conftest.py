@@ -26,6 +26,9 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 APP_ROLE = "aegis_app"
 APP_PASSWORD = "aegis_app"
 TEST_AUTH_SECRET = "test-secret-please-change-in-prod-0123456789"
+# E1.4: TCKN kolonu şifrelidir (ADR-0005). Sabit test anahtarı, kör indeksin
+# (blind_index) koşular arasında kararlı kalmasını da sağlar.
+TEST_FIELD_ENCRYPTION_KEY = "YWVnaXMtdGVzdC1maWVsZC1rZXktMzJieXRlcyEhISE="
 
 
 @pytest.fixture(scope="session")
@@ -116,6 +119,7 @@ def api_client(app_database_url: str, redis_url: str) -> Iterator[object]:
     os.environ["DATABASE_URL"] = app_database_url
     os.environ["REDIS_URL"] = redis_url
     os.environ["AUTH_SECRET"] = TEST_AUTH_SECRET
+    os.environ["FIELD_ENCRYPTION_KEY"] = TEST_FIELD_ENCRYPTION_KEY
     get_settings.cache_clear()
 
     # Oran sınırlama gerçek Redis'e sayar; önceki koşulardan kalan rl:* anahtarları

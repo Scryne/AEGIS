@@ -28,7 +28,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from aegis_core.models import AuditAction, AuditEvent
@@ -131,6 +131,70 @@ async def record_event(
     session.add(event)
     await session.flush()
     return event
+
+
+async def list_events(
+    session: AsyncSession,
+    *,
+    action: str | None = None,
+    object_type: str | None = None,
+    object_id: str | None = None,
+    actor_user_id: uuid.UUID | None = None,
+    occurred_from: datetime | None = None,
+    occurred_to: datetime | None = None,
+    limit: int = 50,
+    offset: int = 0,
+) -> list[AuditEvent]:
+    """Denetim olaylarını en yeniden eskiye listeler (E1.5 denetim görüntüleyicisi).
+
+    Sıralama ``seq`` üzerindendir, ``occurred_at`` üzerinden değil: ``seq`` zincirin
+    gerçek sırasıdır ve aynı saniyeye düşen iki olayı da kesin sıralar.
+    """
+    statement = select(AuditEvent)
+    if action:
+        statement = statement.where(AuditEvent.action == action)
+    if object_type:
+        statement = statement.where(AuditEvent.object_type == object_type)
+    if object_id:
+        statement = statement.where(AuditEvent.object_id == object_id)
+    if actor_user_id is not None:
+        statement = statement.where(AuditEvent.actor_user_id == actor_user_id)
+    if occurred_from is not None:
+        statement = statement.where(AuditEvent.occurred_at >= occurred_from)
+    if occurred_to is not None:
+        statement = statement.where(AuditEvent.occurred_at <= occurred_to)
+    result = await session.scalars(
+        statement.order_by(AuditEvent.seq.desc()).limit(limit).offset(offset)
+    )
+    return list(result)
+
+
+async def count_events(
+    session: AsyncSession,
+    *,
+    action: str | None = None,
+    object_type: str | None = None,
+    object_id: str | None = None,
+    actor_user_id: uuid.UUID | None = None,
+    occurred_from: datetime | None = None,
+    occurred_to: datetime | None = None,
+) -> int:
+    """Süzgeçlere uyan olay sayısı (sayfalama için)."""
+    statement = select(func.count()).select_from(AuditEvent)
+    if action:
+        statement = statement.where(AuditEvent.action == action)
+    if object_type:
+        statement = statement.where(AuditEvent.object_type == object_type)
+    if object_id:
+        statement = statement.where(AuditEvent.object_id == object_id)
+    if actor_user_id is not None:
+        statement = statement.where(AuditEvent.actor_user_id == actor_user_id)
+    if occurred_from is not None:
+        statement = statement.where(AuditEvent.occurred_at >= occurred_from)
+    if occurred_to is not None:
+        statement = statement.where(AuditEvent.occurred_at <= occurred_to)
+    total = await session.scalar(statement)
+    return int(total or 0)
 
 
 async def verify_chain(session: AsyncSession) -> ChainVerification:

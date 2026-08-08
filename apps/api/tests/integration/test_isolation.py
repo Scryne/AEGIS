@@ -108,6 +108,8 @@ def test_cross_tenant_isolation_api_and_direct_sql(
         "document",
         "extraction_proposal",
         "discrepancy",
+        # E1.5 raporlama
+        "report",
     )
     engine = create_engine(app_database_url)
     try:

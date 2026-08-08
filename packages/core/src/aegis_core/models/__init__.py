@@ -21,6 +21,12 @@ from aegis_core.models.entity import (
 )
 from aegis_core.models.membership import Membership, Role
 from aegis_core.models.organization import Organization
+from aegis_core.models.report import (
+    REPORT_CONTENT_TYPES,
+    Report,
+    ReportFormat,
+    ReportType,
+)
 from aegis_core.models.sanctions_dataset import SanctionsDataset
 from aegis_core.models.screening import (
     MatchCandidate,
@@ -32,6 +38,7 @@ from aegis_core.models.tenant_setting import TenantSetting
 from aegis_core.models.user import User
 
 __all__ = [
+    "REPORT_CONTENT_TYPES",
     "AuditAction",
     "AuditEvent",
     "Discrepancy",
@@ -52,6 +59,9 @@ __all__ = [
     "ProposalStatus",
     "Relationship",
     "RelationshipType",
+    "Report",
+    "ReportFormat",
+    "ReportType",
     "Role",
     "SanctionsDataset",
     "Screening",

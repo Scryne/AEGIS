@@ -41,6 +41,7 @@ from aegis_core.screening.thresholds import (
     MatchDecision,
     ScreeningThresholds,
 )
+from aegis_core.screening.topics import has_pep_topic, has_sanction_topic
 from aegis_core.screening.yente import (
     SCHEMA_COMPANY,
     SCHEMA_PERSON,
@@ -226,10 +227,12 @@ async def summarize_screening(session: AsyncSession, screening_id: uuid.UUID) ->
         if is_flagged:
             flagged += 1
         topic_list = topics if isinstance(topics, list) else []
+        # Yüklemler ``screening.topics``tan gelir: ekrandaki sayaç ile rapordaki risk
+        # kuralı aynı tanımı kullanmak zorundadır (bkz. o modülün başlığı).
         if decision != MatchDecision.DISMISSED.value:
-            if any(str(topic).startswith("sanction") for topic in topic_list):
+            if has_sanction_topic(topic_list):
                 sanction_hits += 1
-            if any(str(topic).startswith("role.pep") for topic in topic_list):
+            if has_pep_topic(topic_list):
                 pep_hits += 1
     return ScreeningSummary(
         total=len(rows),

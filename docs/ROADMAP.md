@@ -387,11 +387,11 @@ time-per-file measured against their manual baseline.
 - [ ] Discrepancy flagging: declared vs. extracted/registry data mismatches surfaced on profile + report (MASAK suspicious-transaction precondition)
 - [ ] Internal entity resolution v1 (per R4): deterministic identifier match + normalized-name `pg_trgm` similarity → merge-or-create with review on ambiguity
 
-**E1.5 — Reports, risk summary & dossier — M5 basic** *(M · ~1 week)*
-- [ ] Rule-based risk summary v1 (transparent, no ML): confirmed sanctions hit → High; PEP → Elevated; unresolved discrepancies → flag; each with plain-language rationale
-- [ ] Due diligence dossier export (PDF via HTML template, Word via python-docx): profile, screening results incl. dismissed-with-reason matches, discrepancies, source references, run timestamps + dataset versions
-- [ ] Audit-trail viewer (read-only, auditor role): who/what/when/on-what-basis
-- [ ] Dossiers stored under retention policy with hash for integrity evidence
+**E1.5 — Reports, risk summary & dossier — M5 basic** *(M · ~1 week)* — **DONE** (ADR-0008)
+- [x] Rule-based risk summary v1 (transparent, no ML): confirmed sanctions hit → High; PEP → Elevated; unresolved discrepancies → flag; each with plain-language rationale
+- [x] Due diligence dossier export (PDF via HTML template, Word via python-docx): profile, screening results incl. dismissed-with-reason matches, discrepancies, source references, run timestamps + dataset versions
+- [x] Audit-trail viewer (read-only, auditor role): who/what/when/on-what-basis
+- [x] Dossiers stored under retention policy with hash for integrity evidence
 
 **E1.6 — Production deploy & pilot onboarding (critical path)** *(M · ~1 week)*
 - [ ] Select VPS with Turkey data-center option (KVKK locality); provision single host

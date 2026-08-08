@@ -19,7 +19,7 @@ apps/web      @aegis/web     — Next.js 16 (App Router) + Tailwind, SSR dashboa
 apps/worker   aegis_worker   — Celery workers + beat
 packages/core aegis_core     — db, models, security, config, services (shared library)
 packages/api-client @aegis/api-client — TS types generated from OpenAPI (contract gate)
-migrations    — Alembic; 0001 = identity + RLS
+migrations    — Alembic; 0001 = identity + RLS … 0005 = report
 infra         — compose, docker, (caddy in E1.6)
 evals         — Turkish screening test set + recall-floor gate (E1.3)
 scripts       — tenant-provisioning CLI, gate checks, backup/restore (E1.6)
@@ -41,6 +41,7 @@ workspace** (`@aegis/web`, `@aegis/api-client`).
 | Redis | 7 | |
 | Elasticsearch | **9.4.2** | pinned to yente 5.5.0's own compose |
 | yente | **5.5.0** | self-hosted screening; `YENTE_INDEX_URL` env var |
+| Reporting | jinja2 · xhtml2pdf · python-docx | pure Python, **no native deps** (ADR-0008) |
 
 **yente/ES footprint (record for host sizing, E1.6):** OpenSanctions documents
 **4–16 GB RAM + 10–30 GB SSD** for the ES index; yente 5.5.0 sets `ES_JAVA_OPTS=-Xms4g
@@ -146,6 +147,35 @@ collapse different entities. Ruff `RUF001-003` (ambiguous-unicode) are intention
   Merging marks the source `merged`; it never deletes.
 - **Docling is an optional install** (`uv sync --group extraction`, worker image only).
   Not installed ⇒ document is stored and marked `skipped`; upload still succeeds.
+
+## Reporting invariants (E1.5 — see ADR-0008)
+
+- **Risk level is a rule, not a score.** `reports/risk.py` runs transparent rules
+  (confirmed sanctions → High, confirmed PEP → Elevated, open critical discrepancy →
+  Elevated) and the level is the **maximum** of the findings — no hidden weighting. Every
+  finding carries a plain-Turkish `rationale` that is printed in the report. A weighted /
+  learned score is Phase 2.
+- **An undecided match never raises the level.** A high-scoring but unconfirmed candidate
+  carries `level=None`: it does not touch the level, it sets `complete=False`. Anything
+  else would breach "no auto-confirm" (ADR-0006) through the back door.
+- **"No result" ≠ "clean".** No screening or a failed run ⇒ `unknown` (Belirsiz), never
+  `standard`. Ranking is `standard < unknown < elevated < high`.
+- **What counts as a sanctions/PEP hit lives in `screening/topics.py`** — the on-screen
+  counter and the risk rule must never disagree.
+- **Dismissed matches stay in the dossier**, with their band and reason. So do the run's
+  frozen thresholds and dataset versions: the report answers "against which list, at
+  which threshold" on its own.
+- **PDF = Jinja2 → xhtml2pdf/reportlab** (pure Python; WeasyPrint's Pango dependency was
+  rejected — R6). Turkish glyphs need reportlab's bundled **Bitstream Vera** TTF faces,
+  registered directly (xhtml2pdf's `@font-face` path breaks on Windows). Tests read the
+  text back out of the produced PDF.
+- **PDF and Word are rendered from one `DossierData`**, so they cannot drift. TCKN is
+  **masked** in reports; tax/MERSİS/LEI print in full.
+- **Exported files freeze.** Written to object storage first, then the `report` row with
+  `sha256` + `retention_until`; storage failure ⇒ no row. Exactly one `report.export`
+  audit event, `source_ref = sha256:…`. The **live** risk summary writes no event.
+- **Audit viewer is read-only**, ordered by `seq` (not `occurred_at`), open to
+  owner/compliance_officer/auditor — analyst excluded.
 
 ## Screening invariants (E1.3 — see ADR-0006)
 
@@ -262,5 +292,18 @@ Apache AGE, Kubernetes). If a Phase 1 task tempts toward one, stop and note it f
   - [ ] *Needs verification with real files:* Docling PDF path (optional `extraction`
     dependency group; the plain-text path is covered end-to-end in tests), and the VKN
     checksum against the official specification
-- [ ] E1.5 Reports & dossier (rule-based summary, PDF+Word, audit viewer)
+- [x] **E1.5** Reports & dossier — *complete*
+  - [x] Rule-based risk summary v1 (`reports/risk.py`), transparent + plain-Turkish
+    rationale per finding; shared sanctions/PEP predicate in `screening/topics.py`
+  - [x] Migration 0005: `report` (RLS, in the isolation gate) with `sha256` integrity
+    proof + `retention_until`; risk verdict and dataset versions frozen at export
+  - [x] Dossier export PDF (Jinja2 → xhtml2pdf) + Word (python-docx) from one
+    `DossierData`; dismissed-with-reason matches, discrepancies, source refs, run
+    timestamps + dataset versions; TCKN masked (ADR-0008)
+  - [x] `POST /reports/dossier` · `GET /reports[/{id}][/download]` ·
+    `GET /reports/risk/{entity_id}` (live, writes no audit event); auditor reads but
+    cannot export
+  - [x] Audit-trail viewer: `GET /audit/events` (paginated + filters, `seq`-ordered) and
+    the `/audit` page with a chain-verification badge; analyst excluded
+  - [x] Web: risk panel + export buttons + generated-reports list on the entity page
 - [ ] E1.6 Production deploy + pilot onboarding

@@ -27,8 +27,8 @@ işleme faaliyetleri, ayrım için ayrı bir tabloda özetlenir (aydınlatma mü
 |---|---|---|---|---|---|
 | 6 | Şirket profili & doğrulama | Kimlik/ticari (unvan, vergi no, MERSIS, adres, yöneticiler) | KYB/kurumsal due diligence | RLS izolasyon, denetim izi | Hayır |
 | 7 | Yaptırım/PEP/watchlist tarama | Ad/unvan + eşleşme sonuçları | MASAK yükümlülüğü desteği | **Self-host yente** (PII dışa çıkmaz), RLS | Hayır |
-| 8 | Hassas kimlik alanları | TCKN/vergi no (E1.4'te) | Kimlik doğrulama/tekilleştirme | **AES-256-GCM** kolon şifreleme (ADR-0005) | Hayır |
-| 9 | Belge/dosya saklama | Yüklenen belgeler + üretilen dosyalar | Kanıt/denetim | `retention_until` (≥{{SAKLAMA_YILI}} yıl), bütünlük hash'i | Hayır |
+| 8 | Hassas kimlik alanları | TCKN (şifreli) / vergi no | Kimlik doğrulama/tekilleştirme | **AES-256-GCM** kolon şifreleme + kör indeks (ADR-0005); türev kayıtlarda ve raporlarda yalnız **maskeli** biçim | Hayır |
+| 9 | Belge/dosya saklama | Yüklenen belgeler + üretilen durum tespiti dosyaları (PDF/Word) | Kanıt/denetim | Nesne deposu (DB'de değil), `retention_until` (≥{{SAKLAMA_YILI}} yıl), SHA-256 bütünlük özeti (ADR-0008) | Hayır |
 
 ## C. Teknik ve İdari Tedbirler (özet)
 - **Erişim:** RBAC (owner / compliance_officer / analyst / auditor); denetçi salt-okunur.

@@ -3,9 +3,11 @@
 Invariant 4 (KVKK ≥5 yıl): belge/dosya tabloları ``retention_until`` taşır
 (``RetentionMixin``). Bu task, süresi geçmiş kayıtları temizlemek için beat'e günlük
 programlanır — ama **şimdilik hiçbir şey silmez**. Gerçek silme, önce kuru-çalışma
-rapor modu ile E3.7'de etkinleşir; ayrıca imha edilecek belge tabloları E1.4/E1.5'te gelir.
-Şimdiden programlanmasının nedeni: operasyonel yol (beat girdisi + idempotent task) faz
-sınırında yeniden inşa edilmesin.
+rapor modu ile E3.7'de etkinleşir. İmha kapsamındaki tablolar artık mevcuttur —
+``document`` ve ``entity`` (E1.4), ``screening`` (E1.3), ``report`` (E1.5) — ve hepsi
+``retention_until`` taşır; nesne deposundaki dosyalar da (belge + rapor) aynı anda
+silinecektir. Şimdiden programlanmasının nedeni: operasyonel yol (beat girdisi +
+idempotent task) faz sınırında yeniden inşa edilmesin.
 """
 
 from __future__ import annotations

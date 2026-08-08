@@ -1,0 +1,339 @@
+{#
+  Dosya raporu HTML şablonu — PDF'e xhtml2pdf ile dönüşür (ADR-0008).
+
+  Sınırlar bilinçlidir: xhtml2pdf CSS'in bir alt kümesini destekler (flexbox/grid YOK).
+  Bu bir kayıp değil: dosya raporu bir *belgedir* — başlık, paragraf ve tablo. Düzen
+  tablolarla kurulur ve mizanpaj sürprizi çıkarmaz.
+
+  Marka sabitlenmemiştir (Revizyon R7): renkler aşağıdaki tek blokta durur; kurum
+  kimliği geldiğinde yalnız burası değişir.
+#}
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <title>{{ data.title }}</title>
+    <style>
+      @page {
+        size: a4 portrait;
+        margin: 1.8cm 1.6cm 2.2cm 1.6cm;
+        @frame footer {
+          -pdf-frame-content: footer-content;
+          bottom: 1.1cm;
+          margin-left: 1.6cm;
+          margin-right: 1.6cm;
+          height: 1cm;
+        }
+      }
+      body { font-family: {{ font_family }}; font-size: 8.6pt; color: #1a1a1a; }
+      h1 { font-size: 15pt; margin: 0 0 2pt 0; }
+      h2 {
+        font-size: 10.5pt;
+        margin: 14pt 0 4pt 0;
+        padding-bottom: 2pt;
+        border-bottom: 0.6pt solid #c8c8c8;
+      }
+      h3 { font-size: 9pt; margin: 8pt 0 3pt 0; }
+      p { margin: 0 0 4pt 0; line-height: 1.4; }
+      .muted { color: #666666; }
+      .small { font-size: 7.6pt; }
+      table { width: 100%; border-collapse: collapse; margin-bottom: 6pt; }
+      th, td {
+        border: 0.5pt solid #c8c8c8;
+        padding: 3pt 4pt;
+        text-align: left;
+        vertical-align: top;
+      }
+      th { background-color: #f0f0f0; font-weight: bold; }
+      td.label { width: 32%; color: #444444; }
+      .risk-box { border: 1pt solid #999999; padding: 7pt; margin-bottom: 8pt; }
+      .risk-high { border-color: #a11212; }
+      .risk-elevated { border-color: #a86500; }
+      .risk-unknown { border-color: #555555; }
+      .risk-standard { border-color: #2b6b2b; }
+      .risk-level { font-size: 13pt; font-weight: bold; }
+      .finding { margin-bottom: 5pt; }
+      .finding-title { font-weight: bold; }
+      .tag {
+        font-size: 7pt;
+        border: 0.5pt solid #999999;
+        padding: 0.5pt 2pt;
+        color: #444444;
+      }
+      .notice { border: 0.5pt solid #999999; padding: 5pt; margin-bottom: 8pt; }
+    </style>
+  </head>
+  <body>
+    <div id="footer-content" class="small muted">
+      {{ data.title }} · Üretim: {{ data.generated_at_label }} · Sayfa
+      <pdf:pagenumber /> / <pdf:pagecount />
+    </div>
+
+    <h1>{{ data.title }}</h1>
+    <p class="muted small">
+      {{ data.subject_kind_label }}
+      {%- if data.organization_name %} · {{ data.organization_name }}{% endif %}
+      · Üretim tarihi: {{ data.generated_at_label }}
+      {%- if data.generated_by %} · Üreten: {{ data.generated_by }}{% endif %}
+    </p>
+
+    {# ── Risk özeti: kural tabanlı, gerekçeleriyle (ROADMAP E1.5) ───────────── #}
+    <div class="risk-box risk-{{ data.risk.level.value }}">
+      <div class="risk-level">Risk değerlendirmesi: {{ data.risk.level_label }}</div>
+      <p>{{ data.risk.rationale }}</p>
+      {% if data.risk.findings %}
+        {% for finding in data.risk.findings %}
+          <div class="finding">
+            <span class="finding-title">{{ loop.index }}. {{ finding.title }}</span>
+            {%- if finding.needs_action %} <span class="tag">İŞLEM BEKLİYOR</span>{% endif %}
+            <p>{{ finding.rationale }}</p>
+            {% if finding.source_refs %}
+              <p class="small muted">Kaynak: {{ finding.source_refs | join(" · ") }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="muted">Kuralların ürettiği bulgu yok.</p>
+      {% endif %}
+    </div>
+
+    <div class="notice small">
+      Bu rapor bir <b>karar desteği</b> çıktısıdır; müşteri kabul, ret ya da şüpheli işlem
+      bildirimi kararı yükümlü kuruma aittir. Bulgular, üretim anındaki veri kümesi
+      sürümlerine ve aşağıda belirtilen eşiklere dayanır.
+    </div>
+
+    {# ── Kimlik ─────────────────────────────────────────────────────────────── #}
+    <h2>1. Kimlik bilgileri</h2>
+    <table>
+      {% for item in data.profile %}
+        <tr>
+          <td class="label">{{ item.label }}</td>
+          <td>{{ item.value }}</td>
+        </tr>
+      {% endfor %}
+    </table>
+
+    {# ── İlgili taraflar (UBO HESABI Phase 2; burada kayıtlı bağlar) ────────── #}
+    <h2>2. İlgili taraflar</h2>
+    {% if data.related_parties %}
+      <table>
+        <tr>
+          <th>Ad / unvan</th>
+          <th>Bağ türü</th>
+          <th>Yetki / unvan</th>
+          <th>Pay</th>
+          <th>Kaynak</th>
+        </tr>
+        {% for party in data.related_parties %}
+          <tr>
+            <td>{{ party.name }}</td>
+            <td>{{ party.rel_type_label }}</td>
+            <td>{{ party.role_title or "—" }}</td>
+            <td>{{ party.ownership_percent }}</td>
+            <td>
+              {{ party.source_label }}
+              {%- if party.source_ref %}<br /><span class="small muted">{{ party.source_ref }}</span>{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p class="muted">Kayıtlı bağ yok.</p>
+    {% endif %}
+
+    {# ── Tarama sonuçları: ELENENLER DAHİL (ADR-0006) ───────────────────────── #}
+    <h2>3. Yaptırım ve PEP taraması</h2>
+    {% if data.screenings %}
+      {% for screening in data.screenings %}
+        <h3>
+          3.{{ loop.index }} Koşu — {{ screening.status_label }}
+          ({{ screening.completed_at }})
+        </h3>
+        <table>
+          <tr>
+            <td class="label">Veri kümesi kapsamı</td>
+            <td>{{ screening.dataset }}</td>
+          </tr>
+          <tr>
+            <td class="label">Eşleştirme algoritması</td>
+            <td>{{ screening.algorithm }}</td>
+          </tr>
+          <tr>
+            <td class="label">Koşu anındaki eşikler</td>
+            <td>{{ screening.thresholds }}</td>
+          </tr>
+          <tr>
+            <td class="label">Başlangıç / süre</td>
+            <td>{{ screening.started_at }} · {{ screening.duration }}</td>
+          </tr>
+        </table>
+
+        {% if not screening.succeeded %}
+          <p>
+            <b>Bu koşu sonuç üretmedi.</b> Başarısız bir tarama “temiz” anlamına gelmez.
+            {%- if screening.error %} Hata: {{ screening.error }}{% endif %}
+          </p>
+        {% elif screening.matches %}
+          <table>
+            <tr>
+              <th>Taranan</th>
+              <th>Eşleşen kayıt</th>
+              <th>Skor</th>
+              <th>Karar</th>
+              <th>Konular / listeler</th>
+            </tr>
+            {% for match in screening.matches %}
+              <tr>
+                <td>
+                  {{ match.subject_name }}<br />
+                  <span class="small muted">{{ match.subject_role_label }}</span>
+                </td>
+                <td>
+                  {{ match.caption }}
+                  {%- if match.source_url %}<br /><span class="small muted">{{ match.source_url }}</span>{% endif %}
+                  <br /><span class="small muted">Eşleşme nedeni: {{ match.match_features }}</span>
+                </td>
+                <td>
+                  {{ match.score }}<br />
+                  <span class="small muted">{{ match.band_label }}</span>
+                </td>
+                <td>
+                  {{ match.decision_label }}
+                  {%- if match.decided_automatically %}<br /><span class="small muted">eşik bandı kararı</span>{% endif %}
+                  {%- if match.review_note %}<br /><span class="small">Gerekçe: {{ match.review_note }}</span>{% endif %}
+                </td>
+                <td class="small">
+                  {{ match.topics }}<br />
+                  <span class="muted">{{ match.datasets }}</span>
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
+          <p class="small muted">
+            Elenen eşleşmeler de tabloda yer alır: dosyanın savunması “neye bakıldı ve
+            neden elendi” bilgisini içerir.
+          </p>
+        {% else %}
+          <p class="muted">
+            Bu koşuda eşik üstünde aday bulunamadı (aday alt kesmesinin altındaki kayıtlar
+            motor tarafından hiç döndürülmez).
+          </p>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      <p><b>Bu varlık için tarama kaydı yok.</b> Dosya, tarama koşulmadan tamamlanmış sayılamaz.</p>
+    {% endif %}
+
+    {# ── Tutarsızlıklar ─────────────────────────────────────────────────────── #}
+    <h2>4. Tutarsızlıklar</h2>
+    {% if data.discrepancies %}
+      <table>
+        <tr>
+          <th>Alan</th>
+          <th>Beyan</th>
+          <th>Belge / kütük</th>
+          <th>Ağırlık</th>
+          <th>Durum</th>
+        </tr>
+        {% for item in data.discrepancies %}
+          <tr>
+            <td>{{ item.attribute_label }}</td>
+            <td>{{ item.declared_value }}</td>
+            <td>
+              {{ item.observed_value }}<br />
+              <span class="small muted">
+                {{ item.observed_source_label }}
+                {%- if item.observed_source_ref %} · {{ item.observed_source_ref }}{% endif %}
+              </span>
+            </td>
+            <td>{{ item.severity_label }}</td>
+            <td>
+              {{ item.status_label }}
+              {%- if item.resolution_note %}<br /><span class="small">{{ item.resolution_note }}</span>{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p class="muted">Tutarsızlık tespit edilmedi.</p>
+    {% endif %}
+
+    {# ── Belgeler ───────────────────────────────────────────────────────────── #}
+    <h2>5. Dosyadaki belgeler</h2>
+    {% if data.documents %}
+      <table>
+        <tr>
+          <th>Dosya adı</th>
+          <th>Tür</th>
+          <th>Yükleme</th>
+          <th>SHA-256 (bütünlük)</th>
+        </tr>
+        {% for document in data.documents %}
+          <tr>
+            <td>
+              {{ document.filename }}
+              {%- if document.source_ref %}<br /><span class="small muted">{{ document.source_ref }}</span>{% endif %}
+            </td>
+            <td>{{ document.doc_type_label }}</td>
+            <td>{{ document.uploaded_at }}</td>
+            <td class="small">{{ document.sha256 }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p class="muted">Belge yüklenmedi.</p>
+    {% endif %}
+
+    {# ── Provenans: her değerin kaynağı (Invariant 4) ───────────────────────── #}
+    <h2>6. Veri kaynakları ve gözlemler</h2>
+    {% if data.observations %}
+      <table>
+        <tr>
+          <th>Alan</th>
+          <th>Değer</th>
+          <th>Kaynak</th>
+          <th>Gözlem zamanı</th>
+        </tr>
+        {% for row in data.observations %}
+          <tr>
+            <td>{{ row.attribute_label }}</td>
+            <td>{{ row.value }}</td>
+            <td>
+              {{ row.source_label }}
+              {%- if row.source_ref %}<br /><span class="small muted">{{ row.source_ref }}</span>{% endif %}
+            </td>
+            <td>{{ row.observed_at }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+    {% else %}
+      <p class="muted">Gözlem kaydı yok.</p>
+    {% endif %}
+
+    {# ── Veri kümesi sürümleri: "hangi listeye göre" ────────────────────────── #}
+    <h2>7. Kullanılan veri kümeleri</h2>
+    {% if dataset_versions %}
+      <table>
+        <tr>
+          <th>Veri kümesi</th>
+          <th>Sürüm</th>
+          <th>Son güncelleme</th>
+        </tr>
+        {% for name, version, exported in dataset_versions %}
+          <tr>
+            <td>{{ name }}</td>
+            <td>{{ version }}</td>
+            <td>{{ exported }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+      <p class="small muted">
+        Sürümler koşu anında donduruldu; sonraki güncellemeler bu raporun bulgularını
+        değiştirmez.
+      </p>
+    {% else %}
+      <p class="muted">Veri kümesi sürüm bilgisi kaydedilmedi.</p>
+    {% endif %}
+  </body>
+</html>

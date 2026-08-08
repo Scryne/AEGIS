@@ -5,8 +5,11 @@ import { notFound } from "next/navigation";
 
 import { DiscrepancyReview } from "@/components/discrepancy-review";
 import { DocumentUpload } from "@/components/document-upload";
+import { DossierExport } from "@/components/dossier-export";
 import { EntityActions } from "@/components/entity-actions";
 import { ProposalReview } from "@/components/proposal-review";
+import { ReportDownloadLink } from "@/components/report-download";
+import { RiskSummaryPanel } from "@/components/risk-summary";
 import { serverFetch } from "@/lib/server/backend";
 import { getCurrentUser } from "@/lib/server/user";
 import type {
@@ -24,6 +27,8 @@ import {
   SOURCE_LABELS,
   attributeLabel,
 } from "@/lib/entities";
+import type { Report, RiskSummary } from "@/lib/reports";
+import { FORMAT_LABELS, formatBytes } from "@/lib/reports";
 
 export const dynamic = "force-dynamic";
 
@@ -50,12 +55,15 @@ export default async function EntityDetailPage({
   if (!res.ok) throw new Error("Varlık yüklenemedi.");
   const entity = (await res.json()) as Entity;
 
-  const [attributes, relationships, documents, discrepancies] = await Promise.all([
-    safeJson<EntityAttribute[]>(`/entities/${id}/attributes`),
-    safeJson<Relationship[]>(`/entities/${id}/relationships`),
-    safeJson<AegisDocument[]>(`/documents?entity_id=${id}`),
-    safeJson<Discrepancy[]>(`/entities/${id}/discrepancies`),
-  ]);
+  const [attributes, relationships, documents, discrepancies, risk, reports] =
+    await Promise.all([
+      safeJson<EntityAttribute[]>(`/entities/${id}/attributes`),
+      safeJson<Relationship[]>(`/entities/${id}/relationships`),
+      safeJson<AegisDocument[]>(`/documents?entity_id=${id}`),
+      safeJson<Discrepancy[]>(`/entities/${id}/discrepancies`),
+      safeJson<RiskSummary>(`/reports/risk/${id}`),
+      safeJson<Report[]>(`/reports?entity_id=${id}`),
+    ]);
 
   // Öneriler belge başına gelir; hepsini tek listede topluyoruz.
   const proposalLists = await Promise.all(
@@ -102,9 +110,47 @@ export default async function EntityDetailPage({
         </div>
       )}
 
+      {/* Risk özeti — kurallar her yüklemede yeniden koşar, hiçbir şey saklanmaz. */}
+      {risk !== null && <RiskSummaryPanel risk={risk} />}
+
       {canWrite && (
-        <section className="rounded-card border border-border bg-surface p-5">
+        <section className="space-y-3 rounded-card border border-border bg-surface p-5">
           <EntityActions entityId={entity.id} hasLei={entity.lei_code !== null} />
+          <div className="border-t border-border pt-3">
+            <DossierExport entityId={entity.id} />
+          </div>
+        </section>
+      )}
+
+      {/* Üretilmiş raporlar: her biri saklama süresine tabi ve özetiyle kanıtlanabilir. */}
+      {reports !== null && reports.length > 0 && (
+        <section className="rounded-card border border-border bg-surface p-5">
+          <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted uppercase">
+            Üretilmiş raporlar
+          </h2>
+          <p className="mb-3 text-xs text-muted">
+            Her rapor üretildiği andaki hâliyle donar; SHA-256 özeti, denetime sunulan
+            dosyanın bu kayıtla aynı olduğunu gösterir.
+          </p>
+          <ul className="divide-y divide-border">
+            {reports.map((report) => (
+              <li key={report.id} className="flex items-start justify-between gap-3 py-2">
+                <div className="min-w-0">
+                  <div className="text-sm text-fg">
+                    {FORMAT_LABELS[report.report_format] ?? report.report_format} ·{" "}
+                    {report.risk_level_label}
+                  </div>
+                  <div className="text-xs text-muted">
+                    {formatDate(report.created_at)} · {formatBytes(report.size_bytes)}
+                  </div>
+                  <div className="truncate font-mono text-[10px] text-muted">
+                    sha256:{report.sha256}
+                  </div>
+                </div>
+                <ReportDownloadLink reportId={report.id} />
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

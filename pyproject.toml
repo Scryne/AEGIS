@@ -84,6 +84,11 @@ module = [
     # docling OPSİYONEL bir kurulumdur (extraction extra); tip denetimi onu bulamaz.
     # Tembel import edilir ve kurulu değilse akış "skipped" ile devam eder.
     "docling.*",
+    # PDF üretimi (E1.5/ADR-0008): ikisi de tip bilgisi yayınlamıyor. types-reportlab
+    # eklenmedi — tek kullanım noktası reports/render.py ve orada dönüş tipleri
+    # zaten açıkça yazılıyor.
+    "reportlab.*",
+    "xhtml2pdf.*",
 ]
 ignore_missing_imports = true
 

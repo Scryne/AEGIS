@@ -14,11 +14,19 @@ class HealthResponse(BaseModel):
 
 
 class ReadinessComponent(BaseModel):
-    """Tek bir bağımlılığın (DB, Redis) hazırlık durumu."""
+    """Tek bir bağımlılığın (DB, Redis, yente) hazırlık durumu."""
 
     name: str
     healthy: bool
     detail: str | None = None
+    required: bool = True
+    """Hazırlığı BLOKE eder mi.
+
+    DB ve Redis zorunludur. Tarama motoru (yente) değildir: yente düştüğünde giriş,
+    dosya görüntüleme ve denetim izi çalışmaya devam etmelidir — servisi tamamen
+    hazır-değil ilan etmek, çalışan işlevleri de kapatırdı. Tarama uçları o sırada
+    zaten ``failed`` durumunda kayıt üretip 502 döner.
+    """
 
 
 class ReadinessResponse(BaseModel):

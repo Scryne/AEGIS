@@ -103,14 +103,40 @@ viewer in E1.5).
 - Naming convention enforced via `Base.metadata` (`ix_/uq_/ck_/fk_/pk_`).
 - Every migration that adds a tenant-scoped table must add its RLS policy in the same file.
 
-## Turkish identifier handling (screening, E1.3 — noted now so it's consistent)
+## Turkish identifier handling (screening, E1.3 — implemented)
 
-Turkish normalization (İ/ı-correct casefolding, transliteration, legal-form suffix
-stripping: `A.Ş.`, `Ltd. Şti.`, `San. ve Tic.`) is a shared, heavily unit-tested module
-built against the Phase-0-style test set. A **recall floor (~100% on known sanctioned
-entities)** gates "screening done" in CI — false negatives are the dangerous error.
-Ruff `RUF001-003` (ambiguous-unicode) are intentionally **off**: project language is
-Turkish.
+Turkish normalization lives in `aegis_core.screening.normalization` and is the single
+module both the **query** and the **dataset** side pass through. İ/ı-correct casefolding
+(Python's `str.lower()` gets this wrong), ASCII transliteration, legal-form suffix
+stripping (`A.Ş.`, `Ltd. Şti.`, `San. ve Tic.`) including mid-name forms
+(`… A.Ş. İstanbul Şubesi`). **Suffix tables are matched ASCII-folded** so `Ltd. Şti.`
+and `LTD STI` need one entry, not two.
+
+A **recall floor of 100%** gates screening in CI, in two layers (see `evals/README.md`):
+
+1. `evals/test_normalization_recall.py` — every spelling variant of the same entity must
+   reach the same canonical key. Runs on every push, no Docker.
+2. `evals/test_screening_recall.py` — real yente + Elasticsearch over a 34-entity fixture
+   dataset (`-m screening`, own CI job). Variants are **not** indexed; only reference
+   spellings are, so the test can't validate itself.
+
+`distinct_pairs` in the case file guards the other direction: over-stripping must not
+collapse different entities. Ruff `RUF001-003` (ambiguous-unicode) are intentionally
+**off**: project language is Turkish.
+
+## Screening invariants (E1.3 — see ADR-0006)
+
+- **No auto-confirm.** A high score flags a candidate; it never confirms it. Confirmation
+  is a human decision (decision *support*, not decision).
+- **No candidate is deleted.** Auto-dismissed matches persist with their reason — the
+  dossier (E1.5) must show "matches dismissed, with reason".
+- **A failed run is never "clean".** yente unreachable ⇒ screening persists as `failed`,
+  audit event written, API returns 502, UI says "screening could not run — no result".
+  Stale data (>24h) warns in the UI and alerts via Sentry from `sanctions.sync`.
+- **Provenance frozen at run time:** dataset versions + thresholds are written onto the
+  `screening` row, so later threshold changes never reinterpret an old run.
+- **Identifiers (TCKN/vergi no) are stored masked** until E1.4 puts them in
+  `EncryptedString` columns on `entity`.
 
 ## Web (Next.js 16)
 
@@ -135,8 +161,17 @@ docker compose -f infra/compose/docker-compose.yml up -d   # full stack
 
 uv run ruff check . && uv run ruff format --check .        # lint
 uv run mypy -p aegis_core -p aegis_api -p aegis_worker      # types (strict)
-uv run pytest                    # unit tests
+uv run pytest                    # unit tests + normalization recall gate
 uv run pytest -m integration     # cross-tenant isolation gate (needs Docker)
+
+# End-to-end screening recall gate (yente + Elasticsearch, ~1GB heap)
+uv run python evals/build_eval_dataset.py
+docker compose -f infra/compose/docker-compose.evals.yml up -d --wait
+YENTE_TEST_URL=http://localhost:8002 uv run pytest -m screening
+docker compose -f infra/compose/docker-compose.evals.yml down -v
+
+# Screening stack for local dev (heavy: ES 4GB heap)
+docker compose -f infra/compose/docker-compose.yml --profile screening up -d
 ```
 
 ## Scope discipline (Phase 1 only)
@@ -160,7 +195,29 @@ Apache AGE, Kubernetes). If a Phase 1 task tempts toward one, stop and note it f
     prep) + DPA + pilot agreement with decision-support liability clause (`docs/legal/`)
   - [ ] *Deferred to E1.6 (ops/deploy):* TLS everywhere, at-rest encrypted volumes,
     secrets via SOPS/age or Docker secrets, VERBİS filing (legal review + fill placeholders)
-- [ ] E1.3 Screening service (yente + ES, Turkish normalization, recall floor)
+- [~] **E1.3** Screening service — *core complete; two items need live verification*
+  - [x] Turkish normalization module + 34-case eval set + **100% recall floor in CI**
+    (two layers: normalization on every push, end-to-end vs. real yente in its own job)
+  - [x] yente client (async API + sync worker), defensive response parsing
+  - [x] Migration 0003: `screening` + `match_candidate` (RLS, in the isolation gate) +
+    `sanctions_dataset` (RLS-exempt, see ADR-0006)
+  - [x] `POST /screenings` sync path + `POST /screenings/deep` (Celery) + HITL review
+    endpoints; every run/decision emits one audit event
+  - [x] Per-tenant threshold band (`screening.thresholds` setting) — auto-dismiss /
+    review / auto-flag, **no auto-confirm**
+  - [x] Daily `sanctions.sync` beat job: MASAK rebuild → yente reindex → freshness metric
+    → staleness alert (Sentry + `GET /screenings/datasets`)
+  - [x] MASAK freeze-list → FtM converter + yente manifest + operator CLI
+    (`scripts/masak_dataset.py`)
+  - [x] Screening UI: run form, results with score + "why matched" features, review
+    actions, stale-data and failed-run warnings
+  - [x] Verified against real yente 5.5.0 + ES 9.4.2: manifest `entities_url: file://`
+    loads, end-to-end recall gate green (36/36). **`YENTE_AUTO_REINDEX` must be `true`** —
+    when false, yente skips even the *first* index and `/readyz` stays 503 forever.
+  - [ ] *Needs live verification before pilots:* (a) MASAK source file column layout
+    against `COLUMN_ALIASES`, (b) manifest `datasets:` collection (`aegis_all`) together
+    with the OpenSanctions catalog, (c) the `/updatez` contract — each isolated to one
+    file, and (b)/(c) are non-blocking (the sync job warns rather than fails)
 - [ ] E1.4 Entity registry + verification (FtM schema, Docling, Sicil Gazetesi, ER v1)
 - [ ] E1.5 Reports & dossier (rule-based summary, PDF+Word, audit viewer)
 - [ ] E1.6 Production deploy + pilot onboarding

@@ -11,7 +11,7 @@ from celery.schedules import crontab
 
 from aegis_core.config import get_settings
 from aegis_core.observability import init_sentry
-from aegis_core.queueing import QUEUE_DEFAULT, TASK_RETENTION_DISPOSE
+from aegis_core.queueing import QUEUE_DEFAULT, TASK_RETENTION_DISPOSE, TASK_SANCTIONS_SYNC
 
 
 def create_celery_app() -> Celery:
@@ -22,7 +22,12 @@ def create_celery_app() -> Celery:
         "aegis",
         broker=settings.redis_url,
         backend=settings.redis_url,
-        include=["aegis_worker.tasks.system", "aegis_worker.tasks.retention"],
+        include=[
+            "aegis_worker.tasks.system",
+            "aegis_worker.tasks.retention",
+            "aegis_worker.tasks.sanctions",
+            "aegis_worker.tasks.screening",
+        ],
     )
     app.conf.update(
         task_acks_late=True,
@@ -34,11 +39,17 @@ def create_celery_app() -> Celery:
         timezone="UTC",
         enable_utc=True,
         beat_schedule={
-            # E1.2 saklama süresi imhası (şimdilik kuru çalışma). E1.3'te günlük
-            # yaptırım-veri senkron job'ı da buraya eklenir.
+            # E1.2 saklama süresi imhası (şimdilik kuru çalışma).
             "retention-dispose-daily": {
                 "task": TASK_RETENTION_DISPOSE,
                 "schedule": crontab(hour=3, minute=30),
+            },
+            # E1.3 yaptırım verisi senkronu + tazelik metriği + bayatlık alarmı.
+            # Saat 02:00 UTC: OpenSanctions günlük dışa aktarımından sonra, imha
+            # job'ından önce koşar; böylece tazelik alarmı sabah ilk iş görülür.
+            "sanctions-sync-daily": {
+                "task": TASK_SANCTIONS_SYNC,
+                "schedule": crontab(hour=2, minute=0),
             },
         },
     )

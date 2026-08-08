@@ -5,8 +5,11 @@ import { LogoutButton } from "@/components/logout-button";
 import { getCurrentUser, ROLE_LABELS } from "@/lib/server/user";
 import type { Role } from "@/lib/server/user";
 
-// Rol-kapılı gezinme. E1.1'de yalnız Panel etkin; ileri modüller (tarama/varlık)
-// sonraki epic'lerde açılır — burada rol görünürlüğü kalıbı gösterilir.
+// Rol-kapılı gezinme. Taramalar E1.3'te açıldı; varlık kütüğü (E1.4) ve denetim izi
+// görüntüleyicisi (E1.5) sonraki epic'lerde gelir.
+//
+// Denetçi (auditor) taramaları GÖRÜR ama çalıştıramaz; menü görünürlüğü okuma
+// yetkisine göredir, yazma yetkisi sayfa içinde ayrıca kapılıdır.
 const NAV: { label: string; href: string; roles: Role[]; enabled: boolean }[] = [
   {
     label: "Panel",
@@ -16,9 +19,9 @@ const NAV: { label: string; href: string; roles: Role[]; enabled: boolean }[] = 
   },
   {
     label: "Taramalar",
-    href: "/dashboard",
-    roles: ["owner", "compliance_officer", "analyst"],
-    enabled: false,
+    href: "/screenings",
+    roles: ["owner", "compliance_officer", "analyst", "auditor"],
+    enabled: true,
   },
   {
     label: "Varlıklar",

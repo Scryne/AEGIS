@@ -54,12 +54,47 @@ jobs:
         run: uv run mypy -p aegis_core -p aegis_api -p aegis_worker
       - name: Migration (upgrade head)
         run: uv run alembic upgrade head
-      - name: Birim testleri (pytest)
+      - name: Birim testleri + NORMALİZASYON RECALL KAPISI (BLOKE EDİCİ)
+        # `evals/` testpaths'e dahildir: Türkçe değerlendirme setinin her varyantı
+        # referansla aynı kanonik anahtara inmelidir (recall tabanı %100). Yanlış
+        # negatif bu üründeki tehlikeli hatadır.
         run: uv run pytest
       - name: KİRACI İZOLASYON KAPISI (testcontainers — BLOKE EDİCİ)
         # Invariant 1: iki kiracı, her uçta + app rolü altında doğrudan SQL ile SIFIR
         # sızıntı. Kırmızıya düşerse merge engellenir.
         run: uv run pytest -m integration
+
+  screening-recall:
+    name: Tarama recall kapısı (yente + Elasticsearch)
+    runs-on: ubuntu-latest
+    # Gerçek motor üzerinden uçtan uca recall. Ayrı iş olmasının nedeni ES'in ~1 GB
+    # heap + indeksleme süresi istemesi; backend işini bekletmemesi için paraleldir.
+    steps:
+      - uses: actions/checkout@v4
+      - name: uv kurulumu
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+      - name: Bağımlılıklar
+        run: uv sync --frozen
+      - name: Değerlendirme veri kümesi güncel mi
+        # cases.json değişip fixtures/entities.ftm.json güncellenmediyse kapı
+        # eski veriyi ölçerdi — sessizce yanlış bir "geçti" üretirdi.
+        run: |
+          uv run python evals/build_eval_dataset.py
+          git diff --exit-code -- evals/fixtures/entities.ftm.json
+      - name: yente + Elasticsearch ayağa kaldır
+        run: docker compose -f infra/compose/docker-compose.evals.yml up -d --wait
+      - name: UÇTAN UCA RECALL KAPISI (BLOKE EDİCİ)
+        env:
+          YENTE_TEST_URL: http://localhost:8002
+        run: uv run pytest -m screening
+      - name: Motor günlükleri (hata hâlinde)
+        if: failure()
+        run: docker compose -f infra/compose/docker-compose.evals.yml logs --tail=200
+      - name: Temizlik
+        if: always()
+        run: docker compose -f infra/compose/docker-compose.evals.yml down -v
 
   contract:
     name: OpenAPI sözleşme drift

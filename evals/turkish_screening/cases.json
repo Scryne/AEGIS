@@ -1,0 +1,320 @@
+{
+  "version": 1,
+  "description": "AEGIS Türkçe tarama değerlendirme seti — E1.3 recall tabanı. Her vakada 'canonical' gerçek varlığın referans yazımı, 'variants' ise aynı varlığın sahada karşılaşılan yazımlarıdır. Recall tabanı: HER varyant referansla aynı kanonik anahtara inmelidir (%100).",
+  "cases": [
+    {
+      "id": "abc-yapi",
+      "category": "legal_form",
+      "subject_type": "company",
+      "canonical": "ABC Yapı",
+      "variants": [
+        "ABC YAPI A.Ş.",
+        "ABC Yapı Anonim Şirketi",
+        "ABC YAPI ANONİM ŞİRKETİ",
+        "ABC Yapı AŞ",
+        "ABC Yapı A.Ş"
+      ]
+    },
+    {
+      "id": "yildiz-insaat",
+      "category": "legal_form",
+      "subject_type": "company",
+      "canonical": "Yıldız İnşaat",
+      "variants": [
+        "YILDIZ İNŞAAT SAN. VE TİC. LTD. ŞTİ.",
+        "Yıldız İnşaat Sanayi ve Ticaret Limited Şirketi",
+        "Yıldız Inşaat San ve Tic Ltd Şti",
+        "YILDIZ INSAAT LTD STI",
+        "Yildiz Insaat San. ve Tic. Ltd. Sti."
+      ],
+      "note": "ASCII yazılmış tüzel ekler (LTD STI) de temizlenmelidir."
+    },
+    {
+      "id": "mavi-deniz",
+      "category": "legal_form",
+      "subject_type": "company",
+      "canonical": "Mavi Deniz Turizm",
+      "variants": [
+        "Mavi Deniz Turizm Ticaret A.Ş.",
+        "MAVİ DENİZ TURİZM TİC. A.Ş.",
+        "Mavi Deniz Turizm Tic AS"
+      ]
+    },
+    {
+      "id": "ege-gida",
+      "category": "legal_form",
+      "subject_type": "company",
+      "canonical": "Ege Gıda",
+      "variants": [
+        "Ege Gıda İthalat İhracat Ltd. Şti.",
+        "EGE GIDA ITH. IHR. LTD. STI.",
+        "Ege Gıda İth. İhr. Ltd. Şti."
+      ]
+    },
+    {
+      "id": "kaya-kardesler",
+      "category": "legal_form",
+      "subject_type": "company",
+      "canonical": "Kaya Kardeşler",
+      "variants": [
+        "Kaya Kardeşler Koll. Şti.",
+        "KAYA KARDEŞLER KOLLEKTİF ŞİRKETİ",
+        "Kaya Kardesler Koll. Sti."
+      ]
+    },
+    {
+      "id": "demir-celik",
+      "category": "conjunction",
+      "subject_type": "company",
+      "canonical": "Demir Çelik",
+      "variants": [
+        "Demir ve Çelik Sanayi A.Ş.",
+        "Demir & Çelik Sanayi A.Ş.",
+        "DEMİR VE ÇELİK SANAYİ ANONİM ŞİRKETİ",
+        "Demir Celik Sanayi AS"
+      ],
+      "note": "'ve' bağlacı ayırt edici değildir; '&' zaten noktalama olarak düşer."
+    },
+    {
+      "id": "abc-lojistik-sube",
+      "category": "branch",
+      "subject_type": "company",
+      "canonical": "ABC Lojistik İstanbul",
+      "variants": [
+        "ABC Lojistik A.Ş. İstanbul Şubesi",
+        "ABC Lojistik İstanbul Şubesi",
+        "ABC LOJİSTİK ANONİM ŞİRKETİ İSTANBUL ŞUBESİ",
+        "ABC Lojistik AS Istanbul Subesi"
+      ],
+      "note": "Tüzel ek adın ORTASINDA kalıyor; şube eki sondan atılıyor."
+    },
+    {
+      "id": "isik-holding",
+      "category": "casing_i",
+      "subject_type": "company",
+      "canonical": "Işık Holding",
+      "variants": ["IŞIK HOLDİNG", "ISIK HOLDING", "Işık Holding A.Ş.", "Isik Holding AS"],
+      "note": "Türkçe küçültmede 'HOLDING' → 'holdıng' olur; ASCII biçim bunu telafi eder."
+    },
+    {
+      "id": "anadolu-tekstil",
+      "category": "legal_form",
+      "subject_type": "company",
+      "canonical": "Anadolu Tekstil",
+      "variants": [
+        "Anadolu Tekstil Dış Ticaret A.Ş.",
+        "ANADOLU TEKSTİL DIŞ TİC. A.Ş.",
+        "Anadolu Tekstil Dis Tic AS"
+      ]
+    },
+    {
+      "id": "ak-su-gida",
+      "category": "punctuation",
+      "subject_type": "company",
+      "canonical": "Ak-Su Gıda",
+      "variants": ["Ak Su Gıda", "AK-SU GIDA", "Ak/Su Gıda", "\"Ak-Su\" Gıda"]
+    },
+    {
+      "id": "ticaret-bankasi",
+      "category": "over_stripping_guard",
+      "subject_type": "company",
+      "canonical": "Ticaret Bankası",
+      "variants": ["Ticaret Bankası A.Ş.", "TİCARET BANKASI ANONİM ŞİRKETİ"],
+      "note": "Emniyet kemeri: 'ticaret' sonda değilse ayırt edicidir, atılmamalı."
+    },
+    {
+      "id": "oz-metal",
+      "category": "legal_form",
+      "subject_type": "company",
+      "canonical": "Öz Metal",
+      "variants": [
+        "Öz Metal San. Tic. Ltd. Şti.",
+        "OZ METAL SAN TIC LTD STI",
+        "ÖZ METAL SANAYİ TİCARET LİMİTED ŞİRKETİ"
+      ]
+    },
+    {
+      "id": "guven-sigorta",
+      "category": "transliteration",
+      "subject_type": "company",
+      "canonical": "Güven Sigorta",
+      "variants": ["Güven Sigorta A.Ş.", "GUVEN SIGORTA AS", "Güven Sigorta Anonim Şirketi"]
+    },
+    {
+      "id": "bogazici-enerji",
+      "category": "transliteration",
+      "subject_type": "company",
+      "canonical": "Boğaziçi Enerji",
+      "variants": ["Boğaziçi Enerji A.Ş.", "BOGAZICI ENERJI AS", "BOĞAZİÇİ ENERJİ ANONİM ŞİRKETİ"]
+    },
+    {
+      "id": "ozturk-holding",
+      "category": "transliteration",
+      "subject_type": "company",
+      "canonical": "Öztürk Holding",
+      "variants": ["Öztürk Holding A.Ş.", "OZTURK HOLDING AS", "ÖZTÜRK HOLDİNG ANONİM ŞİRKETİ"]
+    },
+    {
+      "id": "sisli-otomotiv",
+      "category": "transliteration",
+      "subject_type": "company",
+      "canonical": "Şişli Otomotiv",
+      "variants": ["Sisli Otomotiv", "ŞİŞLİ OTOMOTİV", "Şişli Otomotiv Ltd. Şti."]
+    },
+    {
+      "id": "ugur-makine",
+      "category": "legal_form",
+      "subject_type": "company",
+      "canonical": "Uğur Makine",
+      "variants": [
+        "Ugur Makine",
+        "UĞUR MAKİNE SAN. VE TİC. A.Ş.",
+        "UGUR MAKINE SAN VE TIC AS"
+      ]
+    },
+    {
+      "id": "izmir-denizcilik",
+      "category": "casing_i",
+      "subject_type": "company",
+      "canonical": "İzmir Denizcilik",
+      "variants": ["Izmir Denizcilik", "İZMİR DENİZCİLİK", "IZMIR DENIZCILIK A.S."]
+    },
+    {
+      "id": "cinar-gida",
+      "category": "casing_i",
+      "subject_type": "company",
+      "canonical": "Çınar Gıda",
+      "variants": ["Cinar Gida", "ÇINAR GIDA", "CINAR GIDA LTD STI", "Çınar Gıda Ltd. Şti."]
+    },
+    {
+      "id": "marmara-nakliyat",
+      "category": "legal_form",
+      "subject_type": "company",
+      "canonical": "Marmara Nakliyat",
+      "variants": [
+        "Marmara Nakliyat İç ve Dış Ticaret A.Ş.",
+        "MARMARA NAKLİYAT İÇ VE DIŞ TİCARET ANONİM ŞİRKETİ",
+        "Marmara Nakliyat Ic ve Dis Ticaret AS"
+      ]
+    },
+    {
+      "id": "sahin-ozturk",
+      "category": "transliteration",
+      "subject_type": "person",
+      "canonical": "Şahin Öztürk",
+      "variants": [
+        "Sahin Ozturk",
+        "ŞAHİN ÖZTÜRK",
+        "SAHIN OZTURK",
+        "Öztürk, Şahin",
+        "Dr. Şahin Öztürk",
+        "ÖZTÜRK ŞAHİN"
+      ]
+    },
+    {
+      "id": "ibrahim-celik",
+      "category": "casing_i",
+      "subject_type": "person",
+      "canonical": "İbrahim Çelik",
+      "variants": ["Ibrahim Celik", "İBRAHİM ÇELİK", "IBRAHIM CELIK", "Av. İbrahim Çelik"]
+    },
+    {
+      "id": "ayse-yilmaz",
+      "category": "word_order",
+      "subject_type": "person",
+      "canonical": "Ayşe Yılmaz",
+      "variants": ["Ayse Yilmaz", "AYŞE YILMAZ", "AYSE YILMAZ", "Yılmaz, Ayşe"]
+    },
+    {
+      "id": "mehmet-caglar",
+      "category": "person_title",
+      "subject_type": "person",
+      "canonical": "Mehmet Çağlar",
+      "variants": [
+        "Mehmet Caglar",
+        "MEHMET ÇAĞLAR",
+        "MEHMET CAGLAR",
+        "Prof. Dr. Mehmet Çağlar",
+        "Sn. Mehmet Çağlar"
+      ]
+    },
+    {
+      "id": "gulsen-isik",
+      "category": "casing_i",
+      "subject_type": "person",
+      "canonical": "Gülşen Işık",
+      "variants": ["Gulsen Isik", "GÜLŞEN IŞIK", "GULSEN ISIK", "Gülşen Isik"]
+    },
+    {
+      "id": "omer-gunes",
+      "category": "transliteration",
+      "subject_type": "person",
+      "canonical": "Ömer Güneş",
+      "variants": ["Omer Gunes", "ÖMER GÜNEŞ", "OMER GUNES"]
+    },
+    {
+      "id": "kazim-oz",
+      "category": "transliteration",
+      "subject_type": "person",
+      "canonical": "Kâzım Öz",
+      "variants": ["Kazım Öz", "KAZIM ÖZ", "Kazim Oz", "KÂZIM ÖZ"]
+    },
+    {
+      "id": "huseyin-sen",
+      "category": "transliteration",
+      "subject_type": "person",
+      "canonical": "Hüseyin Şen",
+      "variants": ["Huseyin Sen", "HÜSEYİN ŞEN", "HUSEYIN SEN"]
+    },
+    {
+      "id": "zeynep-dogan",
+      "category": "word_order",
+      "subject_type": "person",
+      "canonical": "Zeynep Doğan",
+      "variants": ["Zeynep Dogan", "ZEYNEP DOĞAN", "ZEYNEP DOGAN", "Doğan, Zeynep"]
+    },
+    {
+      "id": "ilker-ari",
+      "category": "casing_i",
+      "subject_type": "person",
+      "canonical": "İlker Arı",
+      "variants": ["Ilker Ari", "İLKER ARI", "ILKER ARI", "Ilker Arı"]
+    },
+    {
+      "id": "fatma-sahin",
+      "category": "transliteration",
+      "subject_type": "person",
+      "canonical": "Fatma Şahin",
+      "variants": ["Fatma Sahin", "FATMA ŞAHİN", "FATMA SAHIN", "Şahin, Fatma"]
+    },
+    {
+      "id": "emre-yildirim",
+      "category": "casing_i",
+      "subject_type": "person",
+      "canonical": "Emre Yıldırım",
+      "variants": ["Emre Yildirim", "EMRE YILDIRIM", "Emre Yıldırım", "Yıldırım, Emre"]
+    },
+    {
+      "id": "necmi-ugurlu",
+      "category": "transliteration",
+      "subject_type": "person",
+      "canonical": "Necmi Uğurlu",
+      "variants": ["Necmi Ugurlu", "NECMİ UĞURLU", "NECMI UGURLU"]
+    },
+    {
+      "id": "sevgi-ozdemir",
+      "category": "person_title",
+      "subject_type": "person",
+      "canonical": "Sevgi Özdemir",
+      "variants": ["Sevgi Ozdemir", "SEVGİ ÖZDEMİR", "Dr. Sevgi Özdemir", "Av. Sevgi Ozdemir"]
+    }
+  ],
+  "distinct_pairs": [
+    ["Yıldız İnşaat", "Yıldız Gıda"],
+    ["Ahmet Yılmaz", "Ahmet Yılmazer"],
+    ["Kaya Holding", "Kaya Tekstil"],
+    ["Demir Çelik", "Demir Çelikkaya"],
+    ["Şahin Öztürk", "Şahin Öztürkoğlu"],
+    ["Ege Gıda", "Ege Tekstil"]
+  ]
+}

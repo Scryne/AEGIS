@@ -1,0 +1,38 @@
+# yente veri kümesi manifest'i — AEGIS (E1.3)
+#
+# İki kaynak birleştirilir:
+#   1. OpenSanctions varsayılan kataloğu (uluslararası yaptırım + PEP listeleri)
+#   2. MASAK malvarlığı dondurma listesi — 6415 s. Kanun kapsamındaki YURTİÇİ kararlar.
+#      OpenSanctions bunları eksiksiz taşımaz; Türkiye'deki yükümlü için asıl denetlenen
+#      liste budur, bu yüzden kendi FtM veri kümemiz olarak enjekte edilir.
+#      Dosyayı günlük `sanctions.sync` job'ı üretir (aegis_core.screening.masak).
+#
+# Sorgular `aegis_all` kapsamına yapılır (YENTE_DATASET=aegis_all): tek çağrıda hem
+# uluslararası hem yurtiçi listeler taranır. Kapsamı ikiye ayırmak, kullanıcının
+# "MASAK'a da baktık mı?" sorusunu her ekranda sormasına yol açardı.
+#
+# DOĞRULAMA DURUMU (yente 5.5.0'a karşı):
+#   [x] `entities_url` + `file://` şeması — değerlendirme ortamında çalıştığı GÖRÜLDÜ
+#       (infra/compose/docker-compose.evals.yml; katalog kümeyi `load: true` ile listeledi).
+#   [ ] `datasets:` (koleksiyon) alanı — bu manifest'e özgü; birleşik `aegis_all` kapsamı
+#       OpenSanctions kataloğuyla birlikte ilk canlı kurulumda teyit edilmeli.
+#   [ ] `/updatez` (YENTE_UPDATE_TOKEN) sözleşmesi — günlük job tetiklemeyi dener,
+#       başarısızlıkta düşmez (yalnız uyarır), o yüzden bloke edici değildir.
+
+catalogs:
+  - url: "https://data.opensanctions.org/datasets/latest/index.json"
+    scope: default
+    resource_name: entities.ftm.json
+
+datasets:
+  # MASAK dondurma listesi — paylaşılan hacimden okunur (worker yazar, yente okur).
+  - name: masak_dondurma
+    title: "MASAK Malvarlığı Dondurma Listeleri (6415 s. Kanun)"
+    entities_url: "file:///manifests/masak/entities.ftm.json"
+
+  # Uygulamanın sorguladığı birleşik kapsam.
+  - name: aegis_all
+    title: "AEGIS birleşik tarama kapsamı"
+    datasets:
+      - default
+      - masak_dondurma

@@ -66,6 +66,37 @@ class Settings(BaseSettings):
     # ── Tarama motoru (yente) — E1.3 ─────────────────────────────────────────
     # KVKK: self-host; müşteri PII'si asla dış tarama API'sine gitmez.
     yente_url: str = "http://localhost:8001"
+    # Sorgulanacak veri kümesi kapsamı. "default" = OpenSanctions birleşik kümesi;
+    # MASAK varlık dondurma listesi özel bir FtM kümesi olarak manifest'e eklenir
+    # (bkz. infra/yente/manifest.yml) ve "all" kapsamıyla birlikte sorgulanır.
+    yente_dataset: str = "default"
+    yente_algorithm: str = "logic-v1"
+    # Senkron yol NFR'si tek varlık için < 30 sn; istemci zaman aşımı bunun altında
+    # kalmalı ki API kullanıcıya zamanında "motor erişilemedi" diyebilsin.
+    yente_timeout_seconds: float = 20.0
+    # Worker (derin koşu) daha uzun bekleyebilir: kullanıcı ekran başında değil.
+    yente_worker_timeout_seconds: float = 120.0
+
+    # ── Tarama davranışı — E1.3 ──────────────────────────────────────────────
+    # Özne başına yente'den istenen azami aday sayısı.
+    screening_candidate_limit: int = 10
+    # Bu sayıdan fazla özne içeren koşu senkron yolda çalışmaz; Celery'ye devredilir
+    # (derin koşu). Eşik, NFR'yi (< 30 sn) korumak içindir.
+    screening_sync_subject_limit: int = 5
+    # Yaptırım verisi bayatlık eşiği (saat). Aşılırsa günlük senkron job'ı alarm üretir.
+    sanctions_staleness_hours: int = 24
+    # yente'nin yeniden indeksleme ucunu (``/updatez``) tetiklemek için jeton. Boşsa
+    # yente'nin kendi otomatik yenilemesine güvenilir, job yalnız tazeliği ölçer.
+    yente_update_token: str | None = None
+
+    # ── MASAK malvarlığı dondurma listesi (özel FtM veri kümesi) — E1.3 ──────
+    masak_dataset_name: str = "masak_dondurma"
+    # Kaynak: ya makine-okur bir URL (doğrulandığında) ya da operatörün paylaşılan
+    # hacme bıraktığı CSV. İkisi de boşsa MASAK yenileme adımı atlanır (job düşmez).
+    masak_source_url: str | None = None
+    masak_source_path: str | None = None
+    # yente manifest'inin okuduğu FtM dosyası (api/worker/yente aynı hacmi paylaşır).
+    masak_entities_path: str = "/manifests/masak/entities.ftm.json"
 
     # ── Saklama süresi (KVKK, Invariant 4) — E1.2 ────────────────────────────
     # Belge/dosya saklama süresi (yıl); ilişki bitiminden itibaren ≥5 yıl. İmha

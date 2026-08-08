@@ -1,0 +1,12 @@
+# yente manifest'i — YALNIZ değerlendirme (recall kapısı) içindir. E1.3
+#
+# OpenSanctions kataloğu bilinçli olarak YOKTUR: recall kapısının GB'larca veri
+# indirmesi CI'ı dakikalarca bekletir ve ölçümü upstream veri değişimlerine bağımlı,
+# yani kararsız hâle getirirdi. Bunun yerine `evals/fixtures/entities.ftm.json`
+# (34 referans varlık) indekslenir; test, varyantların bu referansları bulup
+# bulmadığını ölçer.
+
+datasets:
+  - name: aegis_eval
+    title: "AEGIS Türkçe değerlendirme seti"
+    entities_url: "file:///manifests/evals/entities.ftm.json"

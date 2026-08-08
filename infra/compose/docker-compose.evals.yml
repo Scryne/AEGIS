@@ -1,0 +1,62 @@
+# Değerlendirme (recall kapısı) ortamı — E1.3
+#
+# Ana compose'dan AYRI tutulur çünkü amacı farklıdır: burada OpenSanctions verisi YOKTUR.
+# Yalnız `evals/fixtures/entities.ftm.json` (34 referans varlık) indekslenir. Böylece
+# kapı hem hızlı (GB indirme yok) hem kararlı (upstream veri değişimine bağımlı değil)
+# olur — CI'da her koşuda aynı sonucu vermelidir.
+#
+# Kullanım:
+#   docker compose -f infra/compose/docker-compose.evals.yml up -d
+#   # yente hazır olana kadar bekle (healthcheck), sonra:
+#   YENTE_TEST_URL=http://localhost:8002 uv run pytest -m screening
+#   docker compose -f infra/compose/docker-compose.evals.yml down -v
+
+name: aegis-evals
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.2
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      # Üretimdeki 4g yerine 1g: veri kümesi 34 varlık. CI runner'ları (16 GB) bunu
+      # rahat kaldırır; 4g heap ile aynı runner'da başka iş koşamazdık.
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9202:9200"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s --fail http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+
+  yente:
+    image: ghcr.io/opensanctions/yente:5.5.0
+    environment:
+      YENTE_INDEX_TYPE: elasticsearch
+      YENTE_INDEX_URL: http://elasticsearch:9200
+      YENTE_MANIFEST: /manifests/manifest.eval.yml
+      # AÇIK olmalı: yente indekslemeyi bu ayarla yapar ve kapalıyken İLK indeksleme de
+      # atlanır — indeks hiç oluşmaz, /readyz sonsuza kadar 503 döner. (Doğrulandı:
+      # `auto_reindex=False` ile ES 0 shard'da kalıyor.)
+      YENTE_AUTO_REINDEX: "true"
+    ports:
+      - "8002:8000"
+    volumes:
+      - ../yente/manifest.eval.yml:/manifests/manifest.eval.yml:ro
+      - ../../evals/fixtures:/manifests/evals:ro
+    healthcheck:
+      # /readyz indeks hazır olduğunda 200 döner — testin bekleyeceği sinyal budur.
+      test: ["CMD-SHELL", "curl -s --fail http://localhost:8000/readyz || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+    depends_on:
+      elasticsearch:
+        condition: service_healthy

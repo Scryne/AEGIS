@@ -17,6 +17,7 @@ from aegis_core.config import Settings, get_settings
 from aegis_core.db.tenant import set_tenant_context
 from aegis_core.models import Role
 from aegis_core.observability import bind_sentry_tags
+from aegis_core.screening.yente import YenteClient
 from aegis_core.security.tokens import TYPE_ACCESS, decode_token
 
 
@@ -100,9 +101,20 @@ def get_redis(request: Request) -> Redis:
     return redis
 
 
+def get_yente_client(request: Request) -> YenteClient:
+    """Uygulamanın paylaşılan yente istemcisini döndürür (E1.3).
+
+    İstemci yaşam döngüsü boyunca tektir: httpx bağlantı havuzu korunur, böylece her
+    tarama için TCP/TLS el sıkışması tekrarlanmaz (senkron yol NFR'si < 30 sn).
+    """
+    client: YenteClient = request.app.state.yente_client
+    return client
+
+
 # Sık kullanılan tip takma adları (router imzalarını sadeleştirir).
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
 TenantSessionDep = Annotated[AsyncSession, Depends(get_tenant_session)]
 PrincipalDep = Annotated[Principal, Depends(get_principal)]
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 RedisDep = Annotated[Redis, Depends(get_redis)]
+YenteClientDep = Annotated[YenteClient, Depends(get_yente_client)]

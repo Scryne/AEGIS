@@ -61,6 +61,119 @@
         "title": "ChainVerificationResponse",
         "type": "object"
       },
+      "DatasetFreshnessResponse": {
+        "description": "Veri tazeliği raporu — bayat veri kümesi varsa ``stale`` işaretlenir.",
+        "properties": {
+          "any_stale": {
+            "title": "Any Stale",
+            "type": "boolean"
+          },
+          "datasets": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetStateResponse"
+            },
+            "title": "Datasets",
+            "type": "array"
+          },
+          "staleness_threshold_hours": {
+            "title": "Staleness Threshold Hours",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "staleness_threshold_hours",
+          "any_stale",
+          "datasets"
+        ],
+        "title": "DatasetFreshnessResponse",
+        "type": "object"
+      },
+      "DatasetStateResponse": {
+        "description": "Bir yaptırım veri kümesinin tazelik durumu.",
+        "properties": {
+          "age_hours": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Hours"
+          },
+          "checked_at": {
+            "format": "date-time",
+            "title": "Checked At",
+            "type": "string"
+          },
+          "entity_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Count"
+          },
+          "last_export_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Export At"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "stale": {
+            "title": "Stale",
+            "type": "boolean"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "required": [
+          "name",
+          "title",
+          "version",
+          "last_export_at",
+          "entity_count",
+          "checked_at",
+          "age_hours",
+          "stale"
+        ],
+        "title": "DatasetStateResponse",
+        "type": "object"
+      },
       "Environment": {
         "description": "Çalışma ortamları.",
         "enum": [
@@ -114,6 +227,179 @@
           "password"
         ],
         "title": "LoginRequest",
+        "type": "object"
+      },
+      "MatchCandidateResponse": {
+        "description": "Bir aday eşleşme — skor, \"neden eşleşti\" ve karar durumu.",
+        "properties": {
+          "band": {
+            "title": "Band",
+            "type": "string"
+          },
+          "caption": {
+            "title": "Caption",
+            "type": "string"
+          },
+          "countries": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Countries",
+            "type": "array"
+          },
+          "datasets": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Datasets",
+            "type": "array"
+          },
+          "decided_automatically": {
+            "title": "Decided Automatically",
+            "type": "boolean"
+          },
+          "decision": {
+            "title": "Decision",
+            "type": "string"
+          },
+          "external_id": {
+            "title": "External Id",
+            "type": "string"
+          },
+          "features": {
+            "additionalProperties": true,
+            "title": "Features",
+            "type": "object"
+          },
+          "flagged": {
+            "title": "Flagged",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "properties": {
+            "additionalProperties": true,
+            "title": "Properties",
+            "type": "object"
+          },
+          "review_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Note"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "schema_type": {
+            "title": "Schema Type",
+            "type": "string"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "subject_key": {
+            "title": "Subject Key",
+            "type": "string"
+          },
+          "subject_name": {
+            "title": "Subject Name",
+            "type": "string"
+          },
+          "subject_role": {
+            "title": "Subject Role",
+            "type": "string"
+          },
+          "topics": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Topics",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "subject_key",
+          "subject_name",
+          "subject_role",
+          "external_id",
+          "caption",
+          "schema_type",
+          "score",
+          "band",
+          "decision",
+          "decided_automatically",
+          "flagged",
+          "datasets",
+          "topics",
+          "countries",
+          "features",
+          "properties",
+          "source_url",
+          "review_note",
+          "reviewed_at"
+        ],
+        "title": "MatchCandidateResponse",
+        "type": "object"
+      },
+      "MatchDecisionRequest": {
+        "description": "Eşleşme kararı: onayla ya da gerekçesiyle ele.",
+        "properties": {
+          "decision": {
+            "enum": [
+              "confirmed",
+              "dismissed"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "title": "MatchDecisionRequest",
         "type": "object"
       },
       "MemberResponse": {
@@ -213,7 +499,7 @@
         "type": "object"
       },
       "ReadinessComponent": {
-        "description": "Tek bir bağımlılığın (DB, Redis) hazırlık durumu.",
+        "description": "Tek bir bağımlılığın (DB, Redis, yente) hazırlık durumu.",
         "properties": {
           "detail": {
             "anyOf": [
@@ -233,6 +519,11 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "required": {
+            "default": true,
+            "title": "Required",
+            "type": "boolean"
           }
         },
         "required": [
@@ -338,6 +629,398 @@
         "title": "Role",
         "type": "string"
       },
+      "ScreeningCreateRequest": {
+        "description": "Tarama koşusu isteği: birincil özne + (varsa) ilgili kişiler.",
+        "properties": {
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "related_subjects": {
+            "items": {
+              "$ref": "#/components/schemas/SubjectRequest"
+            },
+            "title": "Related Subjects",
+            "type": "array"
+          },
+          "subject": {
+            "$ref": "#/components/schemas/SubjectRequest"
+          }
+        },
+        "required": [
+          "subject"
+        ],
+        "title": "ScreeningCreateRequest",
+        "type": "object"
+      },
+      "ScreeningDetailResponse": {
+        "description": "Tarama koşusu + adayları (detay görünümü).",
+        "properties": {
+          "algorithm": {
+            "title": "Algorithm",
+            "type": "string"
+          },
+          "candidate_count": {
+            "title": "Candidate Count",
+            "type": "integer"
+          },
+          "candidates": {
+            "items": {
+              "$ref": "#/components/schemas/MatchCandidateResponse"
+            },
+            "title": "Candidates",
+            "type": "array"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "dataset": {
+            "title": "Dataset",
+            "type": "string"
+          },
+          "dataset_versions": {
+            "additionalProperties": true,
+            "title": "Dataset Versions",
+            "type": "object"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Country"
+          },
+          "subject_name": {
+            "title": "Subject Name",
+            "type": "string"
+          },
+          "subject_normalized": {
+            "title": "Subject Normalized",
+            "type": "string"
+          },
+          "subject_type": {
+            "title": "Subject Type",
+            "type": "string"
+          },
+          "subjects": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Subjects",
+            "type": "array"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ScreeningSummaryResponse"
+          },
+          "thresholds": {
+            "additionalProperties": true,
+            "title": "Thresholds",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "subject_name",
+          "subject_normalized",
+          "subject_type",
+          "subject_country",
+          "subjects",
+          "dataset",
+          "dataset_versions",
+          "algorithm",
+          "thresholds",
+          "candidate_count",
+          "duration_ms",
+          "error",
+          "entity_id",
+          "created_at",
+          "completed_at",
+          "summary",
+          "candidates"
+        ],
+        "title": "ScreeningDetailResponse",
+        "type": "object"
+      },
+      "ScreeningListResponse": {
+        "description": "Sayfalanmış tarama listesi.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ScreeningResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "items"
+        ],
+        "title": "ScreeningListResponse",
+        "type": "object"
+      },
+      "ScreeningResponse": {
+        "description": "Tarama koşusu (liste görünümü).",
+        "properties": {
+          "algorithm": {
+            "title": "Algorithm",
+            "type": "string"
+          },
+          "candidate_count": {
+            "title": "Candidate Count",
+            "type": "integer"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "dataset": {
+            "title": "Dataset",
+            "type": "string"
+          },
+          "dataset_versions": {
+            "additionalProperties": true,
+            "title": "Dataset Versions",
+            "type": "object"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject Country"
+          },
+          "subject_name": {
+            "title": "Subject Name",
+            "type": "string"
+          },
+          "subject_normalized": {
+            "title": "Subject Normalized",
+            "type": "string"
+          },
+          "subject_type": {
+            "title": "Subject Type",
+            "type": "string"
+          },
+          "subjects": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Subjects",
+            "type": "array"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/ScreeningSummaryResponse"
+          },
+          "thresholds": {
+            "additionalProperties": true,
+            "title": "Thresholds",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "subject_name",
+          "subject_normalized",
+          "subject_type",
+          "subject_country",
+          "subjects",
+          "dataset",
+          "dataset_versions",
+          "algorithm",
+          "thresholds",
+          "candidate_count",
+          "duration_ms",
+          "error",
+          "entity_id",
+          "created_at",
+          "completed_at",
+          "summary"
+        ],
+        "title": "ScreeningResponse",
+        "type": "object"
+      },
+      "ScreeningSummaryResponse": {
+        "description": "Karar dağılımı özeti.",
+        "properties": {
+          "confirmed": {
+            "title": "Confirmed",
+            "type": "integer"
+          },
+          "dismissed": {
+            "title": "Dismissed",
+            "type": "integer"
+          },
+          "flagged": {
+            "title": "Flagged",
+            "type": "integer"
+          },
+          "pending": {
+            "title": "Pending",
+            "type": "integer"
+          },
+          "pep_hits": {
+            "title": "Pep Hits",
+            "type": "integer"
+          },
+          "sanction_hits": {
+            "title": "Sanction Hits",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "pending",
+          "confirmed",
+          "dismissed",
+          "flagged",
+          "sanction_hits",
+          "pep_hits"
+        ],
+        "title": "ScreeningSummaryResponse",
+        "type": "object"
+      },
       "SettingResponse": {
         "description": "Tek bir kiracı ayarı.",
         "properties": {
@@ -371,6 +1054,61 @@
           "value"
         ],
         "title": "SettingUpsertRequest",
+        "type": "object"
+      },
+      "SubjectRequest": {
+        "description": "Taranacak bir özne (şirket, yönetici ya da gerçek faydalanıcı).",
+        "properties": {
+          "country": {
+            "anyOf": [
+              {
+                "maxLength": 8,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "identifiers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Identifiers",
+            "type": "object"
+          },
+          "name": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "role": {
+            "default": "self",
+            "enum": [
+              "self",
+              "officer",
+              "ubo",
+              "shareholder"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "subject_type": {
+            "default": "company",
+            "enum": [
+              "person",
+              "company"
+            ],
+            "title": "Subject Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "SubjectRequest",
         "type": "object"
       },
       "TokenResponse": {
@@ -869,6 +1607,387 @@
         ]
       }
     },
+    "/api/v1/screenings": {
+      "get": {
+        "description": "Kiracının taramalarını en yeniden eskiye listeler (RLS ile sınırlı).",
+        "operationId": "list_screenings_api_v1_screenings_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScreeningListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Screenings",
+        "tags": [
+          "screenings"
+        ]
+      },
+      "post": {
+        "description": "Tarama çalıştırır (senkron yol) ve sonuçları adaylarıyla döndürür.\n\nÖzne sayısı ``screening_sync_subject_limit``i aşarsa istek reddedilir: derin koşu\nCelery'ye aittir (``POST /screenings/deep``), senkron yol NFR'yi korumalıdır.",
+        "operationId": "run_screening_api_v1_screenings_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScreeningCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScreeningDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Screening",
+        "tags": [
+          "screenings"
+        ]
+      }
+    },
+    "/api/v1/screenings/datasets": {
+      "get": {
+        "description": "Yaptırım veri kümelerinin tazeliğini döndürür (bayatlık > 24 sa işaretlenir).\n\nVeri bayatsa tarama sonucu \"temiz\" görünse bile güvenilmezdir; bu uç, arayüzün\nkullanıcıyı uyarabilmesi içindir.",
+        "operationId": "dataset_freshness_api_v1_screenings_datasets_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetFreshnessResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Dataset Freshness",
+        "tags": [
+          "screenings"
+        ]
+      }
+    },
+    "/api/v1/screenings/deep": {
+      "post": {
+        "description": "Çok özneli (derin) taramayı kuyruğa alır; sonuç ``GET /screenings/{id}`` ile alınır.\n\nKimlik numaraları göreve **mesajla** geçirilir, veritabanına maskeli yazılır: derin\nkoşu da senkron koşuyla aynı KVKK kuralına uyar.",
+        "operationId": "queue_deep_screening_api_v1_screenings_deep_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScreeningCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScreeningResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Queue Deep Screening",
+        "tags": [
+          "screenings"
+        ]
+      }
+    },
+    "/api/v1/screenings/{screening_id}": {
+      "get": {
+        "description": "Tek bir taramayı adaylarıyla döndürür.",
+        "operationId": "get_screening_api_v1_screenings__screening_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "screening_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Screening Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScreeningDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Screening",
+        "tags": [
+          "screenings"
+        ]
+      }
+    },
+    "/api/v1/screenings/{screening_id}/candidates/{candidate_id}/decision": {
+      "post": {
+        "description": "Bir aday eşleşmeyi onaylar ya da gerekçesiyle eler (HITL).\n\nHer karar tam olarak bir denetim olayı yazar (Invariant 2) ve önceki kararı\npayload'ında taşır; karar değiştirilse bile geçmiş izde durur.",
+        "operationId": "decide_candidate_api_v1_screenings__screening_id__candidates__candidate_id__decision_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "screening_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Screening Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "candidate_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Candidate Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MatchCandidateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Decide Candidate",
+        "tags": [
+          "screenings"
+        ]
+      }
+    },
     "/api/v1/settings": {
       "get": {
         "description": "Aktif kiracının tüm ayarlarını döndürür (RLS ile sınırlı).",
@@ -1095,7 +2214,7 @@
     },
     "/readyz": {
       "get": {
-        "description": "Readiness — DB ve Redis erişilebilir mi; değilse 503 döner.",
+        "description": "Readiness — zorunlu bağımlılıklar (DB, Redis) erişilebilir mi; değilse 503.\n\nyente durumu da raporlanır ama hazırlığı bloke etmez: motor düştüğünde kimlik ve\ngörüntüleme işlevleri ayakta kalmalıdır.",
         "operationId": "readyz_readyz_get",
         "responses": {
           "200": {

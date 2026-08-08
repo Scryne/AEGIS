@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 
 from aegis_api.schemas import HealthResponse, ReadinessComponent, ReadinessResponse
 from aegis_core.config import get_settings
+from aegis_core.screening.yente import YenteClient
 
 router = APIRouter(tags=["health"])
 
@@ -40,12 +41,34 @@ async def _check_redis() -> ReadinessComponent:
         await client.aclose()
 
 
+async def _check_yente(client: YenteClient) -> ReadinessComponent:
+    """Tarama motorunu yoklar — bilgi amaçlı (hazırlığı bloke ETMEZ, bkz. şema)."""
+    try:
+        healthy = await client.is_ready()
+    except Exception as exc:
+        return ReadinessComponent(name="yente", healthy=False, detail=str(exc), required=False)
+    return ReadinessComponent(
+        name="yente",
+        healthy=healthy,
+        detail=None if healthy else "yente hazır değil (tarama uçları 502 döner).",
+        required=False,
+    )
+
+
 @router.get("/readyz", response_model=ReadinessResponse)
 async def readyz(request: Request, response: Response) -> ReadinessResponse:
-    """Readiness — DB ve Redis erişilebilir mi; değilse 503 döner."""
+    """Readiness — zorunlu bağımlılıklar (DB, Redis) erişilebilir mi; değilse 503.
+
+    yente durumu da raporlanır ama hazırlığı bloke etmez: motor düştüğünde kimlik ve
+    görüntüleme işlevleri ayakta kalmalıdır.
+    """
     engine: AsyncEngine = request.app.state.engine
-    components = [await _check_database(engine), await _check_redis()]
-    ready = all(component.healthy for component in components)
+    components = [
+        await _check_database(engine),
+        await _check_redis(),
+        await _check_yente(request.app.state.yente_client),
+    ]
+    ready = all(component.healthy for component in components if component.required)
     if not ready:
         response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
     return ReadinessResponse(ready=ready, components=components)

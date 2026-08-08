@@ -92,24 +92,40 @@ def test_cross_tenant_isolation_api_and_direct_sql(
         assert api_client.get("/api/v1/settings", headers=_auth(token)).status_code == 200
 
     # ── DB katmanı: app rolü altında DOĞRUDAN SQL (RLS gerçekten zorluyor mu) ─
+    # E1.3'te gelen tarama tabloları da aynı iddiaya tabidir: kiracıya-özel HER veri
+    # tablosu bu listeye eklenir (CLAUDE.md: "tablo eklemek = tenant_id + RLS +
+    # izolasyon iddiası, aynı değişiklikte").
+    rls_tables = ("tenant_setting", "screening", "match_candidate", "audit_event")
     engine = create_engine(app_database_url)
     try:
-        # A bağlamı → yalnız A'nın satırı
+        for table in rls_tables:
+            # A bağlamı → yalnız A'nın satırları (ya da hiç)
+            with engine.begin() as conn:
+                conn.execute(
+                    text("SELECT set_config('app.current_tenant', :t, true)"), {"t": tenant_a}
+                )
+                rows = conn.execute(text(f"SELECT tenant_id FROM {table}")).fetchall()
+            assert {str(r[0]) for r in rows} <= {tenant_a}, f"{table}: A'ya sızıntı"
+
+            # B bağlamı → yalnız B'nin satırları
+            with engine.begin() as conn:
+                conn.execute(
+                    text("SELECT set_config('app.current_tenant', :t, true)"), {"t": tenant_b}
+                )
+                rows = conn.execute(text(f"SELECT tenant_id FROM {table}")).fetchall()
+            assert {str(r[0]) for r in rows} <= {tenant_b}, f"{table}: B'ye sızıntı"
+
+            # Bağlam YOK → fail-closed (sıfır satır)
+            with engine.begin() as conn:
+                rows = conn.execute(text(f"SELECT tenant_id FROM {table}")).fetchall()
+            assert rows == [], f"{table}: bağlamsız okuma satır döndürdü"
+
+        # tenant_setting'de her iki kiracının da satırı VAR; yukarıdaki alt-küme
+        # iddiasının boş sonuçla trivially geçmediğini burada doğrularız.
         with engine.begin() as conn:
             conn.execute(text("SELECT set_config('app.current_tenant', :t, true)"), {"t": tenant_a})
             rows = conn.execute(text("SELECT tenant_id FROM tenant_setting")).fetchall()
         assert {str(r[0]) for r in rows} == {tenant_a}
-
-        # B bağlamı → yalnız B'nin satırı
-        with engine.begin() as conn:
-            conn.execute(text("SELECT set_config('app.current_tenant', :t, true)"), {"t": tenant_b})
-            rows = conn.execute(text("SELECT tenant_id FROM tenant_setting")).fetchall()
-        assert {str(r[0]) for r in rows} == {tenant_b}
-
-        # Bağlam YOK → fail-closed (sıfır satır)
-        with engine.begin() as conn:
-            rows = conn.execute(text("SELECT tenant_id FROM tenant_setting")).fetchall()
-        assert rows == []
 
         # WITH CHECK: A bağlamında B'ye ait satır YAZILAMAZ (politika reddeder)
         with pytest.raises(DBAPIError), engine.begin() as conn:  # noqa: PT012

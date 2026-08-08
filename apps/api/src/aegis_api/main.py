@@ -20,6 +20,7 @@ from aegis_core.config import Environment, get_settings
 from aegis_core.db import create_engine, create_session_factory
 from aegis_core.logging import configure_logging
 from aegis_core.observability import init_sentry
+from aegis_core.screening.yente import YenteClient
 
 # Windows'ta psycopg'nin async modu ProactorEventLoop ile çalışmaz; selector
 # event-loop politikası gerekir (Linux/Docker'da bu dal çalışmaz).
@@ -35,9 +36,17 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.engine = engine
     app.state.session_factory = create_session_factory(engine)
     app.state.redis = Redis.from_url(settings.redis_url)
+    # Tarama motoru istemcisi uygulama ömrü boyunca tektir (bağlantı havuzu korunur).
+    app.state.yente_client = YenteClient(
+        settings.yente_url,
+        dataset=settings.yente_dataset,
+        algorithm=settings.yente_algorithm,
+        timeout_seconds=settings.yente_timeout_seconds,
+    )
     try:
         yield
     finally:
+        await app.state.yente_client.aclose()
         await app.state.redis.aclose()
         await engine.dispose()
 

@@ -49,9 +49,13 @@ ignore = ["RUF001", "RUF002", "RUF003"]
 known-first-party = ["aegis_core", "aegis_api", "aegis_worker"]
 
 [tool.ruff.lint.per-file-ignores]
-"**/tests/**" = ["S101", "S105", "S106"]
+# S608: izolasyon testi tablo adlarını sabit bir demetten f-string ile geçirir
+# (kullanıcı girdisi yok); RLS'i her tabloda aynı iddiayla sınamanın tek yolu bu.
+"**/tests/**" = ["S101", "S105", "S106", "S608"]
 "**/conftest.py" = ["S105", "S106"]
 "migrations/**" = ["E501"]
+# evals/ de test dizinidir (recall kapısı), yalnız adı "tests" değil.
+"evals/**" = ["S101"]
 
 # ── Mypy (strict) ────────────────────────────────────────────────────────────
 [tool.mypy]
@@ -82,11 +86,14 @@ warn_required_dynamic_aliases = true
 # ── Pytest ───────────────────────────────────────────────────────────────────
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["packages", "apps"]
-addopts = "-q --strict-markers --import-mode=importlib -m 'not integration'"
+testpaths = ["packages", "apps", "evals"]
+# Varsayılan koşu: hızlı katman. Docker gerektiren kapılar kendi işaretleriyle ayrı
+# koşar (integration: Postgres/Redis; screening: yente + Elasticsearch).
+addopts = "-q --strict-markers --import-mode=importlib -m 'not integration and not screening'"
 # Tek bir test asılı kalırsa koşuyu saatlerce bloke etmesin.
 timeout = 300
 timeout_method = "thread"
 markers = [
     "integration: gerçek servis (Docker/testcontainers) gerektiren testler",
+    "screening: gerçek yente + Elasticsearch gerektiren uçtan uca recall kapısı (E1.3)",
 ]

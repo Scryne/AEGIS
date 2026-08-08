@@ -5,6 +5,10 @@ name: aegis
 x-app-env: &app-env
   DATABASE_URL: postgresql+psycopg://aegis_app:aegis_app@postgres:5432/aegis
   REDIS_URL: redis://redis:6379/0
+  # Tarama motoru (E1.3): self-host yente — KVKK gereği PII dışarı çıkmaz.
+  # `aegis_all`, manifest'te tanımlı birleşik kapsamdır (OpenSanctions + MASAK).
+  YENTE_URL: http://yente:8000
+  YENTE_DATASET: aegis_all
 
 services:
   postgres:
@@ -107,9 +111,14 @@ services:
       dockerfile: infra/docker/worker.Dockerfile
     environment:
       <<: *app-env
+      # Günlük sanctions.sync job'ı MASAK FtM dosyasını buraya yazar; yente aynı
+      # hacmi salt-okunur bağlar (bkz. yente servisi).
+      MASAK_ENTITIES_PATH: /manifests/masak/entities.ftm.json
     env_file:
       - path: ../../.env
         required: false
+    volumes:
+      - masakdata:/manifests/masak
     depends_on:
       postgres:
         condition: service_healthy
@@ -135,10 +144,9 @@ services:
         condition: service_healthy
 
   # ── Tarama motoru (E1.3) — `--profile screening` ile başlatılır ──────────────
-  # E1.1'de varsayılan `up` bunları BAŞLATMAZ: ağır (ES ~4GB heap) ve dataset
-  # bağlama işi E1.3'tedir. Erken footprint ölçümü için bilinçle dahil edildi
-  # (bkz. CLAUDE.md — 4–16GB RAM + 10–30GB disk). Sürümler yente 5.5.0'ın kendi
-  # compose'undan pinlendi.
+  # Varsayılan `up` bunları BAŞLATMAZ: ES ~4GB heap ister ve her geliştirme oturumu
+  # tarama gerektirmez (bkz. CLAUDE.md — 4–16GB RAM + 10–30GB disk). Sürümler
+  # yente 5.5.0'ın kendi compose'undan pinlendi.
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:9.4.2
     profiles: ["screening"]
@@ -150,6 +158,15 @@ services:
       memlock:
         soft: -1
         hard: -1
+    # Heap 4g; konteynere heap + off-heap + Lucene için pay bırakılır. Sınır YOKSA
+    # tek host'ta (R6: Kubernetes yok) ES, Postgres'i OOM'a sürükleyebilir.
+    deploy:
+      resources:
+        limits:
+          memory: 6g
+        reservations:
+          memory: 5g
+    restart: unless-stopped
     ports:
       - "9200:9200"
     volumes:
@@ -159,6 +176,7 @@ services:
       interval: 15s
       timeout: 10s
       retries: 10
+      start_period: 60s
 
   yente:
     image: ghcr.io/opensanctions/yente:5.5.0
@@ -166,10 +184,38 @@ services:
     environment:
       YENTE_INDEX_TYPE: elasticsearch
       YENTE_INDEX_URL: http://elasticsearch:9200
-      # E1.3: OpenSanctions dataset senkron mekanizması + (gerekirse) ticari lisans
-      # teslim token'ı burada bağlanır. KVKK: veri kendi ortamımızda kalır.
+      # Manifest: OpenSanctions + MASAK dondurma listesi → birleşik `aegis_all` kapsamı.
+      YENTE_MANIFEST: /manifests/manifest.yml
+      # AÇIK olmalı — kapalıyken yente İLK indekslemeyi de atlar: indeks hiç oluşmaz ve
+      # /readyz sonsuza kadar 503 döner (değerlendirme ortamında doğrulandı).
+      YENTE_AUTO_REINDEX: "true"
+      # Yeniden indekslemeyi bizim günlük job'ımız tetikler (sanctions.sync); jeton
+      # .env'den gelir. Boşsa yente kendi zamanlayıcısıyla yenilenir.
+      YENTE_UPDATE_TOKEN: ${YENTE_UPDATE_TOKEN:-}
+      # KVKK: sorgu içerikleri dışarı gönderilmez.
+      YENTE_STATEMENT_API: "false"
+    env_file:
+      - path: ../../.env
+        required: false
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2g
     ports:
       - "8001:8000"
+    volumes:
+      - ../yente/manifest.yml:/manifests/manifest.yml:ro
+      # MASAK FtM dosyası: worker YAZAR, yente OKUR (aynı adlandırılmış hacim).
+      - masakdata:/manifests/masak
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "curl -s --fail http://localhost:8000/healthz || exit 1"
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -178,3 +224,4 @@ volumes:
   pgdata:
   miniodata:
   esdata:
+  masakdata:

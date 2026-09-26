@@ -150,6 +150,15 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _enforce_production_hardening(self) -> Self:
         """Production'da güvensiz varsayılanlarla açılışı engeller (fail-fast)."""
+        # Anahtar VERİLMİŞSE biçimi her ortamda doğrulanır: yanlış biçim (ör. URL-güvenli
+        # base64) aksi hâlde ancak ilk TCKN yazımında ham bir binascii 500'üne dönüşüyordu.
+        if self.field_encryption_key and not _is_valid_field_encryption_key(
+            self.field_encryption_key
+        ):
+            raise ValueError(
+                "FIELD_ENCRYPTION_KEY 32 baytlık standart base64 olmalıdır "
+                "(aegis_core.security.encryption.generate_key ile üretin)."
+            )
         if self.environment is Environment.PRODUCTION:
             if not self.auth_secret or len(self.auth_secret) < MIN_AUTH_SECRET_LENGTH:
                 raise ValueError(

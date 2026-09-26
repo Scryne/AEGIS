@@ -94,7 +94,9 @@ def test_encrypted_string_type_is_transparent(field_key: str) -> None:
 
 
 def test_get_secret_box_requires_key(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.delenv("FIELD_ENCRYPTION_KEY", raising=False)
+    # delenv yetmez: ayarlar .env dosyasını da okur ve yerel geliştirme .env'inde anahtar
+    # varsa test makineye bağlı düşer. Boş ortam değişkeni .env'i ezer ve "yok" sayılır.
+    monkeypatch.setenv("FIELD_ENCRYPTION_KEY", "")
     get_settings.cache_clear()
     try:
         with pytest.raises(RuntimeError, match="FIELD_ENCRYPTION_KEY"):

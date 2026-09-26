@@ -88,6 +88,10 @@ class ScreeningSummary:
     flagged: int
     sanction_hits: int
     pep_hits: int
+    flagged_pending: int = 0
+    """Yüksek skorlu VE hâlâ karar bekleyen aday sayısı. ``flagged`` karar sonrası da
+    sayılır (koşunun ham sonucu); "acil inceleme" uyarısı bununla verilmelidir, aksi hâlde
+    analistin gerekçeyle elediği aday uyarıyı sonsuza dek açık tutar."""
 
     @property
     def needs_review(self) -> bool:
@@ -220,12 +224,15 @@ async def summarize_screening(session: AsyncSession, screening_id: uuid.UUID) ->
     )
     counts = {decision.value: 0 for decision in MatchDecision}
     flagged = 0
+    flagged_pending = 0
     sanction_hits = 0
     pep_hits = 0
     for decision, is_flagged, topics in rows:
         counts[decision] = counts.get(decision, 0) + 1
         if is_flagged:
             flagged += 1
+            if decision == MatchDecision.PENDING.value:
+                flagged_pending += 1
         topic_list = topics if isinstance(topics, list) else []
         # Yüklemler ``screening.topics``tan gelir: ekrandaki sayaç ile rapordaki risk
         # kuralı aynı tanımı kullanmak zorundadır (bkz. o modülün başlığı).
@@ -242,6 +249,7 @@ async def summarize_screening(session: AsyncSession, screening_id: uuid.UUID) ->
         flagged=flagged,
         sanction_hits=sanction_hits,
         pep_hits=pep_hits,
+        flagged_pending=flagged_pending,
     )
 
 

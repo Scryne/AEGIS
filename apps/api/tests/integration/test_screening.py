@@ -150,6 +150,7 @@ def test_tarama_calisir_ve_bantlar_uygulanir(screening_client: TestClient) -> No
     assert ozet["pending"] == 2
     assert ozet["dismissed"] == 1
     assert ozet["flagged"] == 1
+    assert ozet["flagged_pending"] == 1
     assert ozet["sanction_hits"] == 1
     assert ozet["pep_hits"] == 1
 
@@ -256,6 +257,30 @@ def test_karar_ozeti_gunceller(screening_client: TestClient) -> None:
     ).json()
     assert detail["summary"]["confirmed"] == 1
     assert detail["summary"]["pending"] == 1
+    # Karara bağlanan yüksek skorlu aday artık "acil inceleme" sayılmaz.
+    assert detail["summary"]["flagged"] == 1
+    assert detail["summary"]["flagged_pending"] == 0
+
+
+def test_elenen_yuksek_skorlu_aday_acil_uyari_birakmaz(screening_client: TestClient) -> None:
+    """Gerekçeyle elenen aday sonrası özet "acil inceleme" demeye devam ediyordu (09-26)."""
+    _tenant, token = _register_and_login(screening_client, slug="elen", email="e@elen.com")
+    created = screening_client.post(
+        "/api/v1/screenings", json={"subject": {"name": "Yıldız İnşaat"}}, headers=_auth(token)
+    ).json()
+    candidate = next(c for c in created["candidates"] if c["external_id"] == "NK-SANCTION")
+    screening_client.post(
+        f"/api/v1/screenings/{created['id']}/candidates/{candidate['id']}/decision",
+        json={"decision": "dismissed", "note": "Farklı tüzel kişi: vergi no uyuşmuyor."},
+        headers=_auth(token),
+    )
+    ozet = screening_client.get(f"/api/v1/screenings/{created['id']}", headers=_auth(token)).json()[
+        "summary"
+    ]
+    assert ozet["flagged"] == 1
+    assert ozet["flagged_pending"] == 0
+    # Elenen yaptırım adayı risk sayacına da girmez.
+    assert ozet["sanction_hits"] == 0
 
 
 # ── RBAC ─────────────────────────────────────────────────────────────────────

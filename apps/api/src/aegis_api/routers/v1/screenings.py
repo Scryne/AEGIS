@@ -143,6 +143,8 @@ class ScreeningSummaryResponse(BaseModel):
     flagged: int
     sanction_hits: int
     pep_hits: int
+    flagged_pending: int
+    """Yüksek skorlu ve hâlâ karar bekleyen aday sayısı ("acil inceleme" uyarısının ölçüsü)."""
 
 
 class ScreeningResponse(BaseModel):
@@ -266,6 +268,7 @@ def _screening_response(
             flagged=summary.flagged,
             sanction_hits=summary.sanction_hits,
             pep_hits=summary.pep_hits,
+            flagged_pending=summary.flagged_pending,
         ),
     )
 

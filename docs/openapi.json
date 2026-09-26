@@ -2901,6 +2901,10 @@
             "title": "Flagged",
             "type": "integer"
           },
+          "flagged_pending": {
+            "title": "Flagged Pending",
+            "type": "integer"
+          },
           "pending": {
             "title": "Pending",
             "type": "integer"
@@ -2925,7 +2929,8 @@
           "dismissed",
           "flagged",
           "sanction_hits",
-          "pep_hits"
+          "pep_hits",
+          "flagged_pending"
         ],
         "title": "ScreeningSummaryResponse",
         "type": "object"
@@ -3881,6 +3886,66 @@
           }
         },
         "summary": "Download Document",
+        "tags": [
+          "documents"
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}/extract": {
+      "post": {
+        "description": "Başarısız ya da atlanmış çıkarımı yeniden kuyruğa alır (ör. Docling sonradan kuruldu).\n\nBelge ``pending``'e döner ve çıkarım görevi yeniden gönderilir; uygun olmayan durumda\n(tamamlanmış, bekleyen ya da çıkarım yapılmayan tür) **409**.",
+        "operationId": "retry_extraction_api_v1_documents__document_id__extract_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "document_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Document Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Retry Extraction",
         "tags": [
           "documents"
         ]

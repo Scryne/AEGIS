@@ -54,31 +54,47 @@ export function MatchReview({
     }
   }
 
+  // Karar geri alınabilir ama "bekliyor"a döndürülemez (backend kuralı): kararlı adayda
+  // yalnız ters yön, "kararı değiştir" diliyle gösterilir.
+  const decided = candidate.decision !== "pending";
+  const noteId = `karar-gerekcesi-${candidate.id}`;
+
   return (
     <div className="mt-3 space-y-2 border-t border-border pt-3">
+      {decided && <p className="text-xs font-medium text-muted">Kararı değiştir</p>}
+      <label htmlFor={noteId} className="sr-only">
+        {decided ? "Değişiklik gerekçesi" : "Karar gerekçesi"}
+      </label>
       <input
+        id={noteId}
         value={note}
         onChange={(e) => setNote(e.target.value)}
-        placeholder="Karar gerekçesi (eleme için zorunlu)"
+        placeholder={
+          decided ? "Değişiklik gerekçesi (eleme için zorunlu)" : "Karar gerekçesi (eleme için zorunlu)"
+        }
         className="w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg"
       />
-      <div className="flex gap-2">
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => decide("confirmed")}
-          className="rounded-md border border-danger px-3 py-1.5 text-sm text-danger disabled:opacity-50"
-        >
-          Eşleşmeyi onayla
-        </button>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => decide("dismissed")}
-          className="rounded-md border border-border px-3 py-1.5 text-sm text-muted hover:text-fg disabled:opacity-50"
-        >
-          Gerekçesiyle ele
-        </button>
+      <div className="flex flex-wrap gap-2">
+        {candidate.decision !== "confirmed" && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => decide("confirmed")}
+            className="rounded-md border border-danger px-3 py-1.5 text-sm text-danger disabled:opacity-50"
+          >
+            Eşleşmeyi onayla
+          </button>
+        )}
+        {candidate.decision !== "dismissed" && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => decide("dismissed")}
+            className="rounded-md border border-border px-3 py-1.5 text-sm text-muted hover:text-fg disabled:opacity-50"
+          >
+            Gerekçesiyle ele
+          </button>
+        )}
       </div>
       {error !== null && (
         <p role="alert" className="text-sm text-danger">

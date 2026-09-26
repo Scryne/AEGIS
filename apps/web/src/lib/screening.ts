@@ -36,6 +36,7 @@ export interface ScreeningSummary {
   confirmed: number;
   dismissed: number;
   flagged: number;
+  flagged_pending: number;
   sanction_hits: number;
   pep_hits: number;
 }
@@ -154,11 +155,15 @@ export function riskHeadline(screening: Screening): {
   if (screening.summary.confirmed > 0) {
     return { tone: "danger", text: "Onaylanmış eşleşme var" };
   }
-  if (screening.summary.flagged > 0) {
+  // Elenmiş/onaylanmış yüksek skorlu aday artık "acil" değildir: yalnız bekleyenler.
+  if (screening.summary.flagged_pending > 0) {
     return { tone: "danger", text: "Yüksek skorlu eşleşme — acil inceleme" };
   }
   if (screening.summary.pending > 0) {
     return { tone: "warning", text: `${screening.summary.pending} eşleşme inceleme bekliyor` };
+  }
+  if (screening.summary.total > 0 && screening.summary.dismissed === screening.summary.total) {
+    return { tone: "success", text: "Tüm adaylar gerekçeyle elendi" };
   }
   return { tone: "success", text: "Eşik üstü eşleşme bulunamadı" };
 }
@@ -169,3 +174,28 @@ export const TONE_CLASSES: Record<string, string> = {
   success: "border-success text-success",
   neutral: "border-border text-muted",
 };
+
+/** Eşik adlarının denetçi okuyabilir karşılığı (bkz. aegis_core.screening.thresholds). */
+const THRESHOLD_LABELS: Record<string, string> = {
+  candidate_cutoff: "aday eşiği",
+  auto_dismiss_below: "otomatik eleme altı",
+  auto_flag_at: "acil işaret",
+};
+
+/** Koşu eşiklerini "aday eşiği 0,50 · otomatik eleme altı 0,65 · acil işaret 0,85" biçiminde yazar. */
+export function formatThresholds(thresholds: Record<string, number>): string {
+  const order = ["candidate_cutoff", "auto_dismiss_below", "auto_flag_at"];
+  const keys = [
+    ...order.filter((key) => key in thresholds),
+    ...Object.keys(thresholds).filter((key) => !order.includes(key)),
+  ];
+  return keys
+    .map(
+      (key) =>
+        `${THRESHOLD_LABELS[key] ?? key} ${thresholds[key].toLocaleString("tr-TR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })}`,
+    )
+    .join(" · ");
+}

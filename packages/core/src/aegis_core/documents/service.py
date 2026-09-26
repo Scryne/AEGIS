@@ -45,7 +45,7 @@ from aegis_core.models import (
     SourceType,
 )
 from aegis_core.models.entity import NATIONAL_ID_DOMAIN
-from aegis_core.security.encryption import blind_index
+from aegis_core.security.encryption import blind_index, get_secret_box
 from aegis_core.services import audit as audit_service
 
 logger = get_logger("aegis.documents.service")
@@ -69,6 +69,30 @@ ALLOWED_CONTENT_TYPES = frozenset(
         "text/plain",
     }
 )
+
+
+# Öneri gövdesi JSONB'dir ve şifresizdir (ADR-0007 §5). TCKN oraya düz yazılırsa şifreli
+# ``entity.national_id`` kolonu anlamsız kalır: numara karar verilene kadar — reddedilen
+# önerilerde saklama süresi boyunca — açıkta dururdu. Bu yüzden öneride yalnız şifreli token
+# (alan-ayrımlı AAD ile) ve maske tutulur; düz değer yalnız kabul anında çözülür.
+_PROPOSAL_ID_AAD = b"extraction_proposal.national_id"
+
+
+def seal_national_id(national_id: str) -> dict[str, str]:
+    """Öneri gövdesine girecek TCKN alanlarını üretir (şifreli token + maske)."""
+    return {
+        "national_id_enc": get_secret_box().encrypt(national_id, aad=_PROPOSAL_ID_AAD),
+        "national_id_masked": entity_service.mask_identifier(national_id),
+    }
+
+
+def proposal_national_id(payload: dict[str, object]) -> str | None:
+    """Öneri gövdesindeki TCKN'yi çözer. Eski (düz metin) satırlar da okunur."""
+    token = payload.get("national_id_enc")
+    if token:
+        return get_secret_box().decrypt(str(token), aad=_PROPOSAL_ID_AAD)
+    legacy = payload.get("national_id")
+    return str(legacy) if legacy else None
 
 
 class DocumentInputError(ValueError):
@@ -238,10 +262,10 @@ async def store_extraction_result(
                     "person_name": person.name,
                     "rel_type": person.rel_type,
                     "role_title": person.role_title,
-                    # TCKN öneride tutulur (henüz kütüğe girmedi); kabul edilince
-                    # şifreli kolona yazılır. Öneri reddedilirse satırla birlikte kalır —
-                    # bu yüzden reddedilen öneriler saklama süresine tabidir.
-                    "national_id": person.national_id,
+                    # TCKN öneride yalnız ŞİFRELİ tutulur (bkz. seal_national_id); kabul
+                    # edilince şifreli varlık kolonuna yazılır. Reddedilen öneri satırla
+                    # birlikte kalır — bu yüzden reddedilen öneriler saklama süresine tabidir.
+                    **(seal_national_id(person.national_id) if person.national_id else {}),
                 },
                 confidence=person.confidence,
                 evidence_text=person.evidence[:2000] if person.evidence else None,
@@ -276,6 +300,54 @@ async def mark_extraction_failed(
     document.extraction_error = error[:2000]
     document.extracted_at = datetime.now(UTC)
     await session.flush()
+    return document
+
+
+RETRYABLE_EXTRACTION_STATUSES = frozenset(
+    {ExtractionStatus.FAILED.value, ExtractionStatus.SKIPPED.value}
+)
+
+
+async def requeue_extraction(
+    session: AsyncSession,
+    document: Document,
+    *,
+    tenant_id: uuid.UUID,
+    actor_user_id: uuid.UUID,
+    actor_role: str,
+) -> Document:
+    """Başarısız ya da atlanmış çıkarımı ``pending``'e döndürür (kuyruğa alma çağıranda).
+
+    Neden gerekli: çıkarım görevi idempotenttir, ``pending`` dışındaki belgeye bir daha
+    dokunmaz. Docling kurulu değilken yüklenen belge "skipped", motor geçici olarak
+    düştüğünde "failed" kalır ve — bu yol olmadan — hiçbir zaman işlenemezdi (aynı dosyayı
+    yeniden yüklemek de aynı kanıtı ikinci kez kütüğe sokardı). Önceki durum ve hata
+    denetim izine yazılır; öneriler yine insan onayı bekler.
+    """
+    if document.doc_type not in EXTRACTABLE_TYPES:
+        raise DocumentInputError("Bu belge türü için çıkarım yapılmaz.")
+    if document.extraction_status not in RETRYABLE_EXTRACTION_STATUSES:
+        raise DocumentInputError(
+            "Yalnız başarısız ya da atlanmış çıkarım yeniden denenebilir "
+            f"(şu anki durum: {document.extraction_status})."
+        )
+    previous_status = document.extraction_status
+    previous_error = (document.extraction_error or "")[:500]
+    document.extraction_status = ExtractionStatus.PENDING.value
+    document.extraction_error = None
+    document.extracted_at = None
+    await session.flush()
+
+    await audit_service.record_event(
+        session,
+        tenant_id=tenant_id,
+        actor_user_id=actor_user_id,
+        actor_role=actor_role,
+        action=AuditAction.DOCUMENT_EXTRACTION_RETRY,
+        object_type="document",
+        object_id=str(document.id),
+        payload={"previous_status": previous_status, "previous_error": previous_error},
+    )
     return document
 
 
@@ -411,12 +483,12 @@ async def accept_proposal(
             if raw_rel_type in {item.value for item in RelationshipType}
             else RelationshipType.OFFICER
         )
-        national_id = proposal.payload.get("national_id")
+        national_id = proposal_national_id(proposal.payload)
         person = await _resolve_person(
             session,
             tenant_id=proposal.tenant_id,
             name=person_name,
-            national_id=str(national_id) if national_id else None,
+            national_id=national_id,
             link_entity_id=link_entity_id,
             source_ref=source_ref,
             actor_user_id=actor_user_id,
@@ -472,6 +544,7 @@ async def accept_proposal(
 def _redacted_payload(payload: dict[str, object]) -> dict[str, object]:
     """Denetim olayına giren öneri içeriğinden kimlik numarasını çıkarır (KVKK)."""
     redacted = dict(payload)
+    redacted.pop("national_id_enc", None)
     if redacted.get("national_id"):
         redacted["national_id"] = "***"
     return redacted

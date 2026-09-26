@@ -134,8 +134,12 @@ def _document_response(document: Document) -> DocumentResponse:
 
 def _proposal_response(proposal: ExtractionProposal) -> ProposalResponse:
     payload = dict(proposal.payload)
-    # TCKN öneri gövdesinde durur ama arayüze maskeli gider.
-    if payload.get("national_id"):
+    # TCKN öneride şifreli durur; arayüze yalnız maskesi gider (şifreli token hiç çıkmaz).
+    token_masked = payload.pop("national_id_masked", None)
+    payload.pop("national_id_enc", None)
+    if token_masked:
+        payload["national_id"] = token_masked
+    elif payload.get("national_id"):  # şifreleme öncesi (eski) satırlar
         payload["national_id"] = entity_service.mask_identifier(str(payload["national_id"]))
     return ProposalResponse(
         id=proposal.id,
@@ -238,6 +242,47 @@ async def upload_document(
             },
             redis_url=settings.redis_url,
         )
+    return _document_response(document)
+
+
+@router.post(
+    "/{document_id}/extract",
+    response_model=DocumentResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
+async def retry_extraction(
+    document_id: uuid.UUID,
+    principal: RequireDocumentWrite,
+    session: TenantSessionDep,
+    settings: SettingsDep,
+) -> DocumentResponse:
+    """Başarısız ya da atlanmış çıkarımı yeniden kuyruğa alır (ör. Docling sonradan kuruldu).
+
+    Belge ``pending``'e döner ve çıkarım görevi yeniden gönderilir; uygun olmayan durumda
+    (tamamlanmış, bekleyen ya da çıkarım yapılmayan tür) **409**.
+    """
+    document = await document_service.get_document(session, document_id)
+    if document is None:
+        raise NotFoundError("Belge bulunamadı.")
+    try:
+        document = await document_service.requeue_extraction(
+            session,
+            document,
+            tenant_id=principal.tenant_id,
+            actor_user_id=principal.user_id,
+            actor_role=principal.role.value,
+        )
+    except DocumentInputError as exc:
+        raise ConflictError(str(exc)) from exc
+    dispatch(
+        TASK_DOCUMENT_EXTRACT,
+        kwargs={
+            "tenant_id": str(principal.tenant_id),
+            "document_id": str(document.id),
+            "actor_role": principal.role.value,
+        },
+        redis_url=settings.redis_url,
+    )
     return _document_response(document)
 
 

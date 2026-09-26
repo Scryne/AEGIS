@@ -7,6 +7,7 @@ import { DiscrepancyReview } from "@/components/discrepancy-review";
 import { DocumentUpload } from "@/components/document-upload";
 import { DossierExport } from "@/components/dossier-export";
 import { EntityActions } from "@/components/entity-actions";
+import { ExtractionRetry } from "@/components/extraction-retry";
 import { ProposalReview } from "@/components/proposal-review";
 import { ReportDownloadLink } from "@/components/report-download";
 import { RiskSummaryPanel } from "@/components/risk-summary";
@@ -233,6 +234,10 @@ export default async function EntityDetailPage({
                   {document.extraction_error !== null && (
                     <div className="text-xs text-warning">{document.extraction_error}</div>
                   )}
+                  {canWrite &&
+                    (document.extraction_status === "failed" ||
+                      document.extraction_status === "skipped") &&
+                    document.doc_type !== "other" && <ExtractionRetry documentId={document.id} />}
                 </div>
                 <span className="shrink-0 rounded border border-border px-2 py-0.5 text-[10px] text-muted">
                   {EXTRACTION_STATUS_LABELS[document.extraction_status] ??

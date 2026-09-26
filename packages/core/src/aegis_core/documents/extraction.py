@@ -55,6 +55,27 @@ _LEGAL_FORM_HINT = re.compile(
 
 _DATE = re.compile(r"\b(\d{1,2})[./-](\d{1,2})[./-](\d{4})\b")
 
+# Docling PDF'i markdown'a çevirirken birbirine yakın satırları TEK paragrafta birleştirir:
+# "AD SOYAD - T.C. Kimlik No: … Şirketi münferiden … yetkilidir. AD2 SOYAD2 - T.C. …".
+# Çıkarım satır tabanlıdır; birleşik paragrafta ikinci yetkiliye birincinin yetki ifadesi
+# ve — daha kötüsü — TCKN'si bağlanıyordu (2026-09-26, üretilmiş imza sirküleri PDF'i).
+# Bu iki desen belgenin kendi düzenini geri kurar: her yetkili bloğu satır başına alınır,
+# kimlik numarasından sonra gelen yetki cümlesi ayrı satıra düşer.
+_PERSON_BLOCK_START = re.compile(
+    rf"(?<=[.;])[ \t]+(?=[{_UPPER}][{_UPPER}{_LOWER}]+(?:\s+[{_UPPER}][{_UPPER}{_LOWER}]+){{1,3}}"
+    r"\s*[-–—]\s*(?:T\.?\s*C\.?|TCKN))"
+)
+_AFTER_NATIONAL_ID = re.compile(
+    r"((?:kimlik\s*(?:no|numarası)|tckn)\s*[:.]?\s*\d{11})[ \t]+(?=\S)", re.IGNORECASE
+)
+
+
+def restore_line_structure(text: str) -> str:
+    """Birleşmiş yetkili paragraflarını satırlara ayırır (bkz. yukarıdaki not)."""
+    text = _PERSON_BLOCK_START.sub("\n", text)
+    return _AFTER_NATIONAL_ID.sub(r"\1\n", text)
+
+
 # İmza sirkülerinde yetkiyi işaretleyen ifadeler.
 _AUTHORITY_HINTS = (
     "münferiden",
@@ -349,15 +370,21 @@ def _extract_persons(text: str) -> list[ExtractedPerson]:
         context = "\n".join(lines[index : index + 2])
         role = _role_for_line(line) or _role_for_line(context)
 
+        # Tüzel kişilik eki taşıyan satır şirket unvanıdır: "YILDIZ İNŞAAT SANAYİ VE"
+        # kişi adı gibi görünür ama kişi değildir (öneri listesinde sahte kişi çıkıyordu).
+        if _LEGAL_FORM_HINT.search(line):
+            continue
         for match in _PERSON_NAME.finditer(line):
             candidate = match.group(1).strip()
             if not _looks_like_person_name(candidate):
                 continue
-            # Aynı satırdaki geçerli bir TCKN kişiye bağlanır.
+            # TCKN önce kişinin KENDİ satırında aranır; bağlam (sonraki satır) ancak satırda
+            # yoksa bakılır — aksi hâlde bitişik yetkilinin numarası yanlış kişiye bağlanır.
             tckn = next(
                 (
                     number
-                    for number in re.findall(r"(?<!\d)\d{11}(?!\d)", context)
+                    for source in (line, context)
+                    for number in re.findall(r"(?<!\d)\d{11}(?!\d)", source)
                     if is_valid_tckn(number)
                 ),
                 None,
@@ -390,6 +417,7 @@ def extract_from_text(text: str, doc_type: str) -> ExtractionResult:
     """
     if not text or not text.strip():
         return ExtractionResult(warnings=["Belgeden metin çıkarılamadı (boş içerik)."])
+    text = restore_line_structure(text)
 
     attributes: list[ExtractedAttribute] = []
     warnings: list[str] = []

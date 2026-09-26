@@ -216,3 +216,51 @@ def test_ayni_kisi_iki_kez_onerilmez() -> None:
     result = extract_from_text(metin, "imza_sirkuleri")
     adlar = [person.name for person in result.persons]
     assert adlar.count("AHMET YILMAZ") == 1
+
+
+# ── Docling paragraf birleştirmesi (2026-09-26) ──────────────────────────────
+
+# Docling'in üretilmiş bir imza sirküleri PDF'inden verdiği gerçek çıktı biçimi: iki
+# yetkilinin satırları tek paragrafta.
+DOCLING_BIRLESIK = """## İMZA SİRKÜLERİ
+
+KUZEY AMBALAJ SANAYİ VE TİCARET ANONİM ŞİRKETİ
+
+Şirketimizi temsil ve ilzama yetkili kişiler aşağıda gösterilmiştir.
+
+DENİZ KARACA - T.C. Kimlik No: 10000000214 Şirketi münferiden temsil ve ilzama yetkilidir. \
+ELİF YURTSEVER - T.C. Kimlik No: 10000000382 Yönetim Kurulu Üyesi olarak müştereken imza \
+yetkisine sahiptir.
+
+Ankara 12. Noterliği Tarih: 14.03.2026"""
+
+
+def test_birlesik_paragrafta_her_yetkili_kendi_tckn_sine_baglanir() -> None:
+    kisiler = {p.name: p for p in extract_from_text(DOCLING_BIRLESIK, "imza_sirkuleri").persons}
+    assert kisiler["DENİZ KARACA"].national_id == "10000000214"
+    assert kisiler["ELİF YURTSEVER"].national_id == "10000000382"
+
+
+def test_birlesik_paragrafta_yetki_ifadesi_dogru_kisiye_gider() -> None:
+    kisiler = {p.name: p for p in extract_from_text(DOCLING_BIRLESIK, "imza_sirkuleri").persons}
+    deniz = kisiler["DENİZ KARACA"].role_title or ""
+    elif_ = kisiler["ELİF YURTSEVER"].role_title or ""
+    assert "münferiden" in deniz
+    assert "müştereken" not in deniz
+    assert "müştereken" in elif_
+    assert "münferiden" not in elif_
+    # Yetki metni kişinin adını/kimlik numarasını taşımaz.
+    assert "DENİZ" not in elif_
+    assert "Kimlik" not in deniz
+
+
+def test_unvan_satirindan_kisi_onerilmez() -> None:
+    for metin in (IMZA_SIRKULERI, DOCLING_BIRLESIK):
+        adlar = {p.name for p in extract_from_text(metin, "imza_sirkuleri").persons}
+        assert not any("SANAYİ" in ad or "İNŞAAT" in ad or "AMBALAJ" in ad for ad in adlar), adlar
+
+
+def test_satir_yapisi_zaten_duzgunse_degismez() -> None:
+    from aegis_core.documents.extraction import restore_line_structure
+
+    assert restore_line_structure(IMZA_SIRKULERI) == IMZA_SIRKULERI

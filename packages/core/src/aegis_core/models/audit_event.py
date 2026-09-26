@@ -46,6 +46,8 @@ class AuditAction(StrEnum):
     ENTITY_MERGE = "entity.merge"
     RELATIONSHIP_EDIT = "relationship.edit"
     DOCUMENT_UPLOAD = "document.upload"
+    DOCUMENT_EXTRACTION_RETRY = "document.extraction_retry"
+    """Başarısız/atlanmış çıkarımın yeniden kuyruğa alınması (önceki hata izde kalır)."""
     PROPOSAL_ACCEPT = "proposal.accept"
     PROPOSAL_REJECT = "proposal.reject"
     DISCREPANCY_DECISION = "discrepancy.decision"

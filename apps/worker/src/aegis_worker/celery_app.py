@@ -6,12 +6,21 @@ E1.3'te günlük OpenSanctions senkron job'ı beat programına eklenir.
 
 from __future__ import annotations
 
+import asyncio
+import sys
+
 from celery import Celery
 from celery.schedules import crontab
 
 from aegis_core.config import get_settings
 from aegis_core.observability import init_sentry
 from aegis_core.queueing import QUEUE_DEFAULT, TASK_RETENTION_DISPOSE, TASK_SANCTIONS_SYNC
+
+# Görevler ``asyncio.run`` ile async psycopg kullanır; Windows'un varsayılan Proactor
+# döngüsünde psycopg async çalışmaz ve her görev InterfaceError ile düşer (conftest.py'deki
+# kuralın worker karşılığı). Linux imajında etkisizdir.
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 def create_celery_app() -> Celery:

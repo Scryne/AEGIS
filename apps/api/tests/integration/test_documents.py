@@ -268,6 +268,99 @@ def test_cikarim_idempotenttir(api_client: TestClient, fake_storage: dict[str, b
     assert len(proposals) == first["proposals"]
 
 
+def test_basarisiz_cikarim_yeniden_denenir(
+    api_client: TestClient, fake_storage: dict[str, bytes], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Motor düştüğünde "failed" kalan belge, yeniden deneme ucuyla işlenebilir hale gelir."""
+    tenant, token = _register_and_login(api_client, slug="retry", email="re@try.com")
+    entity = _create_company(api_client, token)
+    document = _upload(api_client, token, entity_id=entity["id"])
+
+    def _dusen_motor(*args: Any, **kwargs: Any) -> Any:
+        raise RuntimeError("motor geçici olarak yok")
+
+    with monkeypatch.context() as m:
+        m.setattr("aegis_worker.tasks.documents.convert", _dusen_motor)
+        assert _run_extraction(tenant, document["id"])["status"] == "failed"
+    # İdempotent görev "failed" belgeye bir daha dokunmaz — eski davranışın kanıtı.
+    assert _run_extraction(tenant, document["id"])["status"] == "failed"
+
+    retry = api_client.post(f"/api/v1/documents/{document['id']}/extract", headers=_auth(token))
+    assert retry.status_code == 202, retry.text
+    assert retry.json()["extraction_status"] == "pending"
+    assert retry.json()["extraction_error"] is None
+
+    result = _run_extraction(tenant, document["id"])
+    assert result["status"] == "completed"
+    assert result["proposals"] >= 1
+
+    events = api_client.get(
+        "/api/v1/audit/events", params={"action": "document.extraction_retry"}, headers=_auth(token)
+    ).json()
+    items = events["items"] if isinstance(events, dict) else events
+    assert any(e.get("action") == "document.extraction_retry" for e in items)
+
+
+def test_tamamlanmis_cikarim_yeniden_denenemez(
+    api_client: TestClient, fake_storage: dict[str, bytes]
+) -> None:
+    tenant, token = _register_and_login(api_client, slug="retry2", email="re2@try.com")
+    document = _upload(api_client, token)
+    assert _run_extraction(tenant, document["id"])["status"] == "completed"
+    response = api_client.post(f"/api/v1/documents/{document['id']}/extract", headers=_auth(token))
+    assert response.status_code == 409
+
+
+def test_cikarimsiz_tur_yeniden_denenemez(
+    api_client: TestClient, fake_storage: dict[str, bytes]
+) -> None:
+    _tenant, token = _register_and_login(api_client, slug="retry3", email="re3@try.com")
+    document = _upload(api_client, token, doc_type="other")
+    assert document["extraction_status"] == "skipped"
+    response = api_client.post(f"/api/v1/documents/{document['id']}/extract", headers=_auth(token))
+    assert response.status_code == 409
+
+
+def test_denetci_cikarimi_yeniden_deneyemez(
+    api_client: TestClient, fake_storage: dict[str, bytes]
+) -> None:
+    tenant, token = _register_and_login(api_client, slug="retry4", email="re4@try.com")
+    document = _upload(api_client, token)
+    auditor = _role_token(tenant, "auditor")
+    response = api_client.post(
+        f"/api/v1/documents/{document['id']}/extract", headers=_auth(auditor)
+    )
+    assert response.status_code == 403
+
+
+def test_oneri_govdesinde_tckn_duz_metin_durmaz(
+    api_client: TestClient, fake_storage: dict[str, bytes], admin_database_url: str
+) -> None:
+    """ADR-0007 §5: şifresiz alanlara TCKN'nin yalnız maskesi girer — öneri gövdesi dahil."""
+    from sqlalchemy import create_engine, text
+
+    tenant, token = _register_and_login(api_client, slug="tckn-enc", email="t@enc.com")
+    document = _upload(api_client, token)
+    _run_extraction(tenant, document["id"])
+
+    engine = create_engine(admin_database_url)
+    try:
+        with engine.connect() as conn:
+            rows = (
+                conn.execute(
+                    text("SELECT payload::text FROM extraction_proposal WHERE document_id = :d"),
+                    {"d": document["id"]},
+                )
+                .scalars()
+                .all()
+            )
+    finally:
+        engine.dispose()
+    assert rows, "öneri üretilmedi"
+    assert all(GECERLI_TCKN not in row for row in rows)
+    assert any("national_id_enc" in row for row in rows)
+
+
 # ── Öneri kararı ─────────────────────────────────────────────────────────────
 
 

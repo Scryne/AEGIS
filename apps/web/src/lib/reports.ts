@@ -96,6 +96,7 @@ export const ACTION_LABELS: Record<string, string> = {
   "entity.merge": "Varlık birleştirildi",
   "relationship.edit": "Bağ düzenlendi",
   "document.upload": "Belge yüklendi",
+  "document.extraction_retry": "Çıkarım yeniden denendi",
   "proposal.accept": "Öneri kabul edildi",
   "proposal.reject": "Öneri reddedildi",
   "discrepancy.decision": "Tutarsızlık karara bağlandı",

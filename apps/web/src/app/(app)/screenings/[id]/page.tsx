@@ -13,6 +13,7 @@ import {
   ROLE_LABELS,
   STATUS_LABELS,
   TONE_CLASSES,
+  formatThresholds,
   riskHeadline,
   topicLabel,
 } from "@/lib/screening";
@@ -251,11 +252,11 @@ export default async function ScreeningDetailPage({
           </div>
           <div>
             <dt className="inline font-medium">Eşikler: </dt>
-            <dd className="inline font-mono">{JSON.stringify(screening.thresholds)}</dd>
+            <dd className="inline break-words">{formatThresholds(screening.thresholds)}</dd>
           </div>
           <div>
             <dt className="inline font-medium">Liste sürümleri: </dt>
-            <dd className="inline font-mono">
+            <dd className="inline font-mono break-all">
               {Object.entries(screening.dataset_versions)
                 .map(([name, info]) => `${name}@${info.version ?? "?"}`)
                 .join(", ") || "kayıtlı sürüm yok"}

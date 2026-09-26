@@ -1,7 +1,7 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { LogoutButton } from "@/components/logout-button";
+import { NavLinks } from "@/components/nav-links";
 import { getCurrentUser, ROLE_LABELS } from "@/lib/server/user";
 import type { Role } from "@/lib/server/user";
 
@@ -43,41 +43,25 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const visibleNav = NAV.filter((item) => item.roles.includes(user.role));
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="flex w-60 flex-col border-r border-border bg-surface p-4">
-        <div className="mb-6 font-mono text-sm tracking-widest text-muted uppercase">AEGIS</div>
-        <nav className="flex flex-col gap-1">
-          {visibleNav.map((item) =>
-            item.enabled ? (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="rounded-md px-3 py-2 text-sm font-medium text-fg hover:bg-bg"
-              >
-                {item.label}
-              </Link>
-            ) : (
-              <span
-                key={item.label}
-                className="flex items-center justify-between rounded-md px-3 py-2 text-sm text-muted"
-              >
-                {item.label}
-                <span className="rounded bg-bg px-1.5 py-0.5 text-[10px] uppercase">yakında</span>
-              </span>
-            ),
-          )}
-        </nav>
+    <div className="flex min-h-screen flex-col md:flex-row">
+      <aside className="flex flex-col gap-3 border-b border-border bg-surface p-3 md:w-60 md:shrink-0 md:gap-0 md:border-r md:border-b-0 md:p-4">
+        <div className="font-mono text-sm tracking-widest text-muted uppercase md:mb-6">AEGIS</div>
+        <NavLinks
+          items={visibleNav
+            .filter((item) => item.enabled)
+            .map(({ label, href }) => ({ label, href }))}
+        />
       </aside>
-      <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-border bg-surface px-6 py-3">
-          <div className="text-sm text-muted">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="flex items-center justify-between gap-3 border-b border-border bg-surface px-4 py-3 md:px-6">
+          <div className="min-w-0 truncate text-sm text-muted">
             <span className="text-fg">{user.email}</span>
             <span className="mx-2">·</span>
             {ROLE_LABELS[user.role]}
           </div>
           <LogoutButton />
         </header>
-        <main className="flex-1 p-6">{children}</main>
+        <main className="min-w-0 flex-1 p-4 md:p-6">{children}</main>
       </div>
     </div>
   );

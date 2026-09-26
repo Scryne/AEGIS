@@ -1,0 +1,8 @@
+# Gitleaks istisnaları — her satır gerekçeli olmalı.
+#
+# conftest.py TEST_FIELD_ENCRYPTION_KEY: yalnız test fikstürü. TCKN alan şifrelemesinin
+# (ADR-0005) kör indeksi test koşuları arasında kararlı kalsın diye sabittir; hiçbir
+# ortamın (.env.example, deploy) anahtarı değildir ve kodda başka yerde geçmez
+# (2026-09-26 denetiminde git geçmişi dahil doğrulandı). Değeri değiştirmek bulguyu
+# kapatmaz: tarama tüm geçmişi okur.
+a0b6bcb893bb5113ce95ca1b66f0bfa16b420c51:conftest.py:generic-api-key:31

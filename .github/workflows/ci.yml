@@ -39,9 +39,9 @@ jobs:
       DATABASE_ADMIN_URL: postgresql+psycopg://aegis:aegis@localhost:5432/aegis
       REDIS_URL: redis://localhost:6379/0
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: uv kurulumu
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
       - name: Bağımlılıklar
@@ -70,9 +70,9 @@ jobs:
     # Gerçek motor üzerinden uçtan uca recall. Ayrı iş olmasının nedeni ES'in ~1 GB
     # heap + indeksleme süresi istemesi; backend işini bekletmemesi için paraleldir.
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: uv kurulumu
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
       - name: Bağımlılıklar
@@ -100,9 +100,9 @@ jobs:
     name: OpenAPI sözleşme drift
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: uv kurulumu
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v7
         with:
           enable-cache: true
       - run: uv sync --frozen
@@ -115,11 +115,11 @@ jobs:
     name: Frontend — lint · tip · build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: pnpm kurulumu
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
       - name: Node kurulumu
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -131,12 +131,16 @@ jobs:
         run: pnpm --filter @aegis/web typecheck
       - name: Build (Next.js)
         run: pnpm --filter @aegis/web build
+      - name: Bağımlılık denetimi (pnpm audit, üretim — BLOKE EDİCİ)
+        # 2026-09-26: Next 16.0'da kimlik doğrulamasız RCE (Image Optimizer) dahil 2 kritik açık
+        # CI'da görünmüyordu.
+        run: pnpm audit --prod --audit-level high
 
   security:
     name: Güvenlik taraması
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Gitleaks (sır taraması)
@@ -144,9 +148,11 @@ jobs:
           docker run --rm -v "${{ github.workspace }}:/repo"
           ghcr.io/gitleaks/gitleaks:latest detect --source=/repo --no-banner --redact
       - name: uv kurulumu
-        uses: astral-sh/setup-uv@v4
-      - name: Bağımlılık denetimi (pip-audit)
+        uses: astral-sh/setup-uv@v7
+      - name: Bağımlılık denetimi (pip-audit — BLOKE EDİCİ)
+        # Eskiden `|| true` ile hiç kırılmıyordu; 2026-09-26'da cryptography + pypdf'te 5 açık
+        # sessizce birikmişti. Kilitli sürümler dışa aktarılır, çözümleme yapılmaz.
         run: |
           uv export --frozen --no-dev --no-emit-workspace -o /tmp/req.txt \
             || uv export --frozen --no-dev -o /tmp/req.txt
-          uvx pip-audit -r /tmp/req.txt || true
+          uvx pip-audit -r /tmp/req.txt --disable-pip --no-deps

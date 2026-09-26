@@ -291,7 +291,11 @@ Apache AGE, Kubernetes). If a Phase 1 task tempts toward one, stop and note it f
     from the registry (E1.3 × E1.4)
   - [ ] *Needs verification with real files:* Docling PDF path (optional `extraction`
     dependency group; the plain-text path is covered end-to-end in tests), and the VKN
-    checksum against the official specification
+    checksum against the official specification. 2026-09-26: the PDF path ran end to end
+    locally on a generated signature circular (Docling → 5 proposals); real pilot documents
+    are still outstanding.
+  - [x] Failed/skipped extraction can be re-queued (`POST /documents/{id}/extract`, audited as
+    `document.extraction_retry`) — the idempotent task never touches a non-pending document.
 - [x] **E1.5** Reports & dossier — *complete*
   - [x] Rule-based risk summary v1 (`reports/risk.py`), transparent + plain-Turkish
     rationale per finding; shared sanctions/PEP predicate in `screening/topics.py`

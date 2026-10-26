@@ -1,10 +1,13 @@
 name: CI
 
+# Yalnız doküman / not değişen commit'te CI koşmaz (özel repo Actions dakikası, 2026-10-26).
 on:
   push:
     branches: [main]
+    paths-ignore: ["**.md", "docs/**", ".claude/**"]
   pull_request:
     branches: [main]
+    paths-ignore: ["**.md", "docs/**", ".claude/**"]
 
 concurrency:
   group: ci-${{ github.ref }}

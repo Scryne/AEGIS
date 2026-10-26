@@ -18,3 +18,7 @@ overrides:
   js-yaml@>=4 <4.3.2: 4.3.2
   nanoid@<3.3.18: 3.3.18
   postcss@<8.5.23: 8.5.23
+  # 2026-10-26 denetimi: next'in getirdiği sharp (librsvg, GHSA-wq5f-xc86-pv6w) ve postcss altı
+  # source-map-js (DoS, GHSA-68fv-2mgg-jv7q).
+  sharp@<0.35.5: 0.35.5
+  source-map-js@<1.2.2: 1.2.2

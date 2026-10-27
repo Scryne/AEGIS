@@ -3,6 +3,6 @@
 # conftest.py TEST_FIELD_ENCRYPTION_KEY: yalnız test fikstürü. TCKN alan şifrelemesinin
 # (ADR-0005) kör indeksi test koşuları arasında kararlı kalsın diye sabittir; hiçbir
 # ortamın (.env.example, deploy) anahtarı değildir ve kodda başka yerde geçmez
-# (2026-09-26 denetiminde git geçmişi dahil doğrulandı). Değeri değiştirmek bulguyu
+# (2026-09-26 denetiminde git geçmişi dahil doğrulandı). Commit, 2026-10-27 geçmiş temizliğinde yeni hash aldı. Değeri değiştirmek bulguyu
 # kapatmaz: tarama tüm geçmişi okur.
-a0b6bcb893bb5113ce95ca1b66f0bfa16b420c51:conftest.py:generic-api-key:31
+6fa35225944ca24d57ed40098b72e302780be98b:conftest.py:generic-api-key:31

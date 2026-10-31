@@ -1,7 +1,8 @@
 """Kök test yapılandırması: platform shim + paylaşılan entegrasyon fixture'ları.
 
-Entegrasyon testleri (``-m integration``) Docker gerektirir: bir PostgreSQL 16 ve bir
-Redis konteyneri testcontainers ile ayağa kaldırılır. Migration'lar **ayrıcalıklı**
+Entegrasyon testleri (``-m integration``) varsayılan olarak Docker ister: bir PostgreSQL 16 ve
+bir Redis konteyneri testcontainers ile ayağa kaldırılır. Docker'sız makinede
+``AEGIS_TEST_PG_SERVER`` ve ``AEGIS_TEST_REDIS_URL`` hazır sunuculara yönlendirir. Migration'lar **ayrıcalıklı**
 ``aegis`` rolüyle uygulanır; uygulama RLS'ye tabi ``aegis_app`` rolüyle bağlanır — süper
 kullanıcı RLS'yi baypas ederdi (ADR-0002). Bu ayrım, kiracılar-arası izolasyon garantisinin
 DB düzeyinde gerçekten çalıştığını doğrulamanın ön koşuludur.
@@ -31,16 +32,92 @@ TEST_AUTH_SECRET = "test-secret-please-change-in-prod-0123456789"
 TEST_FIELD_ENCRYPTION_KEY = "YWVnaXMtdGVzdC1maWVsZC1rZXktMzJieXRlcyEhISE="
 
 
-@pytest.fixture(scope="session")
-def app_database_url() -> Iterator[str]:
-    """pgvector'suz PostgreSQL 16 + migration + non-superuser app rolü döndürür."""
-    postgres_container = pytest.importorskip("testcontainers.postgres").PostgresContainer
+def _hazirla(admin_url: str, host: str, port: int | str) -> Iterator[str]:
+    """Migration'ları ayrıcalıklı rolle uygular, RLS'ye tabi app rolünü kurar, app URL'ini verir."""
     from alembic import command
     from alembic.config import Config
     from sqlalchemy import create_engine, text
 
     from aegis_core.config import get_settings
 
+    os.environ["DATABASE_ADMIN_URL"] = admin_url
+    os.environ["DATABASE_URL"] = admin_url
+    get_settings.cache_clear()
+
+    cfg = Config(str(PROJECT_ROOT / "alembic.ini"))
+    cfg.set_main_option("script_location", str(PROJECT_ROOT / "migrations"))
+    command.upgrade(cfg, "head")
+
+    admin_engine = create_engine(admin_url)
+    with admin_engine.begin() as conn:
+        conn.execute(text(f"CREATE ROLE {APP_ROLE} LOGIN PASSWORD '{APP_PASSWORD}'"))
+        conn.execute(text(f"GRANT USAGE ON SCHEMA public TO {APP_ROLE}"))
+        conn.execute(
+            text(
+                "GRANT SELECT, INSERT, UPDATE, DELETE "
+                f"ON ALL TABLES IN SCHEMA public TO {APP_ROLE}"
+            )
+        )
+        # Append-only denetim izi: production'da initdb blanket verir, migration
+        # 0002 audit_event için UPDATE/DELETE geri alır. Testte rol migration'dan
+        # SONRA yaratıldığından revoke'u burada yansıtırız (yoksa blanket grant
+        # migration'ın revoke'unu ezerdi). Trigger katmanı rolden bağımsızdır.
+        conn.execute(text(f"REVOKE UPDATE, DELETE ON audit_event FROM {APP_ROLE}"))
+    admin_engine.dispose()
+
+    app_url = f"postgresql+psycopg://{APP_ROLE}:{APP_PASSWORD}@{host}:{port}/aegis"
+    try:
+        yield app_url
+    finally:
+        for key in ("DATABASE_URL", "DATABASE_ADMIN_URL"):
+            os.environ.pop(key, None)
+        get_settings.cache_clear()
+
+
+def _yerel_sunucu(server_url: str) -> Iterator[str]:
+    """Docker'sız yol: ``AEGIS_TEST_PG_SERVER`` (ör. ``postgresql+psycopg://postgres@127.0.0.1:55432``)
+    gösteren hazır bir PostgreSQL 16'da her oturum ``aegis`` veritabanını ve rollerini sıfırdan
+    kurar; konteynerdeki taze durumla aynı başlangıç."""
+    from sqlalchemy import create_engine, text
+    from sqlalchemy.engine import make_url
+
+    server = make_url(server_url)
+    maint = create_engine(server.set(database="postgres"), isolation_level="AUTOCOMMIT")
+    with maint.connect() as conn:
+        conn.execute(text("DROP DATABASE IF EXISTS aegis WITH (FORCE)"))
+        conn.execute(text(f"DROP ROLE IF EXISTS {APP_ROLE}"))
+        conn.execute(
+            text(
+                "DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'aegis') "
+                "THEN CREATE ROLE aegis LOGIN SUPERUSER PASSWORD 'aegis'; END IF; END $$"
+            )
+        )
+        conn.execute(text("CREATE DATABASE aegis OWNER aegis"))
+    maint.dispose()
+    admin_url = server.set(username="aegis", password="aegis", database="aegis").render_as_string(
+        hide_password=False
+    )
+    try:
+        yield from _hazirla(admin_url, server.host or "127.0.0.1", server.port or 5432)
+    finally:
+        maint = create_engine(server.set(database="postgres"), isolation_level="AUTOCOMMIT")
+        with maint.connect() as conn:
+            conn.execute(text("DROP DATABASE IF EXISTS aegis WITH (FORCE)"))
+            conn.execute(text(f"DROP ROLE IF EXISTS {APP_ROLE}"))
+        maint.dispose()
+
+
+@pytest.fixture(scope="session")
+def app_database_url() -> Iterator[str]:
+    """pgvector'suz PostgreSQL 16 + migration + non-superuser app rolü döndürür.
+
+    Varsayılan: testcontainers. ``AEGIS_TEST_PG_SERVER`` verilirse Docker'sız, hazır sunucu.
+    """
+    server_url = os.environ.get("AEGIS_TEST_PG_SERVER")
+    if server_url:
+        yield from _yerel_sunucu(server_url)
+        return
+    postgres_container = pytest.importorskip("testcontainers.postgres").PostgresContainer
     with postgres_container(
         "postgres:16",
         username="aegis",
@@ -48,41 +125,11 @@ def app_database_url() -> Iterator[str]:
         dbname="aegis",
         driver="psycopg",
     ) as postgres:
-        admin_url = postgres.get_connection_url()
-        os.environ["DATABASE_ADMIN_URL"] = admin_url
-        os.environ["DATABASE_URL"] = admin_url
-        get_settings.cache_clear()
-
-        cfg = Config(str(PROJECT_ROOT / "alembic.ini"))
-        cfg.set_main_option("script_location", str(PROJECT_ROOT / "migrations"))
-        command.upgrade(cfg, "head")
-
-        admin_engine = create_engine(admin_url)
-        with admin_engine.begin() as conn:
-            conn.execute(text(f"CREATE ROLE {APP_ROLE} LOGIN PASSWORD '{APP_PASSWORD}'"))
-            conn.execute(text(f"GRANT USAGE ON SCHEMA public TO {APP_ROLE}"))
-            conn.execute(
-                text(
-                    "GRANT SELECT, INSERT, UPDATE, DELETE "
-                    f"ON ALL TABLES IN SCHEMA public TO {APP_ROLE}"
-                )
-            )
-            # Append-only denetim izi: production'da initdb blanket verir, migration
-            # 0002 audit_event için UPDATE/DELETE geri alır. Testte rol migration'dan
-            # SONRA yaratıldığından revoke'u burada yansıtırız (yoksa blanket grant
-            # migration'ın revoke'unu ezerdi). Trigger katmanı rolden bağımsızdır.
-            conn.execute(text(f"REVOKE UPDATE, DELETE ON audit_event FROM {APP_ROLE}"))
-        admin_engine.dispose()
-
-        host = postgres.get_container_host_ip()
-        port = postgres.get_exposed_port(5432)
-        app_url = f"postgresql+psycopg://{APP_ROLE}:{APP_PASSWORD}@{host}:{port}/aegis"
-        try:
-            yield app_url
-        finally:
-            for key in ("DATABASE_URL", "DATABASE_ADMIN_URL"):
-                os.environ.pop(key, None)
-            get_settings.cache_clear()
+        yield from _hazirla(
+            postgres.get_connection_url(),
+            postgres.get_container_host_ip(),
+            postgres.get_exposed_port(5432),
+        )
 
 
 @pytest.fixture
@@ -94,7 +141,17 @@ def admin_database_url(app_database_url: str) -> str:
 
 @pytest.fixture(scope="session")
 def redis_url() -> Iterator[str]:
-    """Testcontainers Redis 7 örneği (oran sınırlama gerçek Redis'e sayar)."""
+    """Testcontainers Redis 7 örneği (oran sınırlama gerçek Redis'e sayar).
+
+    ``AEGIS_TEST_REDIS_URL`` verilirse Docker'sız, hazır bir Redis kullanılır; oturum başında boşaltılır.
+    """
+    hazir = os.environ.get("AEGIS_TEST_REDIS_URL")
+    if hazir:
+        import redis
+
+        redis.Redis.from_url(hazir).flushdb()
+        yield hazir
+        return
     from testcontainers.core.container import DockerContainer
     from testcontainers.core.waiting_utils import wait_for_logs
 

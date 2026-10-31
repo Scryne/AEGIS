@@ -74,6 +74,10 @@ class AuditAction(StrEnum):
     SIB_UPDATE = "sib.update"
     SIB_EXPORT = "sib.export"
     SIB_CANCEL = "sib.cancel"
+    # E2.5 olumsuz haber betası: tarama (adaylar toplandı), insan kararı (ilgili/ilgisiz), bayrak.
+    ADVERSE_MEDIA_SCAN = "adverse_media.scan"
+    ADVERSE_MEDIA_REVIEW = "adverse_media.review"
+    ADVERSE_MEDIA_BETA = "adverse_media.beta_toggle"
     """Puanın kayda geçirilmesi (elle ya da kütüğü etkileyen bir eylemin ardından)."""
 
 

@@ -118,6 +118,8 @@ def test_cross_tenant_isolation_api_and_direct_sql(
         "monitoring_alert",
         # E2.2 ŞİB taslağı
         "sib_draft",
+        # E2.5 olumsuz haber betası
+        "adverse_media_item",
     )
     engine = create_engine(app_database_url)
     try:

@@ -13,6 +13,7 @@ from redis.asyncio import Redis
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from aegis_api.errors import ForbiddenError, UnauthorizedError
+from aegis_core.adverse_media.source import NewsProvider
 from aegis_core.config import Settings, get_settings
 from aegis_core.db.tenant import set_tenant_context
 from aegis_core.models import Role
@@ -111,6 +112,12 @@ def get_yente_client(request: Request) -> YenteClient:
     return client
 
 
+def get_news_provider(request: Request) -> NewsProvider:
+    """Olumsuz haber betasının haber kaynağı (E2.5); uygulama ömrü boyunca tek istemci."""
+    provider: NewsProvider = request.app.state.news_provider
+    return provider
+
+
 # Sık kullanılan tip takma adları (router imzalarını sadeleştirir).
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
 TenantSessionDep = Annotated[AsyncSession, Depends(get_tenant_session)]
@@ -118,3 +125,4 @@ PrincipalDep = Annotated[Principal, Depends(get_principal)]
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 RedisDep = Annotated[Redis, Depends(get_redis)]
 YenteClientDep = Annotated[YenteClient, Depends(get_yente_client)]
+NewsProviderDep = Annotated[NewsProvider, Depends(get_news_provider)]

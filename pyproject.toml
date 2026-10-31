@@ -89,6 +89,8 @@ module = [
     # zaten açıkça yazılıyor.
     "reportlab.*",
     "xhtml2pdf.*",
+    # Olumsuz haber RSS'i (E2.5): tek kullanım noktası adverse_media/source.py.
+    "defusedxml.*",
 ]
 ignore_missing_imports = true
 

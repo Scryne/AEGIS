@@ -477,14 +477,14 @@ value justifies it) → E2.5 last, time-boxed.
 - [x] Alert list UI with acknowledge action (full case-management routing comes in Phase 3)
 - [x] Synthetic diff test (injected dataset change produces exactly one correct alert)
 
-**E2.5 — Adverse media beta — M4 (per R8)** *(L · hard 2-week time-box, feature-flagged)*
-- [ ] Integrate the E0.3-shortlisted news source; candidate retrieval by normalized names + aliases
+**E2.5 — Adverse media beta — M4 (per R8)** *(L · hard 2-week time-box, feature-flagged)* — **retrieval + manual triage shipped 2026-11-01 (ADR-0013)**; LLM pipeline moved to Phase 3 per the time-box rule
+- [x] Integrate the E0.3-shortlisted news source; candidate retrieval by normalized names + aliases (Google News RSS tr-TR; legal-form stripping, targeted negative-term query)
 - [ ] pgvector embeddings for relevance ranking of candidates (embeddings' first production use, per R4)
 - [ ] LangGraph pipeline: disambiguation ("is this actually this person/company?") → negativity classification → evidence-sentence extraction; every claim carries source URL + quote
 - [ ] Model-agnostic LLM abstraction layer (Claude API first; provider-swappable interface) — shared with Phase 3+ AI features
-- [ ] HITL confirmation before any finding attaches to the dossier; beta-labeled UI section; **excluded from risk score** until E3.6 precision measurement clears it
+- [x] HITL confirmation before any finding attaches to the dossier; beta-labeled UI section; **excluded from risk score** until E3.6 precision measurement clears it
 - [ ] Labeled evaluation set (~50 cases from pilot entities); measure precision/recall; publish internal accuracy note
-- [ ] If time-box busts: ship retrieval + manual triage only; move LLM pipeline to Phase 3
+- [x] If time-box busts: ship retrieval + manual triage only; move LLM pipeline to Phase 3
 
 **E2.6 — Pilot → paid conversion (per R5)** *(S–M · ~3–5 days + calendar time)* — **code shipped 2026-11-01 (ADR-0012)**; open: pricing numbers, payment rail, agreement, conversions (business)
 - [ ] Pricing v1 from Phase 0 signals: base subscription + included query quota; overage and monitoring add-on priced but manually enforced

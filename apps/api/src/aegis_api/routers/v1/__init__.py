@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from aegis_api.routers.v1 import (
+    adverse_media,
     audit,
     auth,
     billing,
@@ -22,6 +23,7 @@ from aegis_api.routers.v1 import (
 )
 
 api_v1_router = APIRouter()
+api_v1_router.include_router(adverse_media.router)
 api_v1_router.include_router(audit.router)
 api_v1_router.include_router(auth.router)
 api_v1_router.include_router(billing.router)

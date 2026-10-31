@@ -7,6 +7,19 @@
 **Tek cümle:** İlk kez uçtan uca çalıştırıldı (API + Celery worker + Docling + yente + web);
 259 birim + 79 izolasyon/entegrasyon + 36 uçtan uca recall testi yeşil, bağımlılık açığı 0.
 
+## 2026-11-01: E2.5 olumsuz haber betası (ADR-0013)
+
+- Kapsam yol haritasının zaman kutusu kuralıyla: toplama + elle ayıklama; LLM hattı Phase 3'e.
+  Kaynak Google News RSS (tr-TR): kamuya mal olmuş bir isimde iki sorgu 30+30 sonuç, hedefli sorgu
+  olumsuz başlıkları getirdi (canlı ölçüm). GDELT bu ağdan oran sınırında.
+- `adverse_media_item` (göç 0011, RLS, izolasyon kapısında); beta bayrağı sahipte; 5 dk oran
+  sınırı; "ilgili/ilgisiz" kararı gerekçeli ve denetimli; risk puanına girmez.
+- Testler: birim 4, entegrasyon 2 yeni; tüm paket yeşil. Beta kapısı mutasyonla kaldırılınca test
+  düşüyor. Testte bulunan gerçek hata: Türkçe karakterli User-Agent uygulama açılışını düşürüyordu.
+- Canlı (aegis_dev): Plan sayfasından beta açıldı, varlık sayfasında tarama çalıştı (kurgusal demo
+  şirketine haber yok → "Bu adla haber bulunamadı"); 1440/390 taşma 0, konsol 0. Demo'ya gerçek
+  kişi kaydı bilinçli olarak eklenmedi.
+
 ## 2026-11-01: E2.6 plan ve kota (ADR-0012)
 
 - Kiracı planı `organization.plan_code` (göç 0010), katalog kodda (pilot / standart / kurumsal),

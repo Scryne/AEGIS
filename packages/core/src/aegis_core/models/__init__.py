@@ -1,5 +1,6 @@
 """ORM modelleri — bu paketi import etmek modelleri ``Base.metadata``'ya kaydeder."""
 
+from aegis_core.models.adverse_media import AdverseMediaItem, AdverseMediaStatus
 from aegis_core.models.audit_event import AuditAction, AuditEvent
 from aegis_core.models.discrepancy import Discrepancy, DiscrepancySeverity, DiscrepancyStatus
 from aegis_core.models.document import (
@@ -43,6 +44,8 @@ from aegis_core.models.user import User
 
 __all__ = [
     "REPORT_CONTENT_TYPES",
+    "AdverseMediaItem",
+    "AdverseMediaStatus",
     "AlertStatus",
     "AuditAction",
     "AuditEvent",

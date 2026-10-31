@@ -16,6 +16,7 @@ from aegis_api.errors import register_exception_handlers
 from aegis_api.middleware import RequestContextMiddleware
 from aegis_api.routers.health import router as health_router
 from aegis_api.routers.v1 import api_v1_router
+from aegis_core.adverse_media.source import GoogleNewsRss
 from aegis_core.config import Environment, get_settings
 from aegis_core.db import create_engine, create_session_factory
 from aegis_core.logging import configure_logging
@@ -43,9 +44,13 @@ async def _lifespan(app: FastAPI) -> AsyncIterator[None]:
         algorithm=settings.yente_algorithm,
         timeout_seconds=settings.yente_timeout_seconds,
     )
+    # E2.5 olumsuz haber betası: haber kaynağı istemcisi (testte taklitle değiştirilir).
+    news = GoogleNewsRss()
+    app.state.news_provider = news
     try:
         yield
     finally:
+        await news.aclose()  # testte state'teki taklit değiştirilse de asıl istemci kapanır
         await app.state.yente_client.aclose()
         await app.state.redis.aclose()
         await engine.dispose()

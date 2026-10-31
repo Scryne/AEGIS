@@ -3,7 +3,9 @@
 // Plan elle atanır; ekran yalnız gösterir. Aşım izni olmayan planda kota dolunca yeni tarama
 // reddedilir, bu yüzden "kalan" sayısı ve durum en üstte, sade dille durur.
 
+import { AdverseMediaBetaToggle } from "@/components/adverse-media-beta-toggle";
 import { serverFetch } from "@/lib/server/backend";
+import { getCurrentUser } from "@/lib/server/user";
 
 export const dynamic = "force-dynamic";
 
@@ -46,8 +48,13 @@ function Cubuk({ deger, sinir, label }: { deger: number; sinir: number; label: s
 }
 
 export default async function PlanPage() {
-  const res = await serverFetch("/billing/usage");
+  const [user, res, betaRes] = await Promise.all([
+    getCurrentUser(),
+    serverFetch("/billing/usage"),
+    serverFetch("/adverse-media/beta"),
+  ]);
   const u = res.ok ? ((await res.json()) as Usage) : null;
+  const beta = betaRes.ok ? ((await betaRes.json()) as { enabled: boolean }).enabled : false;
 
   if (u === null) {
     return (
@@ -125,6 +132,12 @@ export default async function PlanPage() {
           </p>
         </div>
       </section>
+
+      {user.role === "owner" && (
+        <section aria-label="Beta özellikler" className="rounded-card border border-border bg-surface p-5">
+          <AdverseMediaBetaToggle enabled={beta} />
+        </section>
+      )}
     </div>
   );
 }

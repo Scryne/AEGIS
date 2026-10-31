@@ -35,6 +35,131 @@
         "title": "AcknowledgeRequest",
         "type": "object"
       },
+      "AdverseMediaItemResponse": {
+        "properties": {
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "negative_terms": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Negative Terms",
+            "type": "array"
+          },
+          "provider": {
+            "title": "Provider",
+            "type": "string"
+          },
+          "published_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published At"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "review_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Note"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "source_name": {
+            "title": "Source Name",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "entity_id",
+          "title",
+          "url",
+          "source_name",
+          "published_at",
+          "query",
+          "provider",
+          "negative_terms",
+          "status",
+          "review_note",
+          "reviewed_at"
+        ],
+        "title": "AdverseMediaItemResponse",
+        "type": "object"
+      },
+      "AdverseMediaListResponse": {
+        "properties": {
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Counts",
+            "type": "object"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdverseMediaItemResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "enabled",
+          "items",
+          "counts"
+        ],
+        "title": "AdverseMediaListResponse",
+        "type": "object"
+      },
       "AlertListResponse": {
         "properties": {
           "items": {
@@ -356,6 +481,19 @@
           "row_hash"
         ],
         "title": "AuditEventResponse",
+        "type": "object"
+      },
+      "BetaState": {
+        "properties": {
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "title": "BetaState",
         "type": "object"
       },
       "Bildirim": {
@@ -3121,6 +3259,30 @@
         "title": "ResolutionResponse",
         "type": "object"
       },
+      "ReviewRequest": {
+        "properties": {
+          "decision": {
+            "enum": [
+              "ilgili",
+              "ilgisiz"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "note": {
+            "maxLength": 2000,
+            "minLength": 10,
+            "title": "Note",
+            "type": "string"
+          }
+        },
+        "required": [
+          "decision",
+          "note"
+        ],
+        "title": "ReviewRequest",
+        "type": "object"
+      },
       "RiskFindingResponse": {
         "description": "Kuralın ürettiği tek bulgu (arayüzde madde olarak gösterilir).",
         "properties": {
@@ -3313,6 +3475,40 @@
           "failed"
         ],
         "title": "RunResponse",
+        "type": "object"
+      },
+      "ScanResponse": {
+        "properties": {
+          "failed_queries": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Failed Queries",
+            "type": "array"
+          },
+          "fetched": {
+            "title": "Fetched",
+            "type": "integer"
+          },
+          "new": {
+            "title": "New",
+            "type": "integer"
+          },
+          "queries": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Queries",
+            "type": "array"
+          }
+        },
+        "required": [
+          "queries",
+          "fetched",
+          "new",
+          "failed_queries"
+        ],
+        "title": "ScanResponse",
         "type": "object"
       },
       "ScoreFactorResponse": {
@@ -5026,6 +5222,183 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/adverse-media/beta": {
+      "get": {
+        "operationId": "get_beta_api_v1_adverse_media_beta_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaState"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Beta",
+        "tags": [
+          "adverse-media"
+        ]
+      },
+      "put": {
+        "description": "Betayı kiracı adına açar/kapatır (sahip). Kapatmak var olan adayları silmez.",
+        "operationId": "put_beta_api_v1_adverse_media_beta_put",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BetaState"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BetaState"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Beta",
+        "tags": [
+          "adverse-media"
+        ]
+      }
+    },
+    "/api/v1/adverse-media/{item_id}/review": {
+      "post": {
+        "description": "İnsan kararı: ilgili (dosyaya bağlanır) ya da ilgisiz (başka kişi/olay). Gerekçe zorunlu.",
+        "operationId": "review_api_v1_adverse_media__item_id__review_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdverseMediaItemResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Review",
+        "tags": [
+          "adverse-media"
+        ]
+      }
+    },
     "/api/v1/audit/events": {
       "get": {
         "description": "Aktif kiracının denetim izini listeler (salt-okunur; hiçbir rol yazamaz).",
@@ -6434,6 +6807,145 @@
         "summary": "Update Entity",
         "tags": [
           "entities"
+        ]
+      }
+    },
+    "/api/v1/entities/{entity_id}/adverse-media": {
+      "get": {
+        "operationId": "list_items_api_v1_entities__entity_id__adverse_media_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "aday",
+                    "ilgili",
+                    "ilgisiz"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdverseMediaListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Items",
+        "tags": [
+          "adverse-media"
+        ]
+      }
+    },
+    "/api/v1/entities/{entity_id}/adverse-media/scan": {
+      "post": {
+        "operationId": "scan_api_v1_entities__entity_id__adverse_media_scan_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Scan",
+        "tags": [
+          "adverse-media"
         ]
       }
     },

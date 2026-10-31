@@ -9,6 +9,7 @@ import { DossierExport } from "@/components/dossier-export";
 import { EntityActions } from "@/components/entity-actions";
 import { ExtractionRetry } from "@/components/extraction-retry";
 import { MonitoringToggle } from "@/components/monitoring-toggle";
+import { AdverseMediaPanel, type AdverseMediaList } from "@/components/adverse-media-panel";
 import { ProposalReview } from "@/components/proposal-review";
 import { ReportDownloadLink } from "@/components/report-download";
 import { RiskSummaryPanel } from "@/components/risk-summary";
@@ -92,6 +93,7 @@ export default async function EntityDetailPage({
   const sibDrafts = canSib
     ? ((await safeJson<{ items: SibOzet[] }>(`/sib-drafts?entity_id=${id}`))?.items ?? [])
     : [];
+  const adverseMedia = await safeJson<AdverseMediaList>(`/entities/${id}/adverse-media`);
   const openDiscrepancies = (discrepancies ?? []).filter((item) => item.status === "open");
   const closedDiscrepancies = (discrepancies ?? []).filter((item) => item.status !== "open");
 
@@ -145,6 +147,11 @@ export default async function EntityDetailPage({
             <DossierExport entityId={entity.id} />
           </div>
         </section>
+      )}
+
+      {/* Olumsuz haber (E2.5 beta): toplama + insan kararı; puana girmez. */}
+      {adverseMedia !== null && (
+        <AdverseMediaPanel entityId={entity.id} data={adverseMedia} canWrite={canWrite} />
       )}
 
       {canSib && (

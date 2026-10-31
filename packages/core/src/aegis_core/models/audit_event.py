@@ -57,6 +57,10 @@ class AuditAction(StrEnum):
     # E1.5 raporlama
     REPORT_EXPORT = "report.export"
 
+    # E2.1 gerçek faydalanıcı
+    UBO_COMPUTE = "ubo.compute"
+    """UBO hesabı; sonuç ve girdi özeti olayda, tam girdi ``ubo_computation`` satırında."""
+
 
 class AuditEvent(UUIDPKMixin, TenantMixin, Base):
     """Değiştirilemez denetim olayı (hash zincirinin bir halkası).

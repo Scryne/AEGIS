@@ -1264,6 +1264,88 @@
         "title": "GleifEnrichResponse",
         "type": "object"
       },
+      "GraphEdgeResponse": {
+        "properties": {
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "owned": {
+            "title": "Owned",
+            "type": "string"
+          },
+          "owner": {
+            "title": "Owner",
+            "type": "string"
+          },
+          "percent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Percent"
+          },
+          "relationship_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Relationship Id"
+          }
+        },
+        "required": [
+          "owner",
+          "owned",
+          "kind",
+          "percent",
+          "relationship_id"
+        ],
+        "title": "GraphEdgeResponse",
+        "type": "object"
+      },
+      "GraphNodeResponse": {
+        "properties": {
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "schema": {
+            "title": "Schema",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "schema",
+          "name",
+          "country"
+        ],
+        "title": "GraphNodeResponse",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -3047,6 +3129,244 @@
           "refresh_token"
         ],
         "title": "TokenResponse",
+        "type": "object"
+      },
+      "UboComputationResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "cycles": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Cycles",
+            "type": "array"
+          },
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/GraphEdgeResponse"
+            },
+            "title": "Edges",
+            "type": "array"
+          },
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "inclusive": {
+            "title": "Inclusive",
+            "type": "boolean"
+          },
+          "input_sha256": {
+            "title": "Input Sha256",
+            "type": "string"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/GraphNodeResponse"
+            },
+            "title": "Nodes",
+            "type": "array"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "threshold_percent": {
+            "title": "Threshold Percent",
+            "type": "string"
+          },
+          "ubos": {
+            "items": {
+              "$ref": "#/components/schemas/UboPersonResponse"
+            },
+            "title": "Ubos",
+            "type": "array"
+          },
+          "unattributed_percent": {
+            "title": "Unattributed Percent",
+            "type": "string"
+          },
+          "unresolved": {
+            "items": {
+              "$ref": "#/components/schemas/UboUnresolvedResponse"
+            },
+            "title": "Unresolved",
+            "type": "array"
+          },
+          "unscreened_ubo_ids": {
+            "description": "Hiç taranmamış UBO'lar; tarama ucu ile tek tıkla taranır.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Unscreened Ubo Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "entity_id",
+          "status",
+          "threshold_percent",
+          "inclusive",
+          "ubos",
+          "unresolved",
+          "cycles",
+          "unattributed_percent",
+          "nodes",
+          "edges",
+          "input_sha256",
+          "created_at"
+        ],
+        "title": "UboComputationResponse",
+        "type": "object"
+      },
+      "UboComputeRequest": {
+        "description": "Eşik ve yorumu. Varsayılan: %25'ten fazla (MASAK ifadesi \"yüzde yirmi beşinden fazla\").",
+        "properties": {
+          "inclusive": {
+            "default": false,
+            "title": "Inclusive",
+            "type": "boolean"
+          },
+          "threshold_percent": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "maximum": 100.0,
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              }
+            ],
+            "default": "25",
+            "title": "Threshold Percent"
+          }
+        },
+        "title": "UboComputeRequest",
+        "type": "object"
+      },
+      "UboHistoryItem": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "input_sha256": {
+            "title": "Input Sha256",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "ubo_count": {
+            "title": "Ubo Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "ubo_count",
+          "input_sha256",
+          "created_at"
+        ],
+        "title": "UboHistoryItem",
+        "type": "object"
+      },
+      "UboPersonResponse": {
+        "properties": {
+          "basis": {
+            "title": "Basis",
+            "type": "string"
+          },
+          "effective_percent": {
+            "title": "Effective Percent",
+            "type": "string"
+          },
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "paths": {
+            "items": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Paths",
+            "type": "array"
+          }
+        },
+        "required": [
+          "entity_id",
+          "name",
+          "basis",
+          "effective_percent",
+          "paths"
+        ],
+        "title": "UboPersonResponse",
+        "type": "object"
+      },
+      "UboUnresolvedResponse": {
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "share_percent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Share Percent"
+          }
+        },
+        "required": [
+          "entity_id",
+          "name",
+          "reason",
+          "share_percent"
+        ],
+        "title": "UboUnresolvedResponse",
         "type": "object"
       },
       "UserResponse": {
@@ -5065,6 +5385,217 @@
         "summary": "Delete Relationship",
         "tags": [
           "entities"
+        ]
+      }
+    },
+    "/api/v1/entities/{entity_id}/ubo": {
+      "get": {
+        "description": "Son UBO hesabı (graf, yollar, gerekçe).",
+        "operationId": "latest_api_v1_entities__entity_id__ubo_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UboComputationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Latest",
+        "tags": [
+          "ubo"
+        ]
+      },
+      "post": {
+        "description": "Sahiplik zincirinden UBO'yu hesaplar ve anlık görüntü olarak saklar.",
+        "operationId": "compute_api_v1_entities__entity_id__ubo_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/UboComputeRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UboComputationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Compute",
+        "tags": [
+          "ubo"
+        ]
+      }
+    },
+    "/api/v1/entities/{entity_id}/ubo/history": {
+      "get": {
+        "description": "Geçmiş hesaplar — \"o gün ne biliyorduk\" sorusunun cevabı.",
+        "operationId": "history_api_v1_entities__entity_id__ubo_history_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/UboHistoryItem"
+                  },
+                  "title": "Response History Api V1 Entities  Entity Id  Ubo History Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "History",
+        "tags": [
+          "ubo"
         ]
       }
     },

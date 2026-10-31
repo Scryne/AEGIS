@@ -447,15 +447,15 @@ value justifies it) → E2.5 last, time-boxed.
 
 ### Epics & tasks
 
-**E2.1 — UBO / ownership graph — M2 (critical path)** *(L · ~2 weeks)*
-- [ ] Ownership edges with percentage + type (direct/indirect/control) on `Relationship`
-- [ ] UBO computation: Postgres recursive CTE from target company through ownership chains; effective-percentage multiplication across layers; ≥25% threshold persons; **cycle/circular-ownership detection** with explicit surfacing
-- [ ] Unresolvable-chain handling (foreign parent, missing data): report "UBO not determinable — reason", never silently absorb (a MASAK-relevant signal in itself)
-- [ ] UBO computation snapshots persisted with inputs + timestamp (audit: "what did we know when we decided")
-- [ ] Interactive graph UI (React Flow or Cytoscape): pan/explore, UBO paths highlighted, % on edges, click-through to person entities + their screening status
+**E2.1 — UBO / ownership graph — M2 (critical path)** *(L · ~2 weeks)* — **core shipped 2026-10-31 (ADR-0009)**; open: Docling shareholding extraction, validation on pilot files
+- [x] Ownership edges with percentage + type (direct/indirect/control) on `Relationship`
+- [x] UBO computation: Postgres recursive CTE from target company through ownership chains; effective-percentage multiplication across layers; ≥25% threshold persons; **cycle/circular-ownership detection** with explicit surfacing
+- [x] Unresolvable-chain handling (foreign parent, missing data): report "UBO not determinable — reason", never silently absorb (a MASAK-relevant signal in itself)
+- [x] UBO computation snapshots persisted with inputs + timestamp (audit: "what did we know when we decided")
+- [x] Interactive graph UI (React Flow or Cytoscape): pan/explore, UBO paths highlighted, % on edges, click-through to person entities + their screening status
 - [ ] Docling extension: extract shareholding tables from ortaklık yapısı documents → proposed ownership edges w/ confirmation
-- [ ] Auto-trigger screening for newly identified UBOs (M2→M3 integration)
-- [ ] Test fixtures: layered structures, cross-holdings, circular ownership, exact-25% boundary
+- [~] Auto-trigger screening for newly identified UBOs (M2→M3 integration) — *2026-10-31: unscreened UBOs are flagged in the response and screened with one click; queue-based auto-run deliberately not built (ADR-0009)*
+- [x] Test fixtures: layered structures, cross-holdings, circular ownership, exact-25% boundary
 
 **E2.2 — ŞİB draft generation (critical path)** *(S–M · ~3–5 days)*
 - [ ] Model the current MASAK ŞİB form; template with prefill from dossier (identity, UBO findings, discrepancies, screening hits)

@@ -14,6 +14,7 @@ from aegis_api.routers.v1 import (
     screenings,
     settings,
     system,
+    ubo,
 )
 
 api_v1_router = APIRouter()
@@ -26,5 +27,6 @@ api_v1_router.include_router(reports.router)
 api_v1_router.include_router(screenings.router)
 api_v1_router.include_router(settings.router)
 api_v1_router.include_router(system.router)
+api_v1_router.include_router(ubo.router)
 
 __all__ = ["api_v1_router"]

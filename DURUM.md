@@ -7,6 +7,22 @@
 **Tek cümle:** İlk kez uçtan uca çalıştırıldı (API + Celery worker + Docling + yente + web);
 259 birim + 79 izolasyon/entegrasyon + 36 uçtan uca recall testi yeşil, bağımlılık açığı 0.
 
+## 2026-10-31: Phase 2 başladı — E2.1 gerçek faydalanıcı (UBO)
+
+- **Hesap:** saf çekirdek (`aegis_core.ubo.compute`) + özyinelemeli CTE ile zincir toplama +
+  `ubo_computation` anlık görüntüsü (migration 0006, RLS, saklama, girdi özeti) + `ubo.compute`
+  denetim olayı. Katman çarpımı, çapraz pay, döngü (açıkça raporlanır), yabancı/ortaksız tüzel
+  kişi, eksik pay, kontrol → üst düzey yönetici dayanağı. Eşik varsayılanı "%25'ten fazla",
+  kapsayıcı yorum seçilebilir (ADR-0009).
+- **API:** `POST/GET /entities/{id}/ubo`, `/ubo/history`; taranmamış UBO'lar yanıtta.
+- **Arayüz:** şirket sayfasında "Gerçek faydalanıcı" paneli — katmanlı sahiplik grafı (UBO yolları
+  ana renkte, döngü kesikli kırmızı, çözülemeyen düğüm kesikli sarı), yollar, belirsizliğin nedeni,
+  tek tıkla tarama. Gerçek API + web ile 1440/390'da doğrulandı, taşma 0, hata 0.
+- **Testler:** birim 273 (+14 UBO), entegrasyon 83 (+4 UBO; izolasyon kapısına `ubo_computation`
+  eklendi). Docker'sız çalıştırma: `AEGIS_TEST_PG_SERVER` + `AEGIS_TEST_REDIS_URL`.
+- **Açık (E2.1):** ortaklık tablosunun belgeden çıkarımı, pilot dosyalarda doğrulama. E2.2–E2.6
+  başlamadı (ŞİB taslağı, risk skoru, izleme-lite, olumsuz haber, ödeme).
+
 ## Ne çalışıyor (ölçüldü)
 
 - **Testler:** birim + normalizasyon recall tabanı 259 · kiracı izolasyon kapısı + API

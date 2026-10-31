@@ -11,3 +11,4 @@ işaretlenir), silinmez.
 - [0006 — Tarama mimarisi: anlık görüntü, eşik bandı, recall kapısı](0006-screening-architecture.md)
 - [0007 — Varlık kütüğü: gözlem tabanlı provenans, öneri kuyruğu, ER v1](0007-entity-registry.md)
 - [0008 — Raporlama: kural tabanlı risk özeti, dosya dışa aktarma, denetim görüntüleyici](0008-reporting-architecture.md)
+- [0009 — Gerçek faydalanıcı hesabı: saf çekirdek, CTE, anlık görüntü, açık belirsizlik](0009-ubo-computation.md)

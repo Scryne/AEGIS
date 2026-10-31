@@ -92,8 +92,8 @@ class RelationshipType(StrEnum):
     """İki varlık arasındaki bağ türü.
 
     ``UBO`` burada yalnız **beyan/tespit edilmiş** gerçek faydalanıcıyı işaretler;
-    ortaklık zincirinden UBO **hesaplama** (özyinelemeli CTE, %25 eşiği, döngü tespiti)
-    Phase 2'nin işidir ve bu fazda yapılmaz.
+    ortaklık zincirinden UBO **hesabı** ``aegis_core.ubo`` modülündedir (E2.1, ADR-0009) ve
+    bu beyanı girdi olarak kullanmaz.
     """
 
     OFFICER = "officer"
@@ -235,7 +235,7 @@ class Relationship(UUIDPKMixin, TenantMixin, TimestampMixin, Base):
     """Unvan/yetki metni ("Yönetim Kurulu Başkanı", "münferiden temsile yetkili")."""
 
     ownership_percent: Mapped[Decimal | None] = mapped_column(Numeric(7, 4), nullable=True)
-    """Ortaklık payı (%). Phase 2'de UBO hesabının girdisi olacak; burada yalnız saklanır."""
+    """Ortaklık payı (%). ``shareholder`` bağlarında UBO hesabının girdisidir (ADR-0009)."""
 
     start_date: Mapped[date | None] = mapped_column(Date, nullable=True)
     end_date: Mapped[date | None] = mapped_column(Date, nullable=True)

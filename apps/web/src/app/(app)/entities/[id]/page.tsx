@@ -11,6 +11,7 @@ import { ExtractionRetry } from "@/components/extraction-retry";
 import { ProposalReview } from "@/components/proposal-review";
 import { ReportDownloadLink } from "@/components/report-download";
 import { RiskSummaryPanel } from "@/components/risk-summary";
+import { UboPanel } from "@/components/ubo-panel";
 import { serverFetch } from "@/lib/server/backend";
 import { getCurrentUser } from "@/lib/server/user";
 import type {
@@ -29,6 +30,7 @@ import {
   attributeLabel,
 } from "@/lib/entities";
 import type { Report, RiskSummary } from "@/lib/reports";
+import type { UboComputation } from "@/lib/ubo";
 import { FORMAT_LABELS, formatBytes } from "@/lib/reports";
 
 export const dynamic = "force-dynamic";
@@ -56,7 +58,8 @@ export default async function EntityDetailPage({
   if (!res.ok) throw new Error("Varlık yüklenemedi.");
   const entity = (await res.json()) as Entity;
 
-  const [attributes, relationships, documents, discrepancies, risk, reports] =
+  const isCompany = entity.schema_type === "Company";
+  const [attributes, relationships, documents, discrepancies, risk, reports, ubo] =
     await Promise.all([
       safeJson<EntityAttribute[]>(`/entities/${id}/attributes`),
       safeJson<Relationship[]>(`/entities/${id}/relationships`),
@@ -64,6 +67,7 @@ export default async function EntityDetailPage({
       safeJson<Discrepancy[]>(`/entities/${id}/discrepancies`),
       safeJson<RiskSummary>(`/reports/risk/${id}`),
       safeJson<Report[]>(`/reports?entity_id=${id}`),
+      isCompany ? safeJson<UboComputation>(`/entities/${id}/ubo`) : Promise.resolve(null),
     ]);
 
   // Öneriler belge başına gelir; hepsini tek listede topluyoruz.
@@ -113,6 +117,9 @@ export default async function EntityDetailPage({
 
       {/* Risk özeti — kurallar her yüklemede yeniden koşar, hiçbir şey saklanmaz. */}
       {risk !== null && <RiskSummaryPanel risk={risk} />}
+
+      {/* Gerçek faydalanıcı (E2.1): sahiplik zincirinden hesap, graf ve gerekçe. */}
+      {isCompany && <UboPanel entityId={entity.id} computation={ubo} canWrite={canWrite} />}
 
       {canWrite && (
         <section className="space-y-3 rounded-card border border-border bg-surface p-5">
@@ -179,7 +186,7 @@ export default async function EntityDetailPage({
         </dl>
       </section>
 
-      {/* Bağlar — UBO HESABI Phase 2'dir; burada yalnız kayıtlı bağlar gösterilir. */}
+      {/* Bağlar — kayıtlı ilişkiler; UBO hesabı yukarıdaki panelde bunlardan yapılır. */}
       <section className="rounded-card border border-border bg-surface p-5">
         <h2 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
           Bağlı kişiler ve şirketler

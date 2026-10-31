@@ -35,6 +35,7 @@ from aegis_core.models.screening import (
     SubjectRole,
 )
 from aegis_core.models.tenant_setting import TenantSetting
+from aegis_core.models.ubo import UboComputation
 from aegis_core.models.user import User
 
 __all__ = [
@@ -69,5 +70,6 @@ __all__ = [
     "SourceType",
     "SubjectRole",
     "TenantSetting",
+    "UboComputation",
     "User",
 ]

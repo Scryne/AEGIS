@@ -110,6 +110,8 @@ def test_cross_tenant_isolation_api_and_direct_sql(
         "discrepancy",
         # E1.5 raporlama
         "report",
+        # E2.1 gerçek faydalanıcı
+        "ubo_computation",
     )
     engine = create_engine(app_database_url)
     try:

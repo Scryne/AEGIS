@@ -20,8 +20,13 @@
   tek tıkla tarama. Gerçek API + web ile 1440/390'da doğrulandı, taşma 0, hata 0.
 - **Testler:** birim 273 (+14 UBO), entegrasyon 83 (+4 UBO; izolasyon kapısına `ubo_computation`
   eklendi). Docker'sız çalıştırma: `AEGIS_TEST_PG_SERVER` + `AEGIS_TEST_REDIS_URL`.
-- **Açık (E2.1):** ortaklık tablosunun belgeden çıkarımı, pilot dosyalarda doğrulama. E2.2–E2.6
-  başlamadı (ŞİB taslağı, risk skoru, izleme-lite, olumsuz haber, ödeme).
+- **E2.3 açıklanabilir risk puanı:** sabit ağırlıklı faktör modeli (v1, ADR-0010), her faktör gerekçe
+  + dayanak bağlantısıyla; canlı puan yazmaz, "kayda geçir" ve UBO hesabı `risk_score_snapshot`'a
+  (göç 0007, RLS) yazar, zaman çizelgesi yalnız değişimleri taşır. Şirket sayfasında puan paneli
+  (1440/390 doğrulandı). Yüksek riskli ülke listesi yapılandırmadan (`HIGH_RISK_COUNTRIES`, boş).
+- **Testler:** birim 282 (+9 puan), entegrasyon 85 (+2 puan; izolasyon kapısına `risk_score_snapshot`).
+- **Açık:** ortaklık tablosunun belgeden çıkarımı, pilot dosyalarda doğrulama, dosya raporunda puan
+  sayfası. E2.2 (ŞİB taslağı), E2.4 (izleme-lite), E2.5 (olumsuz haber), E2.6 (ödeme) başlamadı.
 
 ## Ne çalışıyor (ölçüldü)
 

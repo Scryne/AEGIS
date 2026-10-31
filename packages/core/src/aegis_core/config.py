@@ -98,6 +98,10 @@ class Settings(BaseSettings):
     screening_sync_subject_limit: int = 5
     # Yaptırım verisi bayatlık eşiği (saat). Aşılırsa günlük senkron job'ı alarm üretir.
     sanctions_staleness_hours: int = 24
+    # E2.3 risk puanı: "yüksek riskli yargı alanı" faktörünün ülke listesi (ISO-2, virgüllü).
+    # Bilinçli olarak boş başlar: liste kurumun uyum politikasıdır ve güncel FATF listesine göre
+    # kurum tarafından girilir; kodda tarihli bir liste bayatlar (ADR-0010).
+    high_risk_countries: Annotated[list[str], NoDecode] = []
     # yente'nin yeniden indeksleme ucunu (``/updatez``) tetiklemek için jeton. Boşsa
     # yente'nin kendi otomatik yenilemesine güvenilir, job yalnız tazeliği ölçer.
     yente_update_token: str | None = None
@@ -139,7 +143,7 @@ class Settings(BaseSettings):
     # altyapı (Next proxy / LB) tarafından eklendiği. 0 = XFF yok sayılır.
     trusted_proxy_count: int = 0
 
-    @field_validator("cors_origins", mode="before")
+    @field_validator("cors_origins", "high_risk_countries", mode="before")
     @classmethod
     def _split_csv_list(cls, value: object) -> object:
         """Virgülle ayrılmış env değerini (JSON değil, düz string) listeye ayrıştırır."""

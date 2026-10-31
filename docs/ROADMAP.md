@@ -463,11 +463,11 @@ value justifies it) → E2.5 last, time-boxed.
 - [ ] Prominent UI + document disclaimer: official submission to MASAK is the obligated party's responsibility (per plan §3.3)
 - [ ] Validate output with 2–3 pilot compliance officers against a real filing
 
-**E2.3 — Explainable risk score — M5 mature** *(M · ~1 week)*
-- [ ] Weighted factor model over structured findings only (per plan §6.6: LLM output never scores directly): sanctions/PEP status, UBO determinability, discrepancy count, entity type/jurisdiction flags
-- [ ] Every factor renders reason + link to underlying evidence (screening record, registry data, document)
-- [ ] Fixed global weights v1 (documented rationale); per-tenant tuning deferred until customers ask
-- [ ] Score history timeline per entity; recompute triggers on data change
+**E2.3 — Explainable risk score — M5 mature** *(M · ~1 week)* — **shipped 2026-10-31 (ADR-0010)**; open: score page in the dossier export
+- [x] Weighted factor model over structured findings only (per plan §6.6: LLM output never scores directly): sanctions/PEP status, UBO determinability, discrepancy count, entity type/jurisdiction flags
+- [x] Every factor renders reason + link to underlying evidence (screening record, registry data, document)
+- [x] Fixed global weights v1 (documented rationale); per-tenant tuning deferred until customers ask
+- [x] Score history timeline per entity; recompute triggers on data change
 - [ ] Dossier export upgraded: score breakdown page with per-factor evidence references
 
 **E2.4 — Monitoring-lite (per R3)** *(M · ~1 week)*

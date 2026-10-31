@@ -61,6 +61,10 @@ class AuditAction(StrEnum):
     UBO_COMPUTE = "ubo.compute"
     """UBO hesabı; sonuç ve girdi özeti olayda, tam girdi ``ubo_computation`` satırında."""
 
+    # E2.3 risk puanı
+    RISK_SCORE_SNAPSHOT = "risk_score.snapshot"
+    """Puanın kayda geçirilmesi (elle ya da kütüğü etkileyen bir eylemin ardından)."""
+
 
 class AuditEvent(UUIDPKMixin, TenantMixin, Base):
     """Değiştirilemez denetim olayı (hash zincirinin bir halkası).

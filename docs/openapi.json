@@ -2566,6 +2566,74 @@
         "title": "RiskFindingResponse",
         "type": "object"
       },
+      "RiskScoreResponse": {
+        "properties": {
+          "band": {
+            "title": "Band",
+            "type": "string"
+          },
+          "band_label": {
+            "title": "Band Label",
+            "type": "string"
+          },
+          "complete": {
+            "title": "Complete",
+            "type": "boolean"
+          },
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "factors": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreFactorResponse"
+            },
+            "title": "Factors",
+            "type": "array"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/ScoreHistoryItem"
+            },
+            "title": "History",
+            "type": "array"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "recorded": {
+            "title": "Recorded",
+            "type": "boolean"
+          },
+          "score": {
+            "title": "Score",
+            "type": "integer"
+          },
+          "weights_version": {
+            "title": "Weights Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id",
+          "score",
+          "band",
+          "band_label",
+          "complete",
+          "weights_version",
+          "notes",
+          "factors",
+          "recorded",
+          "history"
+        ],
+        "title": "RiskScoreResponse",
+        "type": "object"
+      },
       "RiskSummaryResponse": {
         "description": "Kural tabanlı risk özeti (şeffaf, öğrenmesiz — bkz. ADR-0008).",
         "properties": {
@@ -2619,6 +2687,92 @@
         ],
         "title": "Role",
         "type": "string"
+      },
+      "ScoreFactorResponse": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "evidence": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Evidence",
+            "type": "array"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "occurrences": {
+            "title": "Occurrences",
+            "type": "integer"
+          },
+          "points": {
+            "title": "Points",
+            "type": "integer"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "label",
+          "points",
+          "occurrences",
+          "reason",
+          "evidence"
+        ],
+        "title": "ScoreFactorResponse",
+        "type": "object"
+      },
+      "ScoreHistoryItem": {
+        "properties": {
+          "band": {
+            "title": "Band",
+            "type": "string"
+          },
+          "band_label": {
+            "title": "Band Label",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "score": {
+            "title": "Score",
+            "type": "integer"
+          },
+          "weights_version": {
+            "title": "Weights Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "score",
+          "band",
+          "band_label",
+          "reason",
+          "weights_version",
+          "created_at"
+        ],
+        "title": "ScoreHistoryItem",
+        "type": "object"
       },
       "ScreeningCreateRequest": {
         "description": "Tarama koşusu isteği: birincil özne + (varsa) ilgili kişiler.",
@@ -5862,6 +6016,126 @@
           }
         },
         "summary": "Get Risk Summary",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/api/v1/reports/score/{entity_id}": {
+      "get": {
+        "description": "Canlı risk puanı, faktör dökümü ve kayıtlı puanların zaman çizelgesi.",
+        "operationId": "get_score_api_v1_reports_score__entity_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskScoreResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Score",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/api/v1/reports/score/{entity_id}/snapshot": {
+      "post": {
+        "description": "Canlı puanı kayda geçirir (döküm değişmediyse mevcut kayıt döner).",
+        "operationId": "record_score_api_v1_reports_score__entity_id__snapshot_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RiskScoreResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Record Score",
         "tags": [
           "reports"
         ]

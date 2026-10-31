@@ -27,6 +27,7 @@ from aegis_core.models.report import (
     ReportFormat,
     ReportType,
 )
+from aegis_core.models.risk_score import RiskScoreSnapshot
 from aegis_core.models.sanctions_dataset import SanctionsDataset
 from aegis_core.models.screening import (
     MatchCandidate,
@@ -63,6 +64,7 @@ __all__ = [
     "Report",
     "ReportFormat",
     "ReportType",
+    "RiskScoreSnapshot",
     "Role",
     "SanctionsDataset",
     "Screening",

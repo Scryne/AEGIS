@@ -11,6 +11,8 @@ import { ExtractionRetry } from "@/components/extraction-retry";
 import { ProposalReview } from "@/components/proposal-review";
 import { ReportDownloadLink } from "@/components/report-download";
 import { RiskSummaryPanel } from "@/components/risk-summary";
+import type { RiskScore } from "@/components/risk-score-panel";
+import { RiskScorePanel } from "@/components/risk-score-panel";
 import { UboPanel } from "@/components/ubo-panel";
 import { serverFetch } from "@/lib/server/backend";
 import { getCurrentUser } from "@/lib/server/user";
@@ -59,7 +61,7 @@ export default async function EntityDetailPage({
   const entity = (await res.json()) as Entity;
 
   const isCompany = entity.schema_type === "Company";
-  const [attributes, relationships, documents, discrepancies, risk, reports, ubo] =
+  const [attributes, relationships, documents, discrepancies, risk, reports, ubo, score] =
     await Promise.all([
       safeJson<EntityAttribute[]>(`/entities/${id}/attributes`),
       safeJson<Relationship[]>(`/entities/${id}/relationships`),
@@ -68,6 +70,7 @@ export default async function EntityDetailPage({
       safeJson<RiskSummary>(`/reports/risk/${id}`),
       safeJson<Report[]>(`/reports?entity_id=${id}`),
       isCompany ? safeJson<UboComputation>(`/entities/${id}/ubo`) : Promise.resolve(null),
+      safeJson<RiskScore>(`/reports/score/${id}`),
     ]);
 
   // Öneriler belge başına gelir; hepsini tek listede topluyoruz.
@@ -117,6 +120,9 @@ export default async function EntityDetailPage({
 
       {/* Risk özeti — kurallar her yüklemede yeniden koşar, hiçbir şey saklanmaz. */}
       {risk !== null && <RiskSummaryPanel risk={risk} />}
+
+      {/* Açıklanabilir risk puanı (E2.3): faktör dökümü ve zaman çizelgesi. */}
+      {score !== null && <RiskScorePanel score={score} canWrite={canWrite} />}
 
       {/* Gerçek faydalanıcı (E2.1): sahiplik zincirinden hesap, graf ve gerekçe. */}
       {isCompany && <UboPanel entityId={entity.id} computation={ubo} canWrite={canWrite} />}

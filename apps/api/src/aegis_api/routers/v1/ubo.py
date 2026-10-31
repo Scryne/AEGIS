@@ -20,11 +20,18 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Query, status
 from pydantic import BaseModel, Field
 
-from aegis_api.dependencies import Principal, PrincipalDep, TenantSessionDep, require_role
+from aegis_api.dependencies import (
+    Principal,
+    PrincipalDep,
+    SettingsDep,
+    TenantSessionDep,
+    require_role,
+)
 from aegis_api.errors import NotFoundError, ValidationFailedError
 from aegis_core.entities import service as entity_service
 from aegis_core.models import Entity, EntitySchema, Role
 from aegis_core.models.ubo import UboComputation
+from aegis_core.reports import score_service
 from aegis_core.ubo import service as ubo_service
 
 router = APIRouter(prefix="/entities", tags=["ubo"])
@@ -140,6 +147,7 @@ async def compute(
     entity_id: uuid.UUID,
     principal: RequireRegistryWrite,
     session: TenantSessionDep,
+    settings: SettingsDep,
     body: UboComputeRequest | None = None,
 ) -> UboComputationResponse:
     """Sahiplik zincirinden UBO'yu hesaplar ve anlık görüntü olarak saklar."""
@@ -153,6 +161,16 @@ async def compute(
         actor_role=principal.role.value,
         threshold=body.threshold_percent,
         inclusive=body.inclusive,
+    )
+    # UBO sonucu risk puanının girdisidir (E2.3): değişen puan zaman çizelgesine düşer.
+    await score_service.snapshot(
+        session,
+        tenant_id=principal.tenant_id,
+        entity=entity,
+        reason="ubo_compute",
+        actor_user_id=principal.user_id,
+        actor_role=principal.role.value,
+        high_risk_countries=settings.high_risk_countries,
     )
     return await _response(session, row)
 

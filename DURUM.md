@@ -7,6 +7,18 @@
 **Tek cümle:** İlk kez uçtan uca çalıştırıldı (API + Celery worker + Docling + yente + web);
 259 birim + 79 izolasyon/entegrasyon + 36 uçtan uca recall testi yeşil, bağımlılık açığı 0.
 
+## 2026-11-01: E2.2 ŞİB taslağı (ADR-0011)
+
+- Form alanları MASAK'ın SM/SMMM/YMM rehberinden (MSK-RHB-ŞİB-018-1.0, 16.06.2025, §4.2 A–G) ve
+  SK tablosundan (41 kod) birincil kaynakla teyit edildi; 10-31'de teyit olmadığı için yazılmamıştı.
+- Dosyadan ön doldurma (kimlik, gerçek faydalanıcılar, risk bulguları); kategori/SK/işlemler boş
+  (yükümlünün kararı); iskelet açıklama değiştirilmeden dışa aktarılamaz. Word çıktısı A–G sırasında,
+  gizlilik ibareli. Yalnız sahip/uyum görevlisi; form şifreli (göç 0009, RLS), denetim izi içeriksiz.
+- Testler: birim +17, entegrasyon +5 (izolasyon kapısına `sib_draft`); 5/5 mutasyon. Gerçek API + web
+  turu: aç → düzenle → kaydet → Word indir, 1440/390 taşmasız.
+- Açık: pilot uyum görevlileriyle gerçek bildirime karşı doğrulama; 10 iş günü süresi yalnız ikincil
+  kaynakta teyitli (sayaç eklenmedi).
+
 ## 2026-10-31: Phase 2 başladı — E2.1 gerçek faydalanıcı (UBO)
 
 - **Hesap:** saf çekirdek (`aegis_core.ubo.compute`) + özyinelemeli CTE ile zincir toplama +

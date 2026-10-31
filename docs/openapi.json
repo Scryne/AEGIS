@@ -358,6 +358,71 @@
         "title": "AuditEventResponse",
         "type": "object"
       },
+      "Bildirim": {
+        "additionalProperties": false,
+        "description": "(B) Bildirime ilişkin bilgiler. Yükümlü referans no sistem tarafından atanır.",
+        "properties": {
+          "aciliyet": {
+            "default": "normal",
+            "enum": [
+              "normal",
+              "ivedi",
+              "cok_ivedi",
+              "erteleme_talepli"
+            ],
+            "title": "Aciliyet",
+            "type": "string"
+          },
+          "kategori": {
+            "anyOf": [
+              {
+                "enum": [
+                  "aklama",
+                  "teror",
+                  "kis"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kategori"
+          },
+          "onceki_referans_no": {
+            "default": "",
+            "title": "Onceki Referans No",
+            "type": "string"
+          },
+          "teror_orgut_turu": {
+            "anyOf": [
+              {
+                "enum": [
+                  "bolucu",
+                  "dini_istismar",
+                  "asiri_sol"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teror Orgut Turu"
+          },
+          "tur": {
+            "default": "yeni",
+            "enum": [
+              "yeni",
+              "ek"
+            ],
+            "title": "Tur",
+            "type": "string"
+          }
+        },
+        "title": "Bildirim",
+        "type": "object"
+      },
       "Body_upload_document_api_v1_documents_post": {
         "properties": {
           "doc_type": {
@@ -427,6 +492,25 @@
           "file"
         ],
         "title": "Body_upload_document_api_v1_documents_post",
+        "type": "object"
+      },
+      "Bulgu": {
+        "additionalProperties": false,
+        "properties": {
+          "alan": {
+            "title": "Alan",
+            "type": "string"
+          },
+          "mesaj": {
+            "title": "Mesaj",
+            "type": "string"
+          }
+        },
+        "required": [
+          "alan",
+          "mesaj"
+        ],
+        "title": "Bulgu",
         "type": "object"
       },
       "ChainVerificationResponse": {
@@ -1317,6 +1401,142 @@
         "title": "Environment",
         "type": "string"
       },
+      "GercekKisi": {
+        "additionalProperties": false,
+        "description": "(C) Şüpheli işlemle ilgili gerçek kişi — kişi başına tekrarlanır.",
+        "properties": {
+          "ad": {
+            "default": "",
+            "title": "Ad",
+            "type": "string"
+          },
+          "adres": {
+            "default": "",
+            "title": "Adres",
+            "type": "string"
+          },
+          "anne_adi": {
+            "default": "",
+            "title": "Anne Adi",
+            "type": "string"
+          },
+          "baba_adi": {
+            "default": "",
+            "title": "Baba Adi",
+            "type": "string"
+          },
+          "baglanti": {
+            "anyOf": [
+              {
+                "enum": [
+                  "kendisi_adina",
+                  "baskasi_adina",
+                  "adina_yapilan",
+                  "gercek_faydalanici",
+                  "dolayli"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baglanti"
+          },
+          "baglanti_aciklamasi": {
+            "default": "",
+            "title": "Baglanti Aciklamasi",
+            "type": "string"
+          },
+          "dogum_tarihi": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dogum Tarihi"
+          },
+          "dogum_yeri": {
+            "default": "",
+            "title": "Dogum Yeri",
+            "type": "string"
+          },
+          "ek_bilgi": {
+            "default": "",
+            "title": "Ek Bilgi",
+            "type": "string"
+          },
+          "eposta": {
+            "default": "",
+            "title": "Eposta",
+            "type": "string"
+          },
+          "is_meslek": {
+            "default": "",
+            "title": "Is Meslek",
+            "type": "string"
+          },
+          "kaynak_varlik_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kaynak Varlik Id"
+          },
+          "kimlik_belgeleri": {
+            "items": {
+              "$ref": "#/components/schemas/KimlikBelgesi"
+            },
+            "title": "Kimlik Belgeleri",
+            "type": "array"
+          },
+          "kimlik_sahte": {
+            "default": false,
+            "title": "Kimlik Sahte",
+            "type": "boolean"
+          },
+          "soyad": {
+            "default": "",
+            "title": "Soyad",
+            "type": "string"
+          },
+          "tckn": {
+            "default": "",
+            "title": "Tckn",
+            "type": "string"
+          },
+          "telefon": {
+            "default": "",
+            "title": "Telefon",
+            "type": "string"
+          },
+          "uyruk": {
+            "default": "",
+            "title": "Uyruk",
+            "type": "string"
+          },
+          "vkn": {
+            "default": "",
+            "title": "Vkn",
+            "type": "string"
+          },
+          "yabanci_kimlik_veya_pasaport": {
+            "default": "",
+            "title": "Yabanci Kimlik Veya Pasaport",
+            "type": "string"
+          }
+        },
+        "title": "GercekKisi",
+        "type": "object"
+      },
       "GleifEnrichResponse": {
         "description": "GLEIF zenginleştirme sonucu.",
         "properties": {
@@ -1530,6 +1750,188 @@
           "message"
         ],
         "title": "IdentifierWarningResponse",
+        "type": "object"
+      },
+      "IptalIstegi": {
+        "properties": {
+          "neden": {
+            "maxLength": 2000,
+            "minLength": 10,
+            "title": "Neden",
+            "type": "string"
+          }
+        },
+        "required": [
+          "neden"
+        ],
+        "title": "IptalIstegi",
+        "type": "object"
+      },
+      "KimlikBelgesi": {
+        "additionalProperties": false,
+        "properties": {
+          "gecerlilik": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gecerlilik"
+          },
+          "numara": {
+            "default": "",
+            "title": "Numara",
+            "type": "string"
+          },
+          "tur": {
+            "enum": [
+              "nufus_cuzdani",
+              "tc_kimlik_karti",
+              "surucu_belgesi",
+              "yeni_surucu_belgesi",
+              "pasaport",
+              "ikamet_izni",
+              "diger"
+            ],
+            "title": "Tur",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tur"
+        ],
+        "title": "KimlikBelgesi",
+        "type": "object"
+      },
+      "Kodlar": {
+        "properties": {
+          "aciklama_en_az": {
+            "title": "Aciklama En Az",
+            "type": "integer"
+          },
+          "aciklama_en_cok": {
+            "title": "Aciklama En Cok",
+            "type": "integer"
+          },
+          "aciliyet": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Aciliyet",
+            "type": "object"
+          },
+          "gercek_baglanti": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Gercek Baglanti",
+            "type": "object"
+          },
+          "islem_cesidi": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Islem Cesidi",
+            "type": "object"
+          },
+          "islem_durumu": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Islem Durumu",
+            "type": "object"
+          },
+          "kategori_zorunlu_sk": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Kategori Zorunlu Sk",
+            "type": "object"
+          },
+          "kategoriler": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Kategoriler",
+            "type": "object"
+          },
+          "kimlik_belgeleri": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Kimlik Belgeleri",
+            "type": "object"
+          },
+          "kurulus_nevi": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Kurulus Nevi",
+            "type": "object"
+          },
+          "rehber": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Rehber",
+            "type": "object"
+          },
+          "sk_en_az": {
+            "title": "Sk En Az",
+            "type": "integer"
+          },
+          "sk_en_cok": {
+            "title": "Sk En Cok",
+            "type": "integer"
+          },
+          "sk_kodlari": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Sk Kodlari",
+            "type": "object"
+          },
+          "teror_orgut_turleri": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Teror Orgut Turleri",
+            "type": "object"
+          },
+          "tuzel_baglanti": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Tuzel Baglanti",
+            "type": "object"
+          }
+        },
+        "required": [
+          "rehber",
+          "aciklama_en_az",
+          "aciklama_en_cok",
+          "sk_en_az",
+          "sk_en_cok",
+          "kategoriler",
+          "teror_orgut_turleri",
+          "aciliyet",
+          "gercek_baglanti",
+          "tuzel_baglanti",
+          "kurulus_nevi",
+          "kimlik_belgeleri",
+          "islem_durumu",
+          "islem_cesidi",
+          "sk_kodlari",
+          "kategori_zorunlu_sk"
+        ],
+        "title": "Kodlar",
         "type": "object"
       },
       "LoginRequest": {
@@ -3398,6 +3800,325 @@
         "title": "SettingUpsertRequest",
         "type": "object"
       },
+      "SibDetay": {
+        "properties": {
+          "cancel_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancel Reason"
+          },
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "entity_name": {
+            "title": "Entity Name",
+            "type": "string"
+          },
+          "errors": {
+            "title": "Errors",
+            "type": "integer"
+          },
+          "export_count": {
+            "title": "Export Count",
+            "type": "integer"
+          },
+          "form": {
+            "$ref": "#/components/schemas/SibFormu-Output"
+          },
+          "guide_version": {
+            "title": "Guide Version",
+            "type": "string"
+          },
+          "hatalar": {
+            "items": {
+              "$ref": "#/components/schemas/Bulgu"
+            },
+            "title": "Hatalar",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "last_exported_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Exported At"
+          },
+          "reference_no": {
+            "title": "Reference No",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "uyarilar": {
+            "items": {
+              "$ref": "#/components/schemas/Bulgu"
+            },
+            "title": "Uyarilar",
+            "type": "array"
+          },
+          "warnings": {
+            "title": "Warnings",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "entity_id",
+          "entity_name",
+          "reference_no",
+          "status",
+          "category",
+          "errors",
+          "warnings",
+          "export_count",
+          "last_exported_at",
+          "updated_at",
+          "created_at",
+          "form",
+          "hatalar",
+          "uyarilar",
+          "guide_version",
+          "cancel_reason"
+        ],
+        "title": "SibDetay",
+        "type": "object"
+      },
+      "SibFormu-Input": {
+        "additionalProperties": false,
+        "properties": {
+          "aciklama": {
+            "default": "",
+            "title": "Aciklama",
+            "type": "string"
+          },
+          "bildirim": {
+            "$ref": "#/components/schemas/Bildirim"
+          },
+          "gercek_kisiler": {
+            "items": {
+              "$ref": "#/components/schemas/GercekKisi"
+            },
+            "title": "Gercek Kisiler",
+            "type": "array"
+          },
+          "islemler": {
+            "items": {
+              "$ref": "#/components/schemas/SupheliIslem-Input"
+            },
+            "title": "Islemler",
+            "type": "array"
+          },
+          "sk_kodlari": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sk Kodlari",
+            "type": "array"
+          },
+          "tuzel_kisiler": {
+            "items": {
+              "$ref": "#/components/schemas/TuzelKisi"
+            },
+            "title": "Tuzel Kisiler",
+            "type": "array"
+          },
+          "yukumlu": {
+            "$ref": "#/components/schemas/Yukumlu"
+          }
+        },
+        "title": "SibFormu",
+        "type": "object"
+      },
+      "SibFormu-Output": {
+        "additionalProperties": false,
+        "properties": {
+          "aciklama": {
+            "default": "",
+            "title": "Aciklama",
+            "type": "string"
+          },
+          "bildirim": {
+            "$ref": "#/components/schemas/Bildirim"
+          },
+          "gercek_kisiler": {
+            "items": {
+              "$ref": "#/components/schemas/GercekKisi"
+            },
+            "title": "Gercek Kisiler",
+            "type": "array"
+          },
+          "islemler": {
+            "items": {
+              "$ref": "#/components/schemas/SupheliIslem-Output"
+            },
+            "title": "Islemler",
+            "type": "array"
+          },
+          "sk_kodlari": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Sk Kodlari",
+            "type": "array"
+          },
+          "tuzel_kisiler": {
+            "items": {
+              "$ref": "#/components/schemas/TuzelKisi"
+            },
+            "title": "Tuzel Kisiler",
+            "type": "array"
+          },
+          "yukumlu": {
+            "$ref": "#/components/schemas/Yukumlu"
+          }
+        },
+        "title": "SibFormu",
+        "type": "object"
+      },
+      "SibListe": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SibOzet"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "SibListe",
+        "type": "object"
+      },
+      "SibOzet": {
+        "properties": {
+          "category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Category"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "entity_name": {
+            "title": "Entity Name",
+            "type": "string"
+          },
+          "errors": {
+            "title": "Errors",
+            "type": "integer"
+          },
+          "export_count": {
+            "title": "Export Count",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "last_exported_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Exported At"
+          },
+          "reference_no": {
+            "title": "Reference No",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "warnings": {
+            "title": "Warnings",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "entity_id",
+          "entity_name",
+          "reference_no",
+          "status",
+          "category",
+          "errors",
+          "warnings",
+          "export_count",
+          "last_exported_at",
+          "updated_at",
+          "created_at"
+        ],
+        "title": "SibOzet",
+        "type": "object"
+      },
       "SubjectRequest": {
         "description": "Taranacak bir özne (şirket, yönetici ya da gerçek faydalanıcı).",
         "properties": {
@@ -3453,6 +4174,234 @@
         "title": "SubjectRequest",
         "type": "object"
       },
+      "SupheliIslem-Input": {
+        "additionalProperties": false,
+        "description": "(E) Parasal tutarlı şüpheli işlem — farklı mahiyette işlemler için tekrarlanabilir.",
+        "properties": {
+          "aciklama": {
+            "default": "",
+            "title": "Aciklama",
+            "type": "string"
+          },
+          "bitis_tarihi": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bitis Tarihi"
+          },
+          "cesit": {
+            "anyOf": [
+              {
+                "enum": [
+                  "tek",
+                  "coklu"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cesit"
+          },
+          "durum": {
+            "anyOf": [
+              {
+                "enum": [
+                  "tesebbus",
+                  "gerceklesmis"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Durum"
+          },
+          "il": {
+            "default": "",
+            "title": "Il",
+            "type": "string"
+          },
+          "ilce": {
+            "default": "",
+            "title": "Ilce",
+            "type": "string"
+          },
+          "para_birimi": {
+            "default": "TRY",
+            "title": "Para Birimi",
+            "type": "string"
+          },
+          "tarih": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tarih"
+          },
+          "tutar": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tutar"
+          },
+          "tutar_tl": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tutar Tl"
+          },
+          "ulke": {
+            "default": "",
+            "title": "Ulke",
+            "type": "string"
+          }
+        },
+        "title": "SupheliIslem",
+        "type": "object"
+      },
+      "SupheliIslem-Output": {
+        "additionalProperties": false,
+        "description": "(E) Parasal tutarlı şüpheli işlem — farklı mahiyette işlemler için tekrarlanabilir.",
+        "properties": {
+          "aciklama": {
+            "default": "",
+            "title": "Aciklama",
+            "type": "string"
+          },
+          "bitis_tarihi": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bitis Tarihi"
+          },
+          "cesit": {
+            "anyOf": [
+              {
+                "enum": [
+                  "tek",
+                  "coklu"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cesit"
+          },
+          "durum": {
+            "anyOf": [
+              {
+                "enum": [
+                  "tesebbus",
+                  "gerceklesmis"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Durum"
+          },
+          "il": {
+            "default": "",
+            "title": "Il",
+            "type": "string"
+          },
+          "ilce": {
+            "default": "",
+            "title": "Ilce",
+            "type": "string"
+          },
+          "para_birimi": {
+            "default": "TRY",
+            "title": "Para Birimi",
+            "type": "string"
+          },
+          "tarih": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tarih"
+          },
+          "tutar": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tutar"
+          },
+          "tutar_tl": {
+            "anyOf": [
+              {
+                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tutar Tl"
+          },
+          "ulke": {
+            "default": "",
+            "title": "Ulke",
+            "type": "string"
+          }
+        },
+        "title": "SupheliIslem",
+        "type": "object"
+      },
       "TokenResponse": {
         "description": "JWT erişim + yenileme token'ı.",
         "properties": {
@@ -3475,6 +4424,143 @@
           "refresh_token"
         ],
         "title": "TokenResponse",
+        "type": "object"
+      },
+      "TuzelKisi": {
+        "additionalProperties": false,
+        "description": "(D) Şüpheli işlemle ilgili tüzel/diğer kişi — kişilik başına tekrarlanır.",
+        "properties": {
+          "adres": {
+            "default": "",
+            "title": "Adres",
+            "type": "string"
+          },
+          "baglanti": {
+            "anyOf": [
+              {
+                "enum": [
+                  "adina_yapilan",
+                  "dolayli"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baglanti"
+          },
+          "baglanti_aciklamasi": {
+            "default": "",
+            "title": "Baglanti Aciklamasi",
+            "type": "string"
+          },
+          "belge_sahte": {
+            "default": false,
+            "title": "Belge Sahte",
+            "type": "boolean"
+          },
+          "ek_bilgi": {
+            "default": "",
+            "title": "Ek Bilgi",
+            "type": "string"
+          },
+          "eposta": {
+            "default": "",
+            "title": "Eposta",
+            "type": "string"
+          },
+          "faaliyet_konusu": {
+            "default": "",
+            "title": "Faaliyet Konusu",
+            "type": "string"
+          },
+          "isletme_adi": {
+            "default": "",
+            "title": "Isletme Adi",
+            "type": "string"
+          },
+          "kaynak_varlik_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kaynak Varlik Id"
+          },
+          "kurulus_nevi": {
+            "anyOf": [
+              {
+                "enum": [
+                  "ticaret_sicili",
+                  "yurt_disi",
+                  "tuzel_kisiligi_olmayan",
+                  "guven_sozlesmesi",
+                  "dernek",
+                  "vakif",
+                  "siyasi_parti",
+                  "sendika"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kurulus Nevi"
+          },
+          "kurulus_tarihi": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kurulus Tarihi"
+          },
+          "kurulus_ulkesi": {
+            "default": "",
+            "title": "Kurulus Ulkesi",
+            "type": "string"
+          },
+          "kurulus_yeri": {
+            "default": "",
+            "title": "Kurulus Yeri",
+            "type": "string"
+          },
+          "sicil_no": {
+            "default": "",
+            "title": "Sicil No",
+            "type": "string"
+          },
+          "telefon": {
+            "default": "",
+            "title": "Telefon",
+            "type": "string"
+          },
+          "unvan": {
+            "default": "",
+            "title": "Unvan",
+            "type": "string"
+          },
+          "vkn": {
+            "default": "",
+            "title": "Vkn",
+            "type": "string"
+          },
+          "web_sitesi": {
+            "default": "",
+            "title": "Web Sitesi",
+            "type": "string"
+          }
+        },
+        "title": "TuzelKisi",
         "type": "object"
       },
       "UboComputationResponse": {
@@ -3819,6 +4905,34 @@
           "environment"
         ],
         "title": "VersionResponse",
+        "type": "object"
+      },
+      "Yukumlu": {
+        "additionalProperties": false,
+        "description": "(A) Formu düzenleyen yükümlü.",
+        "properties": {
+          "ad_unvan": {
+            "default": "",
+            "title": "Ad Unvan",
+            "type": "string"
+          },
+          "kimlik_no": {
+            "default": "",
+            "title": "Kimlik No",
+            "type": "string"
+          },
+          "temsilci_ad_soyad": {
+            "default": "",
+            "title": "Temsilci Ad Soyad",
+            "type": "string"
+          },
+          "temsilci_kimlik_no": {
+            "default": "",
+            "title": "Temsilci Kimlik No",
+            "type": "string"
+          }
+        },
+        "title": "Yukumlu",
         "type": "object"
       }
     }
@@ -5804,6 +6918,66 @@
         ]
       }
     },
+    "/api/v1/entities/{entity_id}/sib-drafts": {
+      "post": {
+        "description": "Varlığın dosyasından ön doldurulmuş yeni bir taslak açar.",
+        "operationId": "olustur_api_v1_entities__entity_id__sib_drafts_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SibDetay"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Olustur",
+        "tags": [
+          "sib"
+        ]
+      }
+    },
     "/api/v1/entities/{entity_id}/ubo": {
       "get": {
         "description": "Son UBO hesabı (graf, yollar, gerekçe).",
@@ -7357,6 +8531,384 @@
         "summary": "Upsert Setting",
         "tags": [
           "settings"
+        ]
+      }
+    },
+    "/api/v1/sib-drafts": {
+      "get": {
+        "operationId": "listele_api_v1_sib_drafts_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "entity_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SibListe"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Listele",
+        "tags": [
+          "sib"
+        ]
+      }
+    },
+    "/api/v1/sib-drafts/{draft_id}": {
+      "get": {
+        "operationId": "detay_api_v1_sib_drafts__draft_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "draft_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Draft Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SibDetay"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Detay",
+        "tags": [
+          "sib"
+        ]
+      },
+      "put": {
+        "description": "Formu kaydeder; hatalar yanıtta döner (kayıt engellenmez).",
+        "operationId": "guncelle_api_v1_sib_drafts__draft_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "draft_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Draft Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SibFormu-Input"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SibDetay"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Guncelle",
+        "tags": [
+          "sib"
+        ]
+      }
+    },
+    "/api/v1/sib-drafts/{draft_id}/cancel": {
+      "post": {
+        "description": "Taslağı gerekçeyle iptal eder; silmez (saklama yükümlülüğü).",
+        "operationId": "iptal_api_v1_sib_drafts__draft_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "draft_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Draft Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IptalIstegi"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SibDetay"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Iptal",
+        "tags": [
+          "sib"
+        ]
+      }
+    },
+    "/api/v1/sib-drafts/{draft_id}/export": {
+      "post": {
+        "description": "Doğrulanmış taslağı düzenlenebilir Word belgesi olarak indirir (denetim izine yazılır).",
+        "operationId": "disa_aktar_api_v1_sib_drafts__draft_id__export_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "draft_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Draft Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Disa Aktar",
+        "tags": [
+          "sib"
+        ]
+      }
+    },
+    "/api/v1/sib/kodlar": {
+      "get": {
+        "description": "Formun seçmeli alanları (rehberdeki etiketleriyle) ve sınırları.",
+        "operationId": "kod_listeleri_api_v1_sib_kodlar_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Kodlar"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Kod Listeleri",
+        "tags": [
+          "sib"
         ]
       }
     },

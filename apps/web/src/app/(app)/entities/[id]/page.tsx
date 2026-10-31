@@ -14,7 +14,9 @@ import { ReportDownloadLink } from "@/components/report-download";
 import { RiskSummaryPanel } from "@/components/risk-summary";
 import type { RiskScore } from "@/components/risk-score-panel";
 import { RiskScorePanel } from "@/components/risk-score-panel";
+import { SibCreate } from "@/components/sib-create";
 import { UboPanel } from "@/components/ubo-panel";
+import { SIB_STATUS_LABELS, SIB_STATUS_TONE, type SibOzet } from "@/lib/sib";
 import { serverFetch } from "@/lib/server/backend";
 import { getCurrentUser } from "@/lib/server/user";
 import type {
@@ -85,6 +87,11 @@ export default async function EntityDetailPage({
 
   const canWrite = user.role !== "auditor";
   const canDecideDiscrepancy = user.role === "owner" || user.role === "compliance_officer";
+  // ŞİB yüzeyi yalnız sahip/uyum görevlisine: diğer roller taslak olup olmadığını da göremez.
+  const canSib = canDecideDiscrepancy;
+  const sibDrafts = canSib
+    ? ((await safeJson<{ items: SibOzet[] }>(`/sib-drafts?entity_id=${id}`))?.items ?? [])
+    : [];
   const openDiscrepancies = (discrepancies ?? []).filter((item) => item.status === "open");
   const closedDiscrepancies = (discrepancies ?? []).filter((item) => item.status !== "open");
 
@@ -137,6 +144,29 @@ export default async function EntityDetailPage({
           <div className="border-t border-border pt-3">
             <DossierExport entityId={entity.id} />
           </div>
+        </section>
+      )}
+
+      {canSib && (
+        <section aria-labelledby="sib-baslik" className="space-y-3 rounded-card border border-border bg-surface p-5">
+          <h2 id="sib-baslik" className="text-sm font-semibold text-fg">
+            Şüpheli işlem bildirimi
+          </h2>
+          {sibDrafts.length > 0 && (
+            <ul className="space-y-1 text-sm">
+              {sibDrafts.map((t) => (
+                <li key={t.id} className="flex flex-wrap items-center gap-2">
+                  <Link href={`/sib/${t.id}`} className="font-mono underline">
+                    {t.reference_no}
+                  </Link>
+                  <span className={`rounded-full border px-2 py-0.5 text-xs ${SIB_STATUS_TONE[t.status]}`}>
+                    {SIB_STATUS_LABELS[t.status]}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <SibCreate entityId={entity.id} />
         </section>
       )}
 

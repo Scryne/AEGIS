@@ -69,6 +69,11 @@ class AuditAction(StrEnum):
     MONITORING_ALERT = "monitoring.alert"
     """Gece yeniden taramada önemli fark; tam fark ``monitoring_alert`` satırında."""
     MONITORING_ACK = "monitoring.acknowledge"
+    # E2.2 ŞİB taslağı: oluşturma, düzenleme, dışa aktarma (belge kurumdan çıkar), iptal.
+    SIB_CREATE = "sib.create"
+    SIB_UPDATE = "sib.update"
+    SIB_EXPORT = "sib.export"
+    SIB_CANCEL = "sib.cancel"
     """Puanın kayda geçirilmesi (elle ya da kütüğü etkileyen bir eylemin ardından)."""
 
 

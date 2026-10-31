@@ -36,6 +36,7 @@ from aegis_core.models.screening import (
     ScreeningStatus,
     SubjectRole,
 )
+from aegis_core.models.sib import SibDraft, SibStatus
 from aegis_core.models.tenant_setting import TenantSetting
 from aegis_core.models.ubo import UboComputation
 from aegis_core.models.user import User
@@ -72,6 +73,8 @@ __all__ = [
     "SanctionsDataset",
     "Screening",
     "ScreeningStatus",
+    "SibDraft",
+    "SibStatus",
     "SourceType",
     "SubjectRole",
     "TenantSetting",

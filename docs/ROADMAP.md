@@ -457,10 +457,10 @@ value justifies it) → E2.5 last, time-boxed.
 - [~] Auto-trigger screening for newly identified UBOs (M2→M3 integration) — *2026-10-31: unscreened UBOs are flagged in the response and screened with one click; queue-based auto-run deliberately not built (ADR-0009)*
 - [x] Test fixtures: layered structures, cross-holdings, circular ownership, exact-25% boundary
 
-**E2.2 — ŞİB draft generation (critical path)** *(S–M · ~3–5 days)*
-- [ ] Model the current MASAK ŞİB form; template with prefill from dossier (identity, UBO findings, discrepancies, screening hits)
-- [ ] Export as editable document; status tracking (draft/exported) + audit events
-- [ ] Prominent UI + document disclaimer: official submission to MASAK is the obligated party's responsibility (per plan §3.3)
+**E2.2 — ŞİB draft generation (critical path)** *(S–M · ~3–5 days)* — **shipped 2026-11-01 (ADR-0011)**; open: pilot validation
+- [x] Model the current MASAK ŞİB form; template with prefill from dossier (identity, UBO findings, discrepancies, screening hits) — *SM/SMMM/YMM guide MSK-RHB-ŞİB-018-1.0 (16.06.2025), 41 SK codes; judgment fields (category, SK, transactions) left for the officer*
+- [x] Export as editable document; status tracking (draft/exported) + audit events
+- [x] Prominent UI + document disclaimer: official submission to MASAK is the obligated party's responsibility (per plan §3.3)
 - [ ] Validate output with 2–3 pilot compliance officers against a real filing
 
 **E2.3 — Explainable risk score — M5 mature** *(M · ~1 week)* — **shipped 2026-10-31 (ADR-0010)**; open: score page in the dossier export

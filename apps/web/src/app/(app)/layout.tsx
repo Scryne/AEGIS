@@ -37,6 +37,13 @@ const NAV: { label: string; href: string; roles: Role[]; enabled: boolean }[] = 
     enabled: true,
   },
   {
+    // E2.2: bildirimin varlığı bile gizli (5549 s.K. m.4/2) → yalnız sahip ve uyum görevlisi.
+    label: "ŞİB Taslakları",
+    href: "/sib",
+    roles: ["owner", "compliance_officer"],
+    enabled: true,
+  },
+  {
     label: "Denetim İzi",
     href: "/audit",
     roles: ["owner", "compliance_officer", "auditor"],

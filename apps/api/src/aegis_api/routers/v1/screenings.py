@@ -37,8 +37,9 @@ from aegis_api.dependencies import (
     YenteClientDep,
     require_role,
 )
-from aegis_api.errors import NotFoundError, ValidationFailedError
+from aegis_api.errors import NotFoundError, QuotaExceededAppError, ValidationFailedError
 from aegis_api.queue import dispatch
+from aegis_core.billing import service as billing_service
 from aegis_core.entities import service as entity_service
 from aegis_core.models import (
     MatchCandidate,
@@ -364,6 +365,12 @@ async def run_screening(
             f"Senkron tarama en fazla {settings.screening_sync_subject_limit} özne alır; "
             "daha fazlası için derin koşuyu (/screenings/deep) kullanın."
         )
+    try:
+        await billing_service.require_screening_quota(session, principal.tenant_id, len(subjects))
+    except billing_service.QuotaExceededError as exc:
+        raise QuotaExceededAppError(
+            str(exc), details=[{"used": exc.used, "included": exc.included}]
+        ) from exc
 
     try:
         screening = await screening_service.run_screening(
@@ -516,6 +523,12 @@ async def screen_entity(
         )
 
     try:
+        await billing_service.require_screening_quota(session, principal.tenant_id, len(subjects))
+    except billing_service.QuotaExceededError as exc:
+        raise QuotaExceededAppError(
+            str(exc), details=[{"used": exc.used, "included": exc.included}]
+        ) from exc
+    try:
         screening = await screening_service.run_screening(
             session,
             yente,
@@ -560,6 +573,12 @@ async def queue_deep_screening(
     thresholds = await _load_thresholds(session)
     subjects = [_to_subject(body.subject, force_self=True)]
     subjects += [_to_subject(item, force_self=False) for item in body.related_subjects]
+    try:
+        await billing_service.require_screening_quota(session, principal.tenant_id, len(subjects))
+    except billing_service.QuotaExceededError as exc:
+        raise QuotaExceededAppError(
+            str(exc), details=[{"used": exc.used, "included": exc.included}]
+        ) from exc
 
     try:
         screening, _queries, _snapshots = await screening_service.create_screening(

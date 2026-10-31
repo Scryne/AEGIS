@@ -486,11 +486,11 @@ value justifies it) → E2.5 last, time-boxed.
 - [ ] Labeled evaluation set (~50 cases from pilot entities); measure precision/recall; publish internal accuracy note
 - [ ] If time-box busts: ship retrieval + manual triage only; move LLM pipeline to Phase 3
 
-**E2.6 — Pilot → paid conversion (per R5)** *(S–M · ~3–5 days + calendar time)*
+**E2.6 — Pilot → paid conversion (per R5)** *(S–M · ~3–5 days + calendar time)* — **code shipped 2026-11-01 (ADR-0012)**; open: pricing numbers, payment rail, agreement, conversions (business)
 - [ ] Pricing v1 from Phase 0 signals: base subscription + included query quota; overage and monitoring add-on priced but manually enforced
 - [ ] Payment rails: iyzico or PayTR hosted checkout/links (decide via E0.3-style quick validation); manual invoicing acceptable for first customers
 - [ ] Subscription agreement: liability positioning, KVKK/DPA, 5-year retention terms
-- [ ] Manual entitlements: plan field per tenant + quota check middleware (hard infra for metering deferred to E3.5)
+- [x] Manual entitlements: plan field per tenant + quota check middleware (hard infra for metering deferred to E3.5)
 - [ ] Convert pilots (target ≥2–3 of 3–5); run structured exit interview with any that decline — that data is Phase 3 input
 - [ ] Case study v1 from the best pilot (time saved, audit-readiness), per go-to-market Stage 1
 

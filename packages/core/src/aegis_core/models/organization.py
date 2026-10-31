@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from sqlalchemy import String
+from datetime import date
+
+from sqlalchemy import Date, String, text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from aegis_core.db.base import Base, TimestampMixin
@@ -20,3 +22,8 @@ class Organization(UUIDPKMixin, TimestampMixin, Base):
 
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     slug: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    # E2.6 (ADR-0012): elle atanan plan; katalog kodda (aegis_core.billing.plans).
+    plan_code: Mapped[str] = mapped_column(
+        String(32), nullable=False, server_default=text("'pilot'")
+    )
+    plan_started_on: Mapped[date | None] = mapped_column(Date, nullable=True)

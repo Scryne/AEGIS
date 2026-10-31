@@ -2282,6 +2282,39 @@
         "title": "PasswordResetResponse",
         "type": "object"
       },
+      "PlanResponse": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "included_queries": {
+            "title": "Included Queries",
+            "type": "integer"
+          },
+          "monitored_entity_limit": {
+            "title": "Monitored Entity Limit",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "overage_allowed": {
+            "title": "Overage Allowed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "included_queries",
+          "monitored_entity_limit",
+          "overage_allowed"
+        ],
+        "title": "PlanResponse",
+        "type": "object"
+      },
       "ProposalDecisionRequest": {
         "description": "Öneri kararı.",
         "properties": {
@@ -4801,6 +4834,55 @@
         "title": "UboUnresolvedResponse",
         "type": "object"
       },
+      "UsageResponse": {
+        "properties": {
+          "blocked": {
+            "title": "Blocked",
+            "type": "boolean"
+          },
+          "monitored_entities": {
+            "title": "Monitored Entities",
+            "type": "integer"
+          },
+          "overage_queries": {
+            "title": "Overage Queries",
+            "type": "integer"
+          },
+          "period_end": {
+            "format": "date-time",
+            "title": "Period End",
+            "type": "string"
+          },
+          "period_start": {
+            "format": "date-time",
+            "title": "Period Start",
+            "type": "string"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/PlanResponse"
+          },
+          "remaining_queries": {
+            "title": "Remaining Queries",
+            "type": "integer"
+          },
+          "used_queries": {
+            "title": "Used Queries",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "plan",
+          "period_start",
+          "period_end",
+          "used_queries",
+          "remaining_queries",
+          "overage_queries",
+          "monitored_entities",
+          "blocked"
+        ],
+        "title": "UsageResponse",
+        "type": "object"
+      },
       "UserResponse": {
         "description": "Kullanıcı + aktif kiracı + rol.",
         "properties": {
@@ -5419,6 +5501,56 @@
         "summary": "Register",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v1/billing/usage": {
+      "get": {
+        "description": "Kiracının planı ve bu takvim ayındaki (UTC) sorgu ve izleme kullanımı.",
+        "operationId": "usage_api_v1_billing_usage_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Usage",
+        "tags": [
+          "billing"
         ]
       }
     },

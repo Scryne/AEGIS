@@ -49,6 +49,12 @@ const NAV: { label: string; href: string; roles: Role[]; enabled: boolean }[] = 
     roles: ["owner", "compliance_officer", "auditor"],
     enabled: true,
   },
+  {
+    label: "Plan ve Kullanım",
+    href: "/plan",
+    roles: ["owner", "compliance_officer", "auditor"],
+    enabled: true,
+  },
 ];
 
 export default async function AppLayout({ children }: { children: ReactNode }) {

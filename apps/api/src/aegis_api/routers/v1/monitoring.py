@@ -25,7 +25,8 @@ from aegis_api.dependencies import (
     YenteClientDep,
     require_role,
 )
-from aegis_api.errors import NotFoundError
+from aegis_api.errors import NotFoundError, PlanLimitError
+from aegis_core.billing import service as billing_service
 from aegis_core.entities import service as entity_service
 from aegis_core.models import MonitoringAlert, Role
 from aegis_core.monitoring import service as monitoring_service
@@ -102,6 +103,11 @@ async def toggle(
     entity = await entity_service.get_entity(session, entity_id)
     if entity is None:
         raise NotFoundError("Varlık bulunamadı.")
+    if body.monitored and not entity.monitored:
+        try:
+            await billing_service.require_monitoring_slot(session, principal.tenant_id)
+        except billing_service.MonitoringLimitError as exc:
+            raise PlanLimitError(str(exc)) from exc
     await monitoring_service.set_monitored(
         session,
         entity,

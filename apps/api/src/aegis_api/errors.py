@@ -31,6 +31,8 @@ class ErrorCode(StrEnum):
     FORBIDDEN = "forbidden"
     CONFLICT = "conflict"
     RATE_LIMITED = "rate_limited"
+    QUOTA_EXCEEDED = "quota_exceeded"
+    PLAN_LIMIT = "plan_limit"
     INTERNAL_ERROR = "internal_error"
 
 
@@ -113,6 +115,20 @@ class RateLimitedError(AppError):
 
     status_code = status.HTTP_429_TOO_MANY_REQUESTS
     code = ErrorCode.RATE_LIMITED
+
+
+class QuotaExceededAppError(AppError):
+    """Planın aylık sorgu kotası doldu (402; aşım izni olmayan plan, E2.6)."""
+
+    status_code = status.HTTP_402_PAYMENT_REQUIRED
+    code = ErrorCode.QUOTA_EXCEEDED
+
+
+class PlanLimitError(AppError):
+    """Planın kaynak sınırı (ör. izlenen varlık) doldu (409, E2.6)."""
+
+    status_code = status.HTTP_409_CONFLICT
+    code = ErrorCode.PLAN_LIMIT
 
 
 _HTTP_STATUS_TO_CODE: dict[int, ErrorCode] = {

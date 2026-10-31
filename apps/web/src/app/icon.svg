@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="AEGIS">
+  <path d="M16 2.5 4.5 7v8.2c0 7.1 4.9 12.4 11.5 14.3 6.6-1.9 11.5-7.2 11.5-14.3V7z" fill="#1f6aa5"/>
+  <path d="M16 6.2 8 9.4v5.9c0 5 3.3 8.9 8 10.5 4.7-1.6 8-5.5 8-10.5V9.4z" fill="#fff" opacity=".18"/>
+  <path d="m11.2 16.4 3.4 3.4 6.4-7" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

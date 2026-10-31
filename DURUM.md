@@ -7,6 +7,18 @@
 **Tek cümle:** İlk kez uçtan uca çalıştırıldı (API + Celery worker + Docling + yente + web);
 259 birim + 79 izolasyon/entegrasyon + 36 uçtan uca recall testi yeşil, bağımlılık açığı 0.
 
+## 2026-11-01: E2.6 plan ve kota (ADR-0012)
+
+- Kiracı planı `organization.plan_code` (göç 0010), katalog kodda (pilot / standart / kurumsal),
+  atama `scripts/plan_ata.py`. Kullanım = Türkiye takvim ayında kullanıcının başlattığı
+  taramalardaki özne sayısı; gece izlemesi sayılmaz.
+- Senkron, varlık ve derin tarama uçlarında kota kapısı: aşım izni olmayan planda 402
+  `quota_exceeded`, kısmi tarama yok, kiracı satırı kilitli. İzlemeye almada plan sınırı 409.
+- Testler: entegrasyon 2 + birim 3 yeni; tüm paket yeşil. Kota kapısı mutasyonla kaldırılınca test
+  düşüyor. Canlı (aegis_dev): `/billing/usage` ve "Plan ve kullanım" sayfası 1440/390 taşmasız;
+  web'deki eksik favicon (404) eklendi.
+- Kod dışı (Scryne): fiyat, ödeme kanalı (iyzico/PayTR), abonelik sözleşmesi, pilot dönüşümü.
+
 ## 2026-11-01: E2.2 ŞİB taslağı (ADR-0011)
 
 - Form alanları MASAK'ın SM/SMMM/YMM rehberinden (MSK-RHB-ŞİB-018-1.0, 16.06.2025, §4.2 A–G) ve

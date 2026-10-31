@@ -7,6 +7,7 @@ from fastapi import APIRouter
 from aegis_api.routers.v1 import (
     audit,
     auth,
+    billing,
     documents,
     entities,
     members,
@@ -23,6 +24,7 @@ from aegis_api.routers.v1 import (
 api_v1_router = APIRouter()
 api_v1_router.include_router(audit.router)
 api_v1_router.include_router(auth.router)
+api_v1_router.include_router(billing.router)
 api_v1_router.include_router(documents.router)
 api_v1_router.include_router(entities.router)
 api_v1_router.include_router(members.router)

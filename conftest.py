@@ -1,11 +1,12 @@
 """Kök test yapılandırması: platform shim + paylaşılan entegrasyon fixture'ları.
 
-Entegrasyon testleri (``-m integration``) varsayılan olarak Docker ister: bir PostgreSQL 16 ve
-bir Redis konteyneri testcontainers ile ayağa kaldırılır. Docker'sız makinede
-``AEGIS_TEST_PG_SERVER`` ve ``AEGIS_TEST_REDIS_URL`` hazır sunuculara yönlendirir. Migration'lar **ayrıcalıklı**
-``aegis`` rolüyle uygulanır; uygulama RLS'ye tabi ``aegis_app`` rolüyle bağlanır — süper
-kullanıcı RLS'yi baypas ederdi (ADR-0002). Bu ayrım, kiracılar-arası izolasyon garantisinin
-DB düzeyinde gerçekten çalıştığını doğrulamanın ön koşuludur.
+Entegrasyon testleri (``-m integration``) varsayılan olarak Docker ister: bir PostgreSQL 16
+ve bir Redis konteyneri testcontainers ile ayağa kaldırılır. Docker'sız makinede
+``AEGIS_TEST_PG_SERVER`` ve ``AEGIS_TEST_REDIS_URL`` hazır sunuculara yönlendirir.
+Migration'lar **ayrıcalıklı** ``aegis`` rolüyle uygulanır; uygulama RLS'ye tabi
+``aegis_app`` rolüyle bağlanır — süper kullanıcı RLS'yi baypas ederdi (ADR-0002). Bu
+ayrım, kiracılar-arası izolasyon garantisinin DB düzeyinde gerçekten çalıştığını
+doğrulamanın ön koşuludur.
 """
 
 from __future__ import annotations
@@ -54,8 +55,7 @@ def _hazirla(admin_url: str, host: str, port: int | str) -> Iterator[str]:
         conn.execute(text(f"GRANT USAGE ON SCHEMA public TO {APP_ROLE}"))
         conn.execute(
             text(
-                "GRANT SELECT, INSERT, UPDATE, DELETE "
-                f"ON ALL TABLES IN SCHEMA public TO {APP_ROLE}"
+                f"GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO {APP_ROLE}"
             )
         )
         # Append-only denetim izi: production'da initdb blanket verir, migration
@@ -143,7 +143,8 @@ def admin_database_url(app_database_url: str) -> str:
 def redis_url() -> Iterator[str]:
     """Testcontainers Redis 7 örneği (oran sınırlama gerçek Redis'e sayar).
 
-    ``AEGIS_TEST_REDIS_URL`` verilirse Docker'sız, hazır bir Redis kullanılır; oturum başında boşaltılır.
+    ``AEGIS_TEST_REDIS_URL`` verilirse Docker'sız, hazır bir Redis kullanılır; oturum
+    başında boşaltılır.
     """
     hazir = os.environ.get("AEGIS_TEST_REDIS_URL")
     if hazir:

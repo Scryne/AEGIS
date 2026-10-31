@@ -24,9 +24,16 @@
   + dayanak bağlantısıyla; canlı puan yazmaz, "kayda geçir" ve UBO hesabı `risk_score_snapshot`'a
   (göç 0007, RLS) yazar, zaman çizelgesi yalnız değişimleri taşır. Şirket sayfasında puan paneli
   (1440/390 doğrulandı). Yüksek riskli ülke listesi yapılandırmadan (`HIGH_RISK_COUNTRIES`, boş).
-- **Testler:** birim 282 (+9 puan), entegrasyon 85 (+2 puan; izolasyon kapısına `risk_score_snapshot`).
+- **E2.4 izleme-lite:** varlıkta `monitored` bayrağı (göç 0008), gece 02:45 UTC görevi (senkrondan
+  sonra) izlenen varlıkları elle taramayla aynı çekirdekle (`screening.entity_run`) yeniden tarar;
+  önceki koşuyla yapısal fark (yeni eşleşme / onaylı eşleşme çıktı / konu değişti; insanın daha önce
+  elediği kayıt "yeni" sayılmaz) → `monitoring_alert` (RLS) + denetim olayı. "İzleme" sayfası ve
+  varlık sayfasında anahtar; onay gerekçe ister. Sahte yente ile canlı API+web'de doğrulandı.
+  E-posta kanalı yok (projede SMTP altyapısı yok).
+- **Testler:** birim 290 (+9 puan, +8 fark), entegrasyon 87 (+2 puan, +2 izleme; izolasyon kapısına
+  `risk_score_snapshot`, `monitoring_alert`).
 - **Açık:** ortaklık tablosunun belgeden çıkarımı, pilot dosyalarda doğrulama, dosya raporunda puan
-  sayfası. E2.2 (ŞİB taslağı), E2.4 (izleme-lite), E2.5 (olumsuz haber), E2.6 (ödeme) başlamadı.
+  sayfası. E2.2 (ŞİB taslağı), E2.5 (olumsuz haber), E2.6 (ödeme) başlamadı.
 
 ## Ne çalışıyor (ölçüldü)
 

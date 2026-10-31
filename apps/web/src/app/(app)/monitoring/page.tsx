@@ -1,0 +1,154 @@
+// İzleme alarmları (E2.4): izlenen varlıkların gece yeniden taramasında çıkan önemli farklar.
+//
+// Her alarm hangi kaydın neden değiştiğini düz Türkçe söyler ve iki koşuya (önceki/yeni)
+// bağlanır. Görülen alarm silinmez, gerekçesiyle "görüldü" olur.
+
+import Link from "next/link";
+
+import { MonitoringAck } from "@/components/monitoring-ack";
+import { serverFetch } from "@/lib/server/backend";
+import { getCurrentUser } from "@/lib/server/user";
+
+export const dynamic = "force-dynamic";
+
+interface AlertItem {
+  kind: "new_match" | "removed_confirmed" | "topics_changed";
+  subject_name: string;
+  external_id: string;
+  caption: string;
+  detail: string;
+}
+
+interface Alert {
+  id: string;
+  entity_id: string;
+  entity_name: string | null;
+  screening_id: string;
+  previous_screening_id: string | null;
+  items: AlertItem[];
+  status: "open" | "acknowledged";
+  created_at: string;
+  acknowledged_at: string | null;
+  acknowledge_note: string | null;
+}
+
+const KIND_LABELS: Record<AlertItem["kind"], string> = {
+  new_match: "Yeni eşleşme",
+  removed_confirmed: "Onaylı eşleşme listeden çıktı",
+  topics_changed: "Liste kaydı değişti",
+};
+
+const KIND_TONE: Record<AlertItem["kind"], string> = {
+  new_match: "border-danger text-danger",
+  removed_confirmed: "border-warning text-warning",
+  topics_changed: "border-warning text-warning",
+};
+
+export default async function MonitoringPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const user = await getCurrentUser();
+  const params = await searchParams;
+  const status = params.status === "acknowledged" ? "acknowledged" : params.status === "all" ? "" : "open";
+  const query = new URLSearchParams({ limit: "100" });
+  if (status) query.set("status", status);
+  const res = await serverFetch(`/monitoring/alerts?${query}`);
+  const data = res.ok ? ((await res.json()) as { items: Alert[]; open_count: number }) : null;
+  const canAck = user.role !== "auditor";
+
+  const tabs = [
+    { key: "open", label: `Açık${data ? ` (${data.open_count})` : ""}` },
+    { key: "acknowledged", label: "Görülen" },
+    { key: "all", label: "Tümü" },
+  ];
+  const current = status || "all";
+
+  return (
+    <div className="mx-auto max-w-4xl space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold text-fg">İzleme</h1>
+        <p className="mt-1 max-w-prose text-sm text-muted">
+          İzlemeye alınan varlıklar her gece yaptırım verisi güncellendikten sonra yeniden taranır.
+          Önceki koşuya göre yeni bir eşleşme, onaylı bir eşleşmenin listeden çıkması ya da liste
+          kaydının değişmesi burada alarm olarak görünür. İzlemeyi varlık sayfasından açarsınız.
+        </p>
+      </div>
+
+      <nav aria-label="Alarm durumu" className="flex gap-1">
+        {tabs.map((tab) => (
+          <Link
+            key={tab.key}
+            href={`/monitoring?status=${tab.key}`}
+            aria-current={current === tab.key ? "page" : undefined}
+            className={`rounded-md px-3 py-1.5 text-sm ${
+              current === tab.key ? "bg-surface font-medium text-primary shadow-sm" : "text-muted hover:text-fg"
+            }`}
+          >
+            {tab.label}
+          </Link>
+        ))}
+      </nav>
+
+      {data === null ? (
+        <p className="rounded-card border border-danger bg-surface p-4 text-sm text-danger">
+          Alarmlar yüklenemedi. Sayfayı yenileyin; sorun sürerse API'nin çalıştığını kontrol edin.
+        </p>
+      ) : data.items.length === 0 ? (
+        <div className="rounded-card border border-border bg-surface p-8 text-center">
+          <p className="text-sm font-medium text-fg">
+            {current === "open" ? "Açık alarm yok." : "Bu görünümde alarm yok."}
+          </p>
+          <p className="mt-1 text-xs text-muted">
+            Gece koşusu önemli bir fark bulduğunda alarm burada belirir.
+          </p>
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {data.items.map((alert) => (
+            <li key={alert.id} className="space-y-3 rounded-card border border-border bg-surface p-5">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <Link href={`/entities/${alert.entity_id}`} className="text-base font-medium text-fg underline">
+                  {alert.entity_name ?? "(silinmiş kayıt)"}
+                </Link>
+                <span className="text-xs text-muted">{new Date(alert.created_at).toLocaleString("tr-TR")}</span>
+              </div>
+              <ul className="space-y-2">
+                {alert.items.map((item) => (
+                  <li key={`${item.kind}-${item.external_id}`} className="flex flex-col gap-1 sm:flex-row sm:items-start sm:gap-3">
+                    <span className={`w-fit shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium ${KIND_TONE[item.kind]}`}>
+                      {KIND_LABELS[item.kind]}
+                    </span>
+                    <div className="min-w-0 text-sm">
+                      <span className="text-fg">{item.caption}</span>{" "}
+                      <span className="text-xs text-muted">· {item.subject_name} · {item.detail}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <div className="flex flex-wrap gap-3 text-xs">
+                <Link href={`/screenings/${alert.screening_id}`} className="text-primary underline">
+                  Yeni koşuyu aç
+                </Link>
+                {alert.previous_screening_id && (
+                  <Link href={`/screenings/${alert.previous_screening_id}`} className="text-muted underline">
+                    Önceki koşu
+                  </Link>
+                )}
+              </div>
+              {alert.status === "acknowledged" ? (
+                <p className="text-xs text-muted">
+                  Görüldü · {alert.acknowledged_at ? new Date(alert.acknowledged_at).toLocaleString("tr-TR") : ""} ·{" "}
+                  {alert.acknowledge_note}
+                </p>
+              ) : (
+                canAck && <MonitoringAck alertId={alert.id} />
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}

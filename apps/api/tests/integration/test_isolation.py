@@ -114,6 +114,8 @@ def test_cross_tenant_isolation_api_and_direct_sql(
         "ubo_computation",
         # E2.3 risk puanı
         "risk_score_snapshot",
+        # E2.4 izleme-lite
+        "monitoring_alert",
     )
     engine = create_engine(app_database_url)
     try:

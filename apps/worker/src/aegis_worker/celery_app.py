@@ -14,7 +14,12 @@ from celery.schedules import crontab
 
 from aegis_core.config import get_settings
 from aegis_core.observability import init_sentry
-from aegis_core.queueing import QUEUE_DEFAULT, TASK_RETENTION_DISPOSE, TASK_SANCTIONS_SYNC
+from aegis_core.queueing import (
+    QUEUE_DEFAULT,
+    TASK_MONITORING_NIGHTLY,
+    TASK_RETENTION_DISPOSE,
+    TASK_SANCTIONS_SYNC,
+)
 
 # Görevler ``asyncio.run`` ile async psycopg kullanır; Windows'un varsayılan Proactor
 # döngüsünde psycopg async çalışmaz ve her görev InterfaceError ile düşer (conftest.py'deki
@@ -37,6 +42,7 @@ def create_celery_app() -> Celery:
             "aegis_worker.tasks.sanctions",
             "aegis_worker.tasks.screening",
             "aegis_worker.tasks.documents",
+            "aegis_worker.tasks.monitoring",
         ],
     )
     app.conf.update(
@@ -60,6 +66,11 @@ def create_celery_app() -> Celery:
             "sanctions-sync-daily": {
                 "task": TASK_SANCTIONS_SYNC,
                 "schedule": crontab(hour=2, minute=0),
+            },
+            # E2.4 izleme-lite: senkrondan sonra, yeni veri kümesiyle yeniden tarama + fark.
+            "monitoring-nightly": {
+                "task": TASK_MONITORING_NIGHTLY,
+                "schedule": crontab(hour=2, minute=45),
             },
         },
     )

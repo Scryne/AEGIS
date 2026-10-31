@@ -20,6 +20,7 @@ from aegis_core.models.entity import (
     SourceType,
 )
 from aegis_core.models.membership import Membership, Role
+from aegis_core.models.monitoring import AlertStatus, MonitoringAlert
 from aegis_core.models.organization import Organization
 from aegis_core.models.report import (
     REPORT_CONTENT_TYPES,
@@ -41,6 +42,7 @@ from aegis_core.models.user import User
 
 __all__ = [
     "REPORT_CONTENT_TYPES",
+    "AlertStatus",
     "AuditAction",
     "AuditEvent",
     "Discrepancy",
@@ -56,6 +58,7 @@ __all__ = [
     "ExtractionStatus",
     "MatchCandidate",
     "Membership",
+    "MonitoringAlert",
     "Organization",
     "ProposalKind",
     "ProposalStatus",

@@ -161,6 +161,11 @@ class Entity(UUIDPKMixin, TenantMixin, TimestampMixin, RetentionMixin, Base):
     )
     created_by_user_id: Mapped[uuid.UUID | None] = mapped_column(Uuid, nullable=True)
 
+    monitored: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=text("false"), index=True
+    )
+    """İzleme-lite (E2.4): gece yeniden taranır, önceki koşuyla fark alarma dönüşür."""
+
 
 class EntityAttribute(UUIDPKMixin, TenantMixin, TimestampMixin, Base):
     """Bir özniteliğin **tek bir gözlemi**, kaynağıyla birlikte (Invariant 4).

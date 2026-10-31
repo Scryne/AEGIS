@@ -121,6 +121,7 @@ class EntityResponse(BaseModel):
     notes: str | None
     status: str
     merged_into_id: uuid.UUID | None
+    monitored: bool = False
     created_at: datetime
 
 
@@ -285,6 +286,7 @@ def _entity_response(entity: Entity) -> EntityResponse:
         notes=entity.notes,
         status=entity.status,
         merged_into_id=entity.merged_into_id,
+        monitored=entity.monitored,
         created_at=entity.created_at,
     )
 

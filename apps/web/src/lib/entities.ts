@@ -29,6 +29,7 @@ export interface Entity {
   notes: string | null;
   status: string;
   merged_into_id: string | null;
+  monitored: boolean;
   created_at: string;
 }
 

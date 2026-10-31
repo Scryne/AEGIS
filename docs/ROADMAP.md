@@ -470,12 +470,12 @@ value justifies it) → E2.5 last, time-boxed.
 - [x] Score history timeline per entity; recompute triggers on data change
 - [ ] Dossier export upgraded: score breakdown page with per-factor evidence references
 
-**E2.4 — Monitoring-lite (per R3)** *(M · ~1 week)*
-- [ ] Watch flag per entity (`monitored: bool`, per-tenant)
-- [ ] Nightly post-sync job: re-screen watched entities → structural diff vs. last confirmed results (new/changed/removed matches)
-- [ ] Alert on material diff: in-app notification + email; links to review workflow; audit event
-- [ ] Alert list UI with acknowledge action (full case-management routing comes in Phase 3)
-- [ ] Synthetic diff test (injected dataset change produces exactly one correct alert)
+**E2.4 — Monitoring-lite (per R3)** *(M · ~1 week)* — **shipped 2026-10-31**; email channel open (no SMTP infra yet)
+- [x] Watch flag per entity (`monitored: bool`, per-tenant)
+- [x] Nightly post-sync job: re-screen watched entities → structural diff vs. last confirmed results (new/changed/removed matches)
+- [~] Alert on material diff: in-app notification + email; links to review workflow; audit event — *in-app + audit + links done; email pending SMTP*
+- [x] Alert list UI with acknowledge action (full case-management routing comes in Phase 3)
+- [x] Synthetic diff test (injected dataset change produces exactly one correct alert)
 
 **E2.5 — Adverse media beta — M4 (per R8)** *(L · hard 2-week time-box, feature-flagged)*
 - [ ] Integrate the E0.3-shortlisted news source; candidate retrieval by normalized names + aliases

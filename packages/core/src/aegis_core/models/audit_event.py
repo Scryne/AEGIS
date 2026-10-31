@@ -63,6 +63,12 @@ class AuditAction(StrEnum):
 
     # E2.3 risk puanı
     RISK_SCORE_SNAPSHOT = "risk_score.snapshot"
+
+    # E2.4 izleme-lite
+    MONITORING_TOGGLE = "monitoring.toggle"
+    MONITORING_ALERT = "monitoring.alert"
+    """Gece yeniden taramada önemli fark; tam fark ``monitoring_alert`` satırında."""
+    MONITORING_ACK = "monitoring.acknowledge"
     """Puanın kayda geçirilmesi (elle ya da kütüğü etkileyen bir eylemin ardından)."""
 
 

@@ -102,6 +102,11 @@ export const ACTION_LABELS: Record<string, string> = {
   "discrepancy.decision": "Tutarsızlık karara bağlandı",
   "enrichment.lookup": "Dış kütük sorgulandı",
   "report.export": "Rapor dışa aktarıldı",
+  "ubo.compute": "Gerçek faydalanıcı hesaplandı",
+  "risk_score.snapshot": "Risk puanı kayda geçirildi",
+  "monitoring.toggle": "İzleme durumu değişti",
+  "monitoring.alert": "İzleme alarmı üretildi",
+  "monitoring.acknowledge": "İzleme alarmı görüldü",
 };
 
 export const OBJECT_TYPE_LABELS: Record<string, string> = {

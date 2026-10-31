@@ -19,7 +19,7 @@ apps/web      @aegis/web     — Next.js 16 (App Router) + Tailwind, SSR dashboa
 apps/worker   aegis_worker   — Celery workers + beat
 packages/core aegis_core     — db, models, security, config, services (shared library)
 packages/api-client @aegis/api-client — TS types generated from OpenAPI (contract gate)
-migrations    — Alembic; 0001 = identity + RLS … 0005 = report, 0006 = ubo_computation, 0007 = risk_score_snapshot
+migrations    — Alembic; 0001 = identity + RLS … 0005 = report, 0006 = ubo_computation, 0007 = risk_score_snapshot, 0008 = monitoring
 infra         — compose, docker, (caddy in E1.6)
 evals         — Turkish screening test set + recall-floor gate (E1.3)
 scripts       — tenant-provisioning CLI, gate checks, backup/restore (E1.6)

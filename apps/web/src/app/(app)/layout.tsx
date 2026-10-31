@@ -31,6 +31,12 @@ const NAV: { label: string; href: string; roles: Role[]; enabled: boolean }[] = 
     enabled: true,
   },
   {
+    label: "İzleme",
+    href: "/monitoring",
+    roles: ["owner", "compliance_officer", "analyst", "auditor"],
+    enabled: true,
+  },
+  {
     label: "Denetim İzi",
     href: "/audit",
     roles: ["owner", "compliance_officer", "auditor"],

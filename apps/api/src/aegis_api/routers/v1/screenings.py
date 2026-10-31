@@ -50,14 +50,13 @@ from aegis_core.models import (
 )
 from aegis_core.queueing import TASK_SCREENING_RUN
 from aegis_core.screening import service as screening_service
+from aegis_core.screening.entity_run import load_thresholds, subjects_for_entity
 from aegis_core.screening.normalization import SubjectType
 from aegis_core.screening.service import ScreeningInputError, ScreeningSubject
 from aegis_core.screening.thresholds import (
-    SCREENING_THRESHOLD_SETTING_KEY,
     MatchDecision,
     ScreeningThresholds,
 )
-from aegis_core.services import tenant_settings as settings_service
 
 router = APIRouter(prefix="/screenings", tags=["screenings"])
 
@@ -291,18 +290,11 @@ def _to_subject(request: SubjectRequest, *, force_self: bool) -> ScreeningSubjec
 
 
 async def _load_thresholds(session: AsyncSession) -> ScreeningThresholds:
-    """Kiracının eşik bandını okur; bozuk yapılandırmada taramayı reddeder.
-
-    Sessizce varsayılana düşmek tehlikelidir: hatalı bir ``auto_dismiss_below``
-    gerçek bir yaptırım eşleşmesini fark ettirmeden eleyebilirdi.
-    """
-    row = await settings_service.get_setting(session, SCREENING_THRESHOLD_SETTING_KEY)
+    """Kiracının eşik bandı (bkz. ``screening.entity_run.load_thresholds``)."""
     try:
-        return ScreeningThresholds.from_mapping(row.value if row else None)
-    except (ValueError, TypeError) as exc:
-        raise ValidationFailedError(
-            f"'{SCREENING_THRESHOLD_SETTING_KEY}' ayarı geçersiz: {exc}"
-        ) from exc
+        return await load_thresholds(session)
+    except ScreeningInputError as exc:
+        raise ValidationFailedError(str(exc)) from exc
 
 
 # ── Uçlar ────────────────────────────────────────────────────────────────────
@@ -516,23 +508,7 @@ async def screen_entity(
         raise NotFoundError("Varlık bulunamadı.")
 
     thresholds = await _load_thresholds(session)
-    pairs = await entity_service.screening_subjects_for(session, entity)
-    subjects = [
-        ScreeningSubject(
-            name=item.name,
-            subject_type=(
-                SubjectType.PERSON if item.schema_type == "Person" else SubjectType.COMPANY
-            ),
-            role=SubjectRole(role)
-            if role in {r.value for r in SubjectRole}
-            else SubjectRole.OFFICER,
-            country=item.country,
-            identifiers=(
-                {"taxNumber": item.tax_number} if item.tax_number and role == "self" else {}
-            ),
-        )
-        for item, role in pairs
-    ]
+    subjects = await subjects_for_entity(session, entity)
     if len(subjects) > settings.screening_sync_subject_limit:
         raise ValidationFailedError(
             f"Bu dosyada {len(subjects)} özne var; senkron tarama en fazla "

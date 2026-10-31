@@ -8,6 +8,7 @@ import { DocumentUpload } from "@/components/document-upload";
 import { DossierExport } from "@/components/dossier-export";
 import { EntityActions } from "@/components/entity-actions";
 import { ExtractionRetry } from "@/components/extraction-retry";
+import { MonitoringToggle } from "@/components/monitoring-toggle";
 import { ProposalReview } from "@/components/proposal-review";
 import { ReportDownloadLink } from "@/components/report-download";
 import { RiskSummaryPanel } from "@/components/risk-summary";
@@ -130,6 +131,9 @@ export default async function EntityDetailPage({
       {canWrite && (
         <section className="space-y-3 rounded-card border border-border bg-surface p-5">
           <EntityActions entityId={entity.id} hasLei={entity.lei_code !== null} />
+          <div className="border-t border-border pt-3">
+            <MonitoringToggle entityId={entity.id} monitored={entity.monitored} />
+          </div>
           <div className="border-t border-border pt-3">
             <DossierExport entityId={entity.id} />
           </div>

@@ -18,3 +18,6 @@ TASK_SCREENING_RUN = "screening.run"
 TASK_SANCTIONS_SYNC = "sanctions.sync"
 # E1.4 belge çıkarımı (Docling) — yükleme isteğini bekletmemek için asenkron.
 TASK_DOCUMENT_EXTRACT = "document.extract"
+
+# E2.4 izleme-lite gece koşusu.
+TASK_MONITORING_NIGHTLY = "monitoring.nightly"

@@ -234,7 +234,7 @@ def test_batch_end_to_end(api_client: TestClient) -> None:
 
 def test_national_id_column_rejected_and_quota_enforced(api_client: TestClient) -> None:
     token, _ = _register(api_client, "toplu2")
-    tckn = "Ad;TCKN\r\nAyşe Kaya;10000000146\r\n".encode()
+    tckn = "Ad;TCKN\r\nAyşe Kaya;12345678901\r\n".encode()  # sağlama toplamı bilerek bozuk
     bad = api_client.post(
         "/api/v1/batches",
         files={"file": ("k.csv", tckn, "text/csv")},

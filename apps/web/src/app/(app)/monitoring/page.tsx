@@ -27,6 +27,16 @@ interface Alert {
   previous_screening_id: string | null;
   items: AlertItem[];
   status: "open" | "acknowledged";
+  severity: "critical" | "high" | "info";
+  severity_label: string;
+  reassessment: {
+    score_before: number | null;
+    score_after: number;
+    band_before: string | null;
+    band_after: string;
+    recorded_new: boolean;
+  } | null;
+  case_id: string | null;
   created_at: string;
   acknowledged_at: string | null;
   acknowledge_note: string | null;
@@ -36,6 +46,12 @@ const KIND_LABELS: Record<AlertItem["kind"], string> = {
   new_match: "Yeni eşleşme",
   removed_confirmed: "Onaylı eşleşme listeden çıktı",
   topics_changed: "Liste kaydı değişti",
+};
+
+const SEVERITY_TONE: Record<Alert["severity"], string> = {
+  critical: "border-danger bg-danger/10 text-danger",
+  high: "border-warning bg-warning/10 text-fg",
+  info: "border-border text-muted",
 };
 
 const KIND_TONE: Record<AlertItem["kind"], string> = {
@@ -72,7 +88,9 @@ export default async function MonitoringPage({
         <p className="mt-1 max-w-prose text-sm text-muted">
           İzlemeye alınan varlıklar her gece yaptırım verisi güncellendikten sonra yeniden taranır.
           Önceki koşuya göre yeni bir eşleşme, onaylı bir eşleşmenin listeden çıkması ya da liste
-          kaydının değişmesi burada alarm olarak görünür. İzlemeyi varlık sayfasından açarsınız.
+          kaydının değişmesi burada alarm olarak görünür. Her alarmda risk puanı yeniden kayda geçer;
+          kritik ve yüksek dereceli alarm bir vaka açar (yaptırımda EDD listesiyle). İzlemeyi varlık
+          sayfasından açarsınız.
         </p>
       </div>
 
@@ -109,9 +127,14 @@ export default async function MonitoringPage({
           {data.items.map((alert) => (
             <li key={alert.id} className="space-y-3 rounded-card border border-border bg-surface p-5">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <Link href={`/entities/${alert.entity_id}`} className="text-base font-medium text-fg underline">
-                  {alert.entity_name ?? "(silinmiş kayıt)"}
-                </Link>
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                  <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${SEVERITY_TONE[alert.severity]}`}>
+                    {alert.severity_label}
+                  </span>
+                  <Link href={`/entities/${alert.entity_id}`} className="text-base font-medium text-fg underline">
+                    {alert.entity_name ?? "(silinmiş kayıt)"}
+                  </Link>
+                </div>
                 <span className="text-xs text-muted">{new Date(alert.created_at).toLocaleString("tr-TR")}</span>
               </div>
               <ul className="space-y-2">
@@ -127,7 +150,24 @@ export default async function MonitoringPage({
                   </li>
                 ))}
               </ul>
+              {alert.reassessment && (
+                <p className="text-xs text-muted">
+                  Risk puanı:{" "}
+                  <span className="font-mono text-fg tabular-nums">
+                    {alert.reassessment.score_before ?? "—"} → {alert.reassessment.score_after}
+                  </span>
+                  {alert.reassessment.score_before === null
+                    ? " (ilk kayıt)"
+                    : alert.reassessment.score_before === alert.reassessment.score_after &&
+                      " (onaylanmamış eşleşme puanı değiştirmez; karar vakada verilir)"}
+                </p>
+              )}
               <div className="flex flex-wrap gap-3 text-xs">
+                {alert.case_id && (
+                  <Link href={`/cases/${alert.case_id}`} className="font-medium text-primary underline">
+                    Vakayı aç
+                  </Link>
+                )}
                 <Link href={`/screenings/${alert.screening_id}`} className="text-primary underline">
                   Yeni koşuyu aç
                 </Link>

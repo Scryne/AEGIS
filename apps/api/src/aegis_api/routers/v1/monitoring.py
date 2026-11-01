@@ -27,9 +27,11 @@ from aegis_api.dependencies import (
 )
 from aegis_api.errors import NotFoundError, PlanLimitError
 from aegis_core.billing import service as billing_service
+from aegis_core.cases import service as case_service
 from aegis_core.entities import service as entity_service
 from aegis_core.models import MonitoringAlert, Role
 from aegis_core.monitoring import service as monitoring_service
+from aegis_core.monitoring.severity import SEVERITY_LABELS
 
 router = APIRouter(tags=["monitoring"])
 
@@ -56,6 +58,14 @@ class AlertResponse(BaseModel):
     previous_screening_id: uuid.UUID | None
     items: list[dict[str, Any]]
     status: str
+    severity: str
+    severity_label: str
+    reassessment: dict[str, Any] | None
+    """Alarm anında kayda geçen risk puanı: önceki ve sonraki (E3.1)."""
+
+    case_id: uuid.UUID | None
+    """Bu alarmın açtığı vaka (yalnız ``critical``/``high``)."""
+
     created_at: datetime
     acknowledged_at: datetime | None
     acknowledge_note: str | None
@@ -78,6 +88,8 @@ class RunResponse(BaseModel):
 
 async def _alert_response(session: Any, alert: MonitoringAlert) -> AlertResponse:
     entity = await entity_service.get_entity(session, alert.entity_id)
+    severity = monitoring_service.severity_of(alert)
+    case = await case_service.case_for_alert(session, alert.id)
     return AlertResponse(
         id=alert.id,
         entity_id=alert.entity_id,
@@ -86,6 +98,10 @@ async def _alert_response(session: Any, alert: MonitoringAlert) -> AlertResponse
         previous_screening_id=alert.previous_screening_id,
         items=list(alert.diff.get("items", [])),
         status=alert.status,
+        severity=severity.value,
+        severity_label=SEVERITY_LABELS[severity],
+        reassessment=alert.reassessment,
+        case_id=case.id if case else None,
         created_at=alert.created_at,
         acknowledged_at=alert.acknowledged_at,
         acknowledge_note=alert.acknowledge_note,
@@ -127,11 +143,12 @@ async def alerts(
         str | None, Query(alias="status", pattern="^(open|acknowledged)$")
     ] = None,
     entity_id: uuid.UUID | None = None,
+    severity: Annotated[str | None, Query(pattern="^(critical|high|info)$")] = None,
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> AlertListResponse:
-    """İzleme alarmları (en yeni üstte)."""
+    """İzleme alarmları (en yeni üstte); derece ve vaka bağlantısıyla."""
     rows = await monitoring_service.list_alerts(
-        session, status=status_filter, entity_id=entity_id, limit=limit
+        session, status=status_filter, entity_id=entity_id, limit=limit, severity=severity
     )
     return AlertListResponse(
         items=[await _alert_response(session, r) for r in rows],

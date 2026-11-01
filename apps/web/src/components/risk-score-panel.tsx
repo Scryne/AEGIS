@@ -48,6 +48,8 @@ const BAND_TONE: Record<RiskScore["band"], { text: string; bar: string; border: 
 const REASON_LABELS: Record<string, string> = {
   manual: "elle kayda geçirildi",
   ubo_compute: "UBO hesabından sonra",
+  monitoring_alert: "izleme alarmıyla otomatik",
+  case_decision: "vaka kararıyla",
 };
 
 function Evidence({ refValue }: { refValue: string }) {

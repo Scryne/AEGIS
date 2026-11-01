@@ -79,6 +79,14 @@ class AuditAction(StrEnum):
     ADVERSE_MEDIA_REVIEW = "adverse_media.review"
     ADVERSE_MEDIA_BETA = "adverse_media.beta_toggle"
     """Puanın kayda geçirilmesi (elle ya da kütüğü etkileyen bir eylemin ardından)."""
+    # E3.2 vaka yönetimi: açılış (kaynağıyla), durum geçişi (gerekçeyle), atama, son tarih,
+    # EDD maddesi, yorum. Vaka geçmişi bu olaylardan okunur.
+    CASE_OPEN = "case.open"
+    CASE_TRANSITION = "case.transition"
+    CASE_ASSIGN = "case.assign"
+    CASE_DUE = "case.due"
+    CASE_EDD_ITEM = "case.edd_item"
+    CASE_COMMENT = "case.comment"
 
 
 class AuditEvent(UUIDPKMixin, TenantMixin, Base):

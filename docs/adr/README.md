@@ -13,3 +13,7 @@ işaretlenir), silinmez.
 - [0008 — Raporlama: kural tabanlı risk özeti, dosya dışa aktarma, denetim görüntüleyici](0008-reporting-architecture.md)
 - [0009 — Gerçek faydalanıcı hesabı: saf çekirdek, CTE, anlık görüntü, açık belirsizlik](0009-ubo-computation.md)
 - [0010 — Açıklanabilir risk puanı: sabit ağırlıklı faktör modeli, kayda geçen zaman çizelgesi](0010-explainable-risk-score.md)
+- [0011 — ŞİB taslağı — rehbere bağlı form, yargı alanları boş, gizlilik ve şifreli saklama](0011-sib-taslagi.md)
+- [0012 — Plan ve kota — elle yetkilendirme, kayıttan sayım, özne başına sorgu](0012-plan-kota-elle-yetkilendirme.md)
+- [0013 — Olumsuz haber betası — toplama + elle ayıklama, puan dışı](0013-olumsuz-haber-betasi.md)
+- [0014 — Tam izleme çekirdeği ve vaka yönetimi](0014-tam-izleme-ve-vaka-yonetimi.md)

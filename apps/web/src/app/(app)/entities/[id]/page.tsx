@@ -9,6 +9,8 @@ import { DossierExport } from "@/components/dossier-export";
 import { EntityActions } from "@/components/entity-actions";
 import { ExtractionRetry } from "@/components/extraction-retry";
 import { MonitoringToggle } from "@/components/monitoring-toggle";
+import { CaseCreate } from "@/components/case-controls";
+import { SEVERITY_TONE, STATUS_TONE, type CaseRow } from "@/lib/cases";
 import { AdverseMediaPanel, type AdverseMediaList } from "@/components/adverse-media-panel";
 import { ProposalReview } from "@/components/proposal-review";
 import { ReportDownloadLink } from "@/components/report-download";
@@ -94,6 +96,7 @@ export default async function EntityDetailPage({
     ? ((await safeJson<{ items: SibOzet[] }>(`/sib-drafts?entity_id=${id}`))?.items ?? [])
     : [];
   const adverseMedia = await safeJson<AdverseMediaList>(`/entities/${id}/adverse-media`);
+  const cases = (await safeJson<{ items: CaseRow[] }>(`/cases?status=all&entity_id=${id}&limit=20`))?.items ?? [];
   const openDiscrepancies = (discrepancies ?? []).filter((item) => item.status === "open");
   const closedDiscrepancies = (discrepancies ?? []).filter((item) => item.status !== "open");
 
@@ -146,6 +149,35 @@ export default async function EntityDetailPage({
           <div className="border-t border-border pt-3">
             <DossierExport entityId={entity.id} />
           </div>
+        </section>
+      )}
+
+      {/* Vakalar (E3.2): bu varlık hakkında karar bekleyen ya da verilmiş konular. */}
+      {(canWrite || cases.length > 0) && (
+        <section aria-labelledby="vaka-baslik" className="space-y-3 rounded-card border border-border bg-surface p-5">
+          <h2 id="vaka-baslik" className="text-sm font-semibold tracking-wide text-muted uppercase">
+            Vakalar
+          </h2>
+          {cases.length > 0 ? (
+            <ul className="space-y-2 text-sm">
+              {cases.map((c) => (
+                <li key={c.id} className="flex flex-wrap items-center gap-2">
+                  <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${SEVERITY_TONE[c.severity]}`}>
+                    {c.severity_label}
+                  </span>
+                  <Link href={`/cases/${c.id}`} className="min-w-0 truncate text-fg underline">
+                    {c.title}
+                  </Link>
+                  <span className={`rounded-full border px-2 py-0.5 text-xs ${STATUS_TONE[c.status]}`}>
+                    {c.status_label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-muted">Bu varlık için açılmış vaka yok.</p>
+          )}
+          {canWrite && <CaseCreate entityId={entity.id} />}
         </section>
       )}
 

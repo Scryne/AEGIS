@@ -5,6 +5,10 @@ bir satır yazılır: yeni eşleşme, onaylanmış eşleşmenin listeden çıkma
 konu etiketlerinin değişmesi. Alarm silinmez; görüldüğünde gerekçeyle ``acknowledged`` olur
 (tam vaka yönetimi Phase 3).
 
+E3.1 (migration 0012): ``severity`` (``monitoring/severity.py``) ve ``reassessment`` (alarm anında
+kayda geçen risk puanı: önceki/sonraki). 0012 öncesi satırlarda ikisi de boştur; okuma tarafı
+dereceyi farktan yeniden hesaplar.
+
 Kiracıya-özel *veri* tablosudur → ``TenantMixin`` + ENABLE/FORCE RLS (migration 0008).
 """
 
@@ -50,3 +54,5 @@ class MonitoringAlert(UUIDPKMixin, TenantMixin, TimestampMixin, Base):
     acknowledged_by_user_id: Mapped[uuid.UUID | None] = mapped_column(Uuid, nullable=True)
     acknowledged_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     acknowledge_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    severity: Mapped[str | None] = mapped_column(String(16), nullable=True, index=True)
+    reassessment: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)

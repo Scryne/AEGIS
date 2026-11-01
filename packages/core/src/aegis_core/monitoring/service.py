@@ -9,6 +9,11 @@ koşunun her adayına, o kaydın **en son insan kararı** (varlığın tüm geç
 Böylece bir kez elenen yanlış pozitif her gece yeniden alarm üretmez.
 
 Eposta kanalı yoktur (projede SMTP altyapısı yok); alarm uygulama içinde listelenir.
+
+Tam izleme (E3.1, ADR-0014): alarm yazılınca derecesi (``monitoring/severity.py``) belirlenir,
+varlığın risk puanı yeniden kayda geçirilir (önceki/sonraki alarmda saklanır) ve ``critical`` /
+``high`` alarm bir vaka açar (``critical`` → EDD işaretli). Hepsi aynı alt işlemde: biri
+başarısız olursa alarm da yazılmaz, gece koşusu ertesi gün aynı farkı yeniden bulur.
 """
 
 from __future__ import annotations
@@ -19,6 +24,7 @@ from datetime import UTC, datetime
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from aegis_core.cases import service as case_service
 from aegis_core.config import Settings
 from aegis_core.logging import get_logger
 from aegis_core.models import (
@@ -32,6 +38,8 @@ from aegis_core.models import (
     ScreeningStatus,
 )
 from aegis_core.monitoring.diff import CandidateView, diff_candidates
+from aegis_core.monitoring.severity import RANK, Severity, alert_severity
+from aegis_core.reports import score_service
 from aegis_core.screening import service as screening_service
 from aegis_core.screening.entity_run import load_thresholds, subjects_for_entity
 from aegis_core.screening.yente import YenteClient
@@ -157,13 +165,16 @@ async def monitor_entity(
     )
     if not diff.material:
         return None
+    diff_dict = diff.to_dict()
+    severity = alert_severity(diff_dict["items"])
     alert = MonitoringAlert(
         tenant_id=tenant_id,
         entity_id=entity.id,
         screening_id=screening.id,
         previous_screening_id=previous.id,
-        diff=diff.to_dict(),
+        diff=diff_dict,
         status=AlertStatus.OPEN.value,
+        severity=severity.value,
     )
     session.add(alert)
     await session.flush()
@@ -179,8 +190,36 @@ async def monitor_entity(
             "screening_id": str(screening.id),
             "previous_screening_id": str(previous.id),
             "kinds": sorted({i.kind for i in diff.items}),
+            "severity": severity.value,
         },
     )
+
+    # Otomatik yeniden değerlendirme: puan kayda geçer, alarm önce/sonra farkını taşır.
+    before = await score_service.latest_snapshot(session, entity.id)
+    snap, created = await score_service.snapshot(
+        session,
+        tenant_id=tenant_id,
+        entity=entity,
+        reason="monitoring_alert",
+        actor_user_id=None,
+        actor_role="monitoring",
+        high_risk_countries=settings.high_risk_countries,
+        retention_years=settings.document_retention_years,
+    )
+    alert.reassessment = {
+        "snapshot_id": str(snap.id),
+        "score_before": before.score if before else None,
+        "band_before": before.band if before else None,
+        "score_after": snap.score,
+        "band_after": snap.band,
+        "recorded_new": created,
+    }
+
+    if RANK[severity] >= RANK[Severity.HIGH]:
+        await case_service.open_from_alert(
+            session, tenant_id=tenant_id, alert=alert, entity=entity, severity=severity.value
+        )
+    await session.flush()
     return alert
 
 
@@ -211,12 +250,26 @@ async def run_for_tenant(
     return {"checked": checked, "alerts": alerts, "failed": failed}
 
 
+def severity_of(alert: MonitoringAlert) -> Severity:
+    """Kayıtlı derece; 0012 öncesi satırda farktan yeniden hesaplanır."""
+    if alert.severity:
+        return Severity(alert.severity)
+    return alert_severity(alert.diff.get("items", []))
+
+
 async def list_alerts(
-    session: AsyncSession, *, status: str | None, entity_id: uuid.UUID | None, limit: int
+    session: AsyncSession,
+    *,
+    status: str | None,
+    entity_id: uuid.UUID | None,
+    limit: int,
+    severity: str | None = None,
 ) -> list[MonitoringAlert]:
     query = select(MonitoringAlert).order_by(MonitoringAlert.created_at.desc()).limit(limit)
     if status:
         query = query.where(MonitoringAlert.status == status)
+    if severity:
+        query = query.where(MonitoringAlert.severity == severity)
     if entity_id:
         query = query.where(MonitoringAlert.entity_id == entity_id)
     return list(await session.scalars(query))

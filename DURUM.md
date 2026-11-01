@@ -7,6 +7,22 @@
 **Tek cümle:** İlk kez uçtan uca çalıştırıldı (API + Celery worker + Docling + yente + web);
 259 birim + 79 izolasyon/entegrasyon + 36 uçtan uca recall testi yeşil, bağımlılık açığı 0.
 
+## 2026-11-01: Phase 3 — E3.1 tam izleme çekirdeği + E3.2 vaka yönetimi (ADR-0014)
+
+- Alarm derecesi (yaptırım → kritik, PEP / onaylı eşleşmenin düşmesi → yüksek), alarm anında risk
+  puanı kaydı (önce/sonra alarmda), kritik/yüksek alarm vaka açar (kritik → EDD listesiyle; alarm
+  başına tek vaka, tekillik kısıtı). Göç 0012: `compliance_case` + `case_comment` (RLS, izolasyon
+  kapısında), alarm `severity`/`reassessment`.
+- Vaka: durum makinesi (analist yükseltir, karar uyum uzmanının), gerekçe zorunlu, EDD tamamlanmadan
+  karar yok, karar anında puan yeniden kayda geçer; atama, son tarih, yorum; geçmiş denetim izinden.
+- Phase 3 çıkış ölçütü 1 testte uçtan uca: veri değişikliği → kritik alarm → EDD vakası → kapanış →
+  puan yükseldi (`case_decision`). Birim 13 + entegrasyon 4 yeni, tüm paket yeşil; 8/8 sabotaj
+  yakalandı; göç ileri-geri-ileri temiz.
+- Canlı (aegis_dev, taklit yente ile kurgusal iki şirket): /monitoring derece + puan + vaka bağı,
+  /cases kuyruğu, vaka ayrıntısında atama → inceleme → EDD kapısı (409 mesajı) → madde → kapanış;
+  1440 ve 390'da taşma yok. Not: API Windows'ta Selector döngüsüyle başlatılmalı (psycopg async).
+- Açık: sicil/gazete ve olumsuz haber yeniden kontrolü (kaynak yok), yönlendirme/özet (e-posta yok).
+
 ## 2026-11-01: E2.5 olumsuz haber betası (ADR-0013)
 
 - Kapsam yol haritasının zaman kutusu kuralıyla: toplama + elle ayıklama; LLM hattı Phase 3'e.

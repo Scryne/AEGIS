@@ -120,6 +120,9 @@ def test_cross_tenant_isolation_api_and_direct_sql(
         "sib_draft",
         # E2.5 olumsuz haber betası
         "adverse_media_item",
+        # E3.2 vaka yönetimi
+        "compliance_case",
+        "case_comment",
     )
     engine = create_engine(app_database_url)
     try:

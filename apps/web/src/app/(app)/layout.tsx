@@ -37,6 +37,13 @@ const NAV: { label: string; href: string; roles: Role[]; enabled: boolean }[] = 
     enabled: true,
   },
   {
+    // E3.2: denetçi vaka geçmişini görür, değiştiremez (sayfa içinde kapılı).
+    label: "Vakalar",
+    href: "/cases",
+    roles: ["owner", "compliance_officer", "analyst", "auditor"],
+    enabled: true,
+  },
+  {
     // E2.2: bildirimin varlığı bile gizli (5549 s.K. m.4/2) → yalnız sahip ve uyum görevlisi.
     label: "ŞİB Taslakları",
     href: "/sib",

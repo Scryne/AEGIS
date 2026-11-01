@@ -536,20 +536,20 @@ integrate via API + webhooks, get monitored continuously, and are billed automat
 
 ### Epics & tasks
 
-**E3.1 — Full continuous monitoring (critical path)** *(L · ~2 weeks)*
+**E3.1 — Full continuous monitoring (critical path)** *(L · ~2 weeks)* — **core shipped 2026-11-01 (ADR-0014)**; registry/adverse-media sources and routing open
 - [ ] Generalize E2.4 diff engine: sanctions/watchlist diffs + registry/gazette change detection (scope per E0.3 verdict) + adverse-media re-checks (if E2.5 cleared)
-- [ ] Alert severity model (critical: new sanctions hit / high: ownership change / info) + per-tenant routing & digest preferences
-- [ ] Auto re-assessment: material alert → recompute risk score → snapshot delta in dossier
-- [ ] EDD escalation trigger: threshold-crossing alerts open an EDD-flagged case (→ E3.2)
+- [~] Alert severity model (critical: new sanctions hit / high: ownership change / info) + per-tenant routing & digest preferences — *severity done (sanction → critical, PEP / removed confirmed → high); ownership change waits for a registry source; routing/digest wait for email infra*
+- [x] Auto re-assessment: material alert → recompute risk score → snapshot delta in dossier (alert carries before/after; case decision re-scores)
+- [x] EDD escalation trigger: threshold-crossing alerts open an EDD-flagged case (→ E3.2) — critical → EDD case, high → plain case, one case per alert (unique)
 - [ ] Monitoring entitlement enforcement: per-watched-entity metering (→ E3.5)
 - [ ] Idempotency + retry hardening on the full pipeline; dead-letter handling; per-stage metrics (plan NFR: reliability)
 
-**E3.2 — Case management & workflow** *(L · ~1.5–2 weeks)*
-- [ ] `Case` lifecycle: new → in review → approved / escalated (EDD) → closed; assignment, due dates, comments
-- [ ] Sources: manual open, screening review, monitoring alert (E3.1)
-- [ ] EDD checklist template on escalated cases; auditor read-only view of full case history
-- [ ] Case events in the append-only audit trail; SLA timestamps for reporting
-- [ ] Dashboard: open cases, aging, alert queue per role
+**E3.2 — Case management & workflow** *(L · ~1.5–2 weeks)* — **shipped 2026-11-01 (ADR-0014)**
+- [x] `Case` lifecycle: new → in review → approved / escalated (EDD) → closed; assignment, due dates, comments
+- [x] Sources: manual open, screening review, monitoring alert (E3.1)
+- [x] EDD checklist template on escalated cases; auditor read-only view of full case history
+- [x] Case events in the append-only audit trail; SLA timestamps for reporting
+- [x] Dashboard: open cases, aging, alert queue per role (case queue summary: open / overdue / mine / unassigned / EDD)
 
 **E3.3 — Batch screening** *(M · ~1 week)*
 - [ ] CSV import with column mapping + validation preview; dedupe against existing entities via ER pipeline (E1.4)

@@ -2,6 +2,7 @@
 
 from aegis_core.models.adverse_media import AdverseMediaItem, AdverseMediaStatus
 from aegis_core.models.audit_event import AuditAction, AuditEvent
+from aegis_core.models.case import CaseComment, ComplianceCase
 from aegis_core.models.discrepancy import Discrepancy, DiscrepancySeverity, DiscrepancyStatus
 from aegis_core.models.document import (
     Document,
@@ -49,6 +50,8 @@ __all__ = [
     "AlertStatus",
     "AuditAction",
     "AuditEvent",
+    "CaseComment",
+    "ComplianceCase",
     "Discrepancy",
     "DiscrepancySeverity",
     "DiscrepancyStatus",

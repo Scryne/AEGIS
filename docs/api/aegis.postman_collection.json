@@ -1,0 +1,2552 @@
+{
+  "info": {
+    "description": "AEGIS genel API'si. Hızlı başlangıç: docs/api/README.md",
+    "name": "AEGIS API v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "item": [
+        {
+          "name": "Get Beta",
+          "request": {
+            "description": "Get Beta",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "adverse-media",
+                "beta"
+              ],
+              "raw": "{{baseUrl}}/adverse-media/beta"
+            }
+          }
+        },
+        {
+          "name": "Put Beta",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": false\n}"
+            },
+            "description": "Betayı kiracı adına açar/kapatır (sahip). Kapatmak var olan adayları silmez.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "adverse-media",
+                "beta"
+              ],
+              "raw": "{{baseUrl}}/adverse-media/beta"
+            }
+          }
+        },
+        {
+          "name": "Review",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"\",\n  \"note\": \"\"\n}"
+            },
+            "description": "İnsan kararı: ilgili (dosyaya bağlanır) ya da ilgisiz (başka kişi/olay). Gerekçe zorunlu.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "adverse-media",
+                ":item_id",
+                "review"
+              ],
+              "raw": "{{baseUrl}}/adverse-media/:item_id/review"
+            }
+          }
+        },
+        {
+          "name": "List Items",
+          "request": {
+            "description": "List Items",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "adverse-media"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/adverse-media"
+            }
+          }
+        },
+        {
+          "name": "Scan",
+          "request": {
+            "description": "Scan",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "adverse-media",
+                "scan"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/adverse-media/scan"
+            }
+          }
+        }
+      ],
+      "name": "adverse-media"
+    },
+    {
+      "item": [
+        {
+          "name": "List Audit Events",
+          "request": {
+            "description": "Aktif kiracının denetim izini listeler (salt-okunur; hiçbir rol yazamaz).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "audit",
+                "events"
+              ],
+              "raw": "{{baseUrl}}/audit/events"
+            }
+          }
+        },
+        {
+          "name": "Verify Audit Chain",
+          "request": {
+            "description": "Aktif kiracının denetim izi hash zincirini doğrular (kurcalama tespiti).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "audit",
+                "verify"
+              ],
+              "raw": "{{baseUrl}}/audit/verify"
+            }
+          }
+        }
+      ],
+      "name": "audit"
+    },
+    {
+      "item": [
+        {
+          "name": "List Batches",
+          "request": {
+            "description": "List Batches",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches"
+              ],
+              "raw": "{{baseUrl}}/batches"
+            }
+          }
+        },
+        {
+          "name": "Create Batch",
+          "request": {
+            "body": {
+              "formdata": [
+                {
+                  "key": "file",
+                  "src": "",
+                  "type": "file"
+                }
+              ],
+              "mode": "formdata"
+            },
+            "description": "Toplu işi taslak olarak kaydeder (yalnız eşlenen alanlar saklanır, TCKN alınmaz).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches"
+              ],
+              "raw": "{{baseUrl}}/batches"
+            }
+          }
+        },
+        {
+          "name": "Preview",
+          "request": {
+            "body": {
+              "formdata": [
+                {
+                  "key": "file",
+                  "src": "",
+                  "type": "file"
+                }
+              ],
+              "mode": "formdata"
+            },
+            "description": "Dosyayı kaydetmeden okur: başlıklar, önerilen eşleme, ilk 20 satırın doğrulaması.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                "preview"
+              ],
+              "raw": "{{baseUrl}}/batches/preview"
+            }
+          }
+        },
+        {
+          "name": "Get Batch",
+          "request": {
+            "description": "Get Batch",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                ":batch_id"
+              ],
+              "raw": "{{baseUrl}}/batches/:batch_id"
+            }
+          }
+        },
+        {
+          "name": "Bulk",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"\",\n  \"row_ids\": [\n    \"00000000-0000-0000-0000-000000000000\"\n  ]\n}"
+            },
+            "description": "Seçili (taranmış) satırların varlıklarını izlemeye alır ya da her biri için vaka açar.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                ":batch_id",
+                "bulk"
+              ],
+              "raw": "{{baseUrl}}/batches/:batch_id/bulk"
+            }
+          }
+        },
+        {
+          "name": "Cancel Batch",
+          "request": {
+            "description": "Cancel Batch",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                ":batch_id",
+                "cancel"
+              ],
+              "raw": "{{baseUrl}}/batches/:batch_id/cancel"
+            }
+          }
+        },
+        {
+          "name": "Export",
+          "request": {
+            "description": "Sonuç özeti (Excel'de doğrudan açılır: UTF-8 BOM, ``;``), riske göre sıralı.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                ":batch_id",
+                "export.csv"
+              ],
+              "raw": "{{baseUrl}}/batches/:batch_id/export.csv"
+            }
+          }
+        },
+        {
+          "name": "Process Now",
+          "request": {
+            "description": "Process Now",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                ":batch_id",
+                "process"
+              ],
+              "raw": "{{baseUrl}}/batches/:batch_id/process"
+            }
+          }
+        },
+        {
+          "name": "Retry Failed",
+          "request": {
+            "description": "Retry Failed",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                ":batch_id",
+                "retry"
+              ],
+              "raw": "{{baseUrl}}/batches/:batch_id/retry"
+            }
+          }
+        },
+        {
+          "name": "List Rows",
+          "request": {
+            "description": "List Rows",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                ":batch_id",
+                "rows"
+              ],
+              "raw": "{{baseUrl}}/batches/:batch_id/rows"
+            }
+          }
+        },
+        {
+          "name": "Resolve Row",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entity_id\": \"00000000-0000-0000-0000-000000000000\"\n}"
+            },
+            "description": "Belirsiz eşleşmede insan kararı; satır yeniden kuyruğa girer.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                ":batch_id",
+                "rows",
+                ":row_id",
+                "resolve"
+              ],
+              "raw": "{{baseUrl}}/batches/:batch_id/rows/:row_id/resolve"
+            }
+          }
+        },
+        {
+          "name": "Start Batch",
+          "request": {
+            "description": "Kota denetimiyle başlatır ve worker'a bırakır. Kuyruğa ulaşılamazsa iş ``queued``\nkalır; \"şimdi işle\" ile ya da worker ayağa kalkınca devam eder.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                ":batch_id",
+                "start"
+              ],
+              "raw": "{{baseUrl}}/batches/:batch_id/start"
+            }
+          }
+        }
+      ],
+      "name": "batches"
+    },
+    {
+      "item": [
+        {
+          "name": "Usage",
+          "request": {
+            "description": "Kiracının planı ve bu takvim ayındaki (UTC) sorgu ve izleme kullanımı.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "billing",
+                "usage"
+              ],
+              "raw": "{{baseUrl}}/billing/usage"
+            }
+          }
+        }
+      ],
+      "name": "billing"
+    },
+    {
+      "item": [
+        {
+          "name": "List Cases",
+          "request": {
+            "description": "Vaka kuyruğu: son tarihe göre (en acil üstte) ve rol başına özet sayılar.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cases"
+              ],
+              "raw": "{{baseUrl}}/cases"
+            }
+          }
+        },
+        {
+          "name": "Create Case",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entity_id\": \"00000000-0000-0000-0000-000000000000\",\n  \"title\": \"\"\n}"
+            },
+            "description": "Elle vaka açar; ``screening_id`` verilirse kaynak o tarama incelemesidir.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cases"
+              ],
+              "raw": "{{baseUrl}}/cases"
+            }
+          }
+        },
+        {
+          "name": "Get Case",
+          "request": {
+            "description": "Vaka ayrıntısı: EDD listesi, yorumlar ve denetim izinden tam geçmiş.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cases",
+                ":case_id"
+              ],
+              "raw": "{{baseUrl}}/cases/:case_id"
+            }
+          }
+        },
+        {
+          "name": "Case Action",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"\"\n}"
+            },
+            "description": "Durum geçişi. Rol, durum, gerekçe ve EDD koşulları ``lifecycle``'da denetlenir.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cases",
+                ":case_id",
+                "actions"
+              ],
+              "raw": "{{baseUrl}}/cases/:case_id/actions"
+            }
+          }
+        },
+        {
+          "name": "Assign Case",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user_id\": \"00000000-0000-0000-0000-000000000000\"\n}"
+            },
+            "description": "Assign Case",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cases",
+                ":case_id",
+                "assignee"
+              ],
+              "raw": "{{baseUrl}}/cases/:case_id/assignee"
+            }
+          }
+        },
+        {
+          "name": "Add Comment",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"\"\n}"
+            },
+            "description": "Add Comment",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cases",
+                ":case_id",
+                "comments"
+              ],
+              "raw": "{{baseUrl}}/cases/:case_id/comments"
+            }
+          }
+        },
+        {
+          "name": "Set Due",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"due_at\": \"\"\n}"
+            },
+            "description": "Set Due",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cases",
+                ":case_id",
+                "due"
+              ],
+              "raw": "{{baseUrl}}/cases/:case_id/due"
+            }
+          }
+        },
+        {
+          "name": "Set Edd Item",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"done\": false\n}"
+            },
+            "description": "Set Edd Item",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cases",
+                ":case_id",
+                "edd",
+                ":key"
+              ],
+              "raw": "{{baseUrl}}/cases/:case_id/edd/:key"
+            }
+          }
+        }
+      ],
+      "name": "cases"
+    },
+    {
+      "item": [
+        {
+          "name": "List Documents",
+          "request": {
+            "description": "Belgeleri listeler (isteğe bağlı varlık süzgeciyle).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents"
+              ],
+              "raw": "{{baseUrl}}/documents"
+            }
+          }
+        },
+        {
+          "name": "Upload Document",
+          "request": {
+            "body": {
+              "formdata": [
+                {
+                  "key": "file",
+                  "src": "",
+                  "type": "file"
+                }
+              ],
+              "mode": "formdata"
+            },
+            "description": "Belge yükler; çıkarılabilir türse çıkarımı kuyruğa alır.\n\nTicaret Sicil Gazetesi için (Revizyon R1: otomatik sorgu YOK) kullanıcı sayı/tarih/\nbağlantı verir; bunlar kanıt referansı olarak saklanır ve raporda görünür.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents"
+              ],
+              "raw": "{{baseUrl}}/documents"
+            }
+          }
+        },
+        {
+          "name": "Get Document",
+          "request": {
+            "description": "Tek bir belgeyi döndürür.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents",
+                ":document_id"
+              ],
+              "raw": "{{baseUrl}}/documents/:document_id"
+            }
+          }
+        },
+        {
+          "name": "Download Document",
+          "request": {
+            "description": "Belge için kısa ömürlü imzalı indirme bağlantısı üretir.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents",
+                ":document_id",
+                "download"
+              ],
+              "raw": "{{baseUrl}}/documents/:document_id/download"
+            }
+          }
+        },
+        {
+          "name": "Retry Extraction",
+          "request": {
+            "description": "Başarısız ya da atlanmış çıkarımı yeniden kuyruğa alır (ör. Docling sonradan kuruldu).\n\nBelge ``pending``'e döner ve çıkarım görevi yeniden gönderilir; uygun olmayan durumda\n(tamamlanmış, bekleyen ya da çıkarım yapılmayan tür) **409**.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents",
+                ":document_id",
+                "extract"
+              ],
+              "raw": "{{baseUrl}}/documents/:document_id/extract"
+            }
+          }
+        },
+        {
+          "name": "List Proposals",
+          "request": {
+            "description": "Belgeden çıkan önerileri döndürür (güveni yüksek olan önce).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents",
+                ":document_id",
+                "proposals"
+              ],
+              "raw": "{{baseUrl}}/documents/:document_id/proposals"
+            }
+          }
+        },
+        {
+          "name": "Decide Proposal",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"\"\n}"
+            },
+            "description": "Öneriyi kabul eder (kütüğe uygular) ya da reddeder.\n\nKişi önerisinde kütükte birden çok benzer kayıt varsa **409** döner ve adayları\nlisteler; kullanıcı ``link_entity_id`` ile hangisine bağlanacağını seçer. Otomatik\nbirleştirme yapılmaz.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "documents",
+                ":document_id",
+                "proposals",
+                ":proposal_id",
+                "decision"
+              ],
+              "raw": "{{baseUrl}}/documents/:document_id/proposals/:proposal_id/decision"
+            }
+          }
+        }
+      ],
+      "name": "documents"
+    },
+    {
+      "item": [
+        {
+          "name": "List Entities",
+          "request": {
+            "description": "Varlıkları listeler / adına göre arar.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities"
+              ],
+              "raw": "{{baseUrl}}/entities"
+            }
+          }
+        },
+        {
+          "name": "Create Entity",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\"\n}"
+            },
+            "description": "Yeni varlık oluşturur (her alan beyan gözlemi olarak provenansla kaydedilir).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities"
+              ],
+              "raw": "{{baseUrl}}/entities"
+            }
+          }
+        },
+        {
+          "name": "List All Discrepancies",
+          "request": {
+            "description": "Kiracının tüm tutarsızlıklarını listeler (panel için).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                "discrepancies"
+              ],
+              "raw": "{{baseUrl}}/entities/discrepancies"
+            }
+          }
+        },
+        {
+          "name": "Resolve",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\"\n}"
+            },
+            "description": "Bir varlık tanımının kütükte karşılığı var mı — **kayıt oluşturmaz**.\n\nArayüz bunu \"yeni dosya\" formunda kullanır: kullanıcı unvanı yazarken aynı şirketin\nzaten kayıtlı olup olmadığını görür ve mükerrer kayıt açmaz.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                "resolve"
+              ],
+              "raw": "{{baseUrl}}/entities/resolve"
+            }
+          }
+        },
+        {
+          "name": "Get Entity",
+          "request": {
+            "description": "Tek bir varlığı döndürür.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id"
+            }
+          }
+        },
+        {
+          "name": "Update Entity",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"changes\": {},\n  \"promote_to_current\": true,\n  \"source_ref\": \"\",\n  \"source_type\": \"declared\"\n}"
+            },
+            "description": "Varlığı günceller; beyanla çelişen gözlem tutarsızlık üretir.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id"
+            }
+          }
+        },
+        {
+          "name": "List Attributes",
+          "request": {
+            "description": "Varlığın öznitelik gözlemlerini kaynaklarıyla döndürür (provenans görünümü).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "attributes"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/attributes"
+            }
+          }
+        },
+        {
+          "name": "List Entity Discrepancies",
+          "request": {
+            "description": "Bir varlığın tutarsızlıklarını döndürür.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "discrepancies"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/discrepancies"
+            }
+          }
+        },
+        {
+          "name": "Decide Discrepancy",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"\",\n  \"status\": \"\"\n}"
+            },
+            "description": "Tutarsızlığı karara bağlar (gerekçe zorunlu, denetim olayı yazılır).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "discrepancies",
+                ":discrepancy_id",
+                "decision"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/discrepancies/:discrepancy_id/decision"
+            }
+          }
+        },
+        {
+          "name": "Enrich Gleif",
+          "request": {
+            "description": "Varlığın LEI kodunu kamuya açık GLEIF kütüğünde sorgular.\n\n**KVKK:** dışarı çıkan tek şey LEI kodudur (kamuya açık tanımlayıcı); ad, adres,\nvergi no ya da TCKN gönderilmez. Sorgu bir denetim olayı yazar.\n\nGelen değerler beyanın üstüne **yazılmaz**: ``gleif`` kaynaklı gözlem olarak\nkaydedilir; beyanla çelişirse tutarsızlık üretir.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "enrich",
+                "gleif"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/enrich/gleif"
+            }
+          }
+        },
+        {
+          "name": "Merge",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source_entity_id\": \"00000000-0000-0000-0000-000000000000\"\n}"
+            },
+            "description": "``source_entity_id`` kaydını bu varlığa birleştirir (kaynak kayıt silinmez).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "merge"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/merge"
+            }
+          }
+        },
+        {
+          "name": "List Relationships",
+          "request": {
+            "description": "Varlığa bağlı ilişkileri (her iki yön) döndürür.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "relationships"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/relationships"
+            }
+          }
+        },
+        {
+          "name": "Create Relationship",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rel_type\": \"\",\n  \"source_entity_id\": \"00000000-0000-0000-0000-000000000000\"\n}"
+            },
+            "description": "Varlığa bir bağ ekler (yönetici, ortak, UBO …).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "relationships"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/relationships"
+            }
+          }
+        },
+        {
+          "name": "Delete Relationship",
+          "request": {
+            "description": "Bir bağı kaldırır (denetim izinde kalır).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "DELETE",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "relationships",
+                ":relationship_id"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/relationships/:relationship_id"
+            }
+          }
+        }
+      ],
+      "name": "entities"
+    },
+    {
+      "item": [
+        {
+          "name": "List Keys",
+          "request": {
+            "description": "List Keys",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api-keys"
+              ],
+              "raw": "{{baseUrl}}/api-keys"
+            }
+          }
+        },
+        {
+          "name": "Create Key",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"role\": \"\"\n}"
+            },
+            "description": "Create Key",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api-keys"
+              ],
+              "raw": "{{baseUrl}}/api-keys"
+            }
+          }
+        },
+        {
+          "name": "Revoke Key",
+          "request": {
+            "description": "Revoke Key",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "DELETE",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api-keys",
+                ":key_id"
+              ],
+              "raw": "{{baseUrl}}/api-keys/:key_id"
+            }
+          }
+        },
+        {
+          "name": "List Webhooks",
+          "request": {
+            "description": "List Webhooks",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks"
+              ],
+              "raw": "{{baseUrl}}/webhooks"
+            }
+          }
+        },
+        {
+          "name": "Create Webhook",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"events\": [\n    \"\"\n  ],\n  \"url\": \"\"\n}"
+            },
+            "description": "Create Webhook",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks"
+              ],
+              "raw": "{{baseUrl}}/webhooks"
+            }
+          }
+        },
+        {
+          "name": "Redeliver",
+          "request": {
+            "description": "Redeliver",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                "deliveries",
+                ":delivery_id",
+                "redeliver"
+              ],
+              "raw": "{{baseUrl}}/webhooks/deliveries/:delivery_id/redeliver"
+            }
+          }
+        },
+        {
+          "name": "Event Catalog",
+          "request": {
+            "description": "Event Catalog",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                "events"
+              ],
+              "raw": "{{baseUrl}}/webhooks/events"
+            }
+          }
+        },
+        {
+          "name": "Update Webhook",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": false,\n  \"events\": [\n    \"\"\n  ],\n  \"url\": \"\"\n}"
+            },
+            "description": "Update Webhook",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                ":endpoint_id"
+              ],
+              "raw": "{{baseUrl}}/webhooks/:endpoint_id"
+            }
+          }
+        },
+        {
+          "name": "Deliveries",
+          "request": {
+            "description": "Deliveries",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                ":endpoint_id",
+                "deliveries"
+              ],
+              "raw": "{{baseUrl}}/webhooks/:endpoint_id/deliveries"
+            }
+          }
+        },
+        {
+          "name": "Rotate Secret",
+          "request": {
+            "description": "Rotate Secret",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                ":endpoint_id",
+                "rotate-secret"
+              ],
+              "raw": "{{baseUrl}}/webhooks/:endpoint_id/rotate-secret"
+            }
+          }
+        },
+        {
+          "name": "Send Test Ping",
+          "request": {
+            "description": "``ping`` olayını kuyruğa alır; teslim worker'ın bir sonraki turunda denenir.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "webhooks",
+                ":endpoint_id",
+                "test"
+              ],
+              "raw": "{{baseUrl}}/webhooks/:endpoint_id/test"
+            }
+          }
+        }
+      ],
+      "name": "integrations"
+    },
+    {
+      "item": [
+        {
+          "name": "List Members",
+          "request": {
+            "description": "Çağıran kullanıcının kiracısındaki üyeleri listeler (yalnız kendi kiracısı).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "members"
+              ],
+              "raw": "{{baseUrl}}/members"
+            }
+          }
+        }
+      ],
+      "name": "members"
+    },
+    {
+      "item": [
+        {
+          "name": "Toggle",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"monitored\": false\n}"
+            },
+            "description": "Varlığı gece izlemeye alır ya da çıkarır (denetim izine yazılır).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "monitoring"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/monitoring"
+            }
+          }
+        },
+        {
+          "name": "Alerts",
+          "request": {
+            "description": "İzleme alarmları (en yeni üstte); derece ve vaka bağlantısıyla.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "monitoring",
+                "alerts"
+              ],
+              "raw": "{{baseUrl}}/monitoring/alerts"
+            }
+          }
+        },
+        {
+          "name": "Acknowledge",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"\"\n}"
+            },
+            "description": "Alarmı gerekçeyle \"görüldü\" yapar; alarm silinmez.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "monitoring",
+                "alerts",
+                ":alert_id",
+                "acknowledge"
+              ],
+              "raw": "{{baseUrl}}/monitoring/alerts/:alert_id/acknowledge"
+            }
+          }
+        },
+        {
+          "name": "Run Now",
+          "request": {
+            "description": "İzlenen tüm varlıkları şimdi yeniden tarar (gece görevinin aynısı).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "monitoring",
+                "run"
+              ],
+              "raw": "{{baseUrl}}/monitoring/run"
+            }
+          }
+        }
+      ],
+      "name": "monitoring"
+    },
+    {
+      "item": [
+        {
+          "name": "List Reports",
+          "request": {
+            "description": "Üretilmiş raporları en yeniden eskiye listeler.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports"
+              ],
+              "raw": "{{baseUrl}}/reports"
+            }
+          }
+        },
+        {
+          "name": "Export Dossier",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entity_id\": \"00000000-0000-0000-0000-000000000000\"\n}"
+            },
+            "description": "Durum tespiti dosyasını PDF ya da Word olarak üretir, saklar ve denetime yazar.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "dossier"
+              ],
+              "raw": "{{baseUrl}}/reports/dossier"
+            }
+          }
+        },
+        {
+          "name": "Get Risk Summary",
+          "request": {
+            "description": "Varlığın canlı risk özetini döndürür (kurallar her çağrıda yeniden koşar).\n\nHiçbir şey saklanmaz ve denetim olayı yazılmaz — bu bir okuma işlemidir. Dosyanın\nkanıt niteliğindeki hâli için ``POST /reports/dossier`` kullanılır.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "risk",
+                ":entity_id"
+              ],
+              "raw": "{{baseUrl}}/reports/risk/:entity_id"
+            }
+          }
+        },
+        {
+          "name": "Get Score",
+          "request": {
+            "description": "Canlı risk puanı, faktör dökümü ve kayıtlı puanların zaman çizelgesi.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "score",
+                ":entity_id"
+              ],
+              "raw": "{{baseUrl}}/reports/score/:entity_id"
+            }
+          }
+        },
+        {
+          "name": "Record Score",
+          "request": {
+            "description": "Canlı puanı kayda geçirir (döküm değişmediyse mevcut kayıt döner).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "score",
+                ":entity_id",
+                "snapshot"
+              ],
+              "raw": "{{baseUrl}}/reports/score/:entity_id/snapshot"
+            }
+          }
+        },
+        {
+          "name": "Get Report",
+          "request": {
+            "description": "Tek bir raporun kaydını döndürür.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                ":report_id"
+              ],
+              "raw": "{{baseUrl}}/reports/:report_id"
+            }
+          }
+        },
+        {
+          "name": "Download Report",
+          "request": {
+            "description": "Rapor için kısa ömürlü imzalı indirme bağlantısı üretir.\n\n``sha256`` birlikte döner: indirilen dosyanın kayıtla aynı olduğu doğrulanabilir.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                ":report_id",
+                "download"
+              ],
+              "raw": "{{baseUrl}}/reports/:report_id/download"
+            }
+          }
+        }
+      ],
+      "name": "reports"
+    },
+    {
+      "item": [
+        {
+          "name": "List Screenings",
+          "request": {
+            "description": "Kiracının taramalarını en yeniden eskiye listeler (RLS ile sınırlı).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "screenings"
+              ],
+              "raw": "{{baseUrl}}/screenings"
+            }
+          }
+        },
+        {
+          "name": "Run Screening",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": {\n    \"name\": \"\"\n  }\n}"
+            },
+            "description": "Tarama çalıştırır (senkron yol) ve sonuçları adaylarıyla döndürür.\n\nÖzne sayısı ``screening_sync_subject_limit``i aşarsa istek reddedilir: derin koşu\nCelery'ye aittir (``POST /screenings/deep``), senkron yol NFR'yi korumalıdır.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "screenings"
+              ],
+              "raw": "{{baseUrl}}/screenings"
+            }
+          }
+        },
+        {
+          "name": "Dataset Freshness",
+          "request": {
+            "description": "Yaptırım veri kümelerinin tazeliğini döndürür (bayatlık > 24 sa işaretlenir).\n\nVeri bayatsa tarama sonucu \"temiz\" görünse bile güvenilmezdir; bu uç, arayüzün\nkullanıcıyı uyarabilmesi içindir.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "screenings",
+                "datasets"
+              ],
+              "raw": "{{baseUrl}}/screenings/datasets"
+            }
+          }
+        },
+        {
+          "name": "Queue Deep Screening",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": {\n    \"name\": \"\"\n  }\n}"
+            },
+            "description": "Çok özneli (derin) taramayı kuyruğa alır; sonuç ``GET /screenings/{id}`` ile alınır.\n\nKimlik numaraları göreve **mesajla** geçirilir, veritabanına maskeli yazılır: derin\nkoşu da senkron koşuyla aynı KVKK kuralına uyar.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "screenings",
+                "deep"
+              ],
+              "raw": "{{baseUrl}}/screenings/deep"
+            }
+          }
+        },
+        {
+          "name": "Screen Entity",
+          "request": {
+            "description": "Kütükteki bir varlığı **bağlı kişileriyle birlikte** tarar (E1.3 × E1.4).\n\nROADMAP E1.3: *\"yente match (entity + directors/UBOs)\"*. Özneler kütükten okunur:\nşirketin kendisi + ona bağlı yönetici/ortak/UBO kayıtları. Böylece kullanıcı adları\nyeniden yazmaz ve tarama, dosyada kayıtlı olanla birebir aynı kişiler üzerinde koşar.\n\nKimlik numaraları kütükte şifrelidir ve buradan yente'ye **gönderilmez**: eşleştirme\nad üzerinden yapılır (yaptırım listeleri TCKN taşımaz).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "screenings",
+                "from-entity",
+                ":entity_id"
+              ],
+              "raw": "{{baseUrl}}/screenings/from-entity/:entity_id"
+            }
+          }
+        },
+        {
+          "name": "Get Screening",
+          "request": {
+            "description": "Tek bir taramayı adaylarıyla döndürür.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "screenings",
+                ":screening_id"
+              ],
+              "raw": "{{baseUrl}}/screenings/:screening_id"
+            }
+          }
+        },
+        {
+          "name": "Decide Candidate",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"\"\n}"
+            },
+            "description": "Bir aday eşleşmeyi onaylar ya da gerekçesiyle eler (HITL).\n\nHer karar tam olarak bir denetim olayı yazar (Invariant 2) ve önceki kararı\npayload'ında taşır; karar değiştirilse bile geçmiş izde durur.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "screenings",
+                ":screening_id",
+                "candidates",
+                ":candidate_id",
+                "decision"
+              ],
+              "raw": "{{baseUrl}}/screenings/:screening_id/candidates/:candidate_id/decision"
+            }
+          }
+        }
+      ],
+      "name": "screenings"
+    },
+    {
+      "item": [
+        {
+          "name": "List Settings",
+          "request": {
+            "description": "Aktif kiracının tüm ayarlarını döndürür (RLS ile sınırlı).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings"
+              ],
+              "raw": "{{baseUrl}}/settings"
+            }
+          }
+        },
+        {
+          "name": "Get Setting",
+          "request": {
+            "description": "Anahtara göre tek ayar döndürür.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings",
+                ":key"
+              ],
+              "raw": "{{baseUrl}}/settings/:key"
+            }
+          }
+        },
+        {
+          "name": "Upsert Setting",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": {}\n}"
+            },
+            "description": "Ayarı oluşturur veya günceller (Owner + Compliance Officer).\n\nRisk eşiği gibi ayarlar risk-etkileyendir → aynı transaction içinde bir denetim\nolayı yayılır (Invariant 2); ayar değişikliği ve denetim izi atomik olarak commit olur.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings",
+                ":key"
+              ],
+              "raw": "{{baseUrl}}/settings/:key"
+            }
+          }
+        }
+      ],
+      "name": "settings"
+    },
+    {
+      "item": [
+        {
+          "name": "Olustur",
+          "request": {
+            "description": "Varlığın dosyasından ön doldurulmuş yeni bir taslak açar.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "sib-drafts"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/sib-drafts"
+            }
+          }
+        },
+        {
+          "name": "Listele",
+          "request": {
+            "description": "Listele",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sib-drafts"
+              ],
+              "raw": "{{baseUrl}}/sib-drafts"
+            }
+          }
+        },
+        {
+          "name": "Detay",
+          "request": {
+            "description": "Detay",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sib-drafts",
+                ":draft_id"
+              ],
+              "raw": "{{baseUrl}}/sib-drafts/:draft_id"
+            }
+          }
+        },
+        {
+          "name": "Guncelle",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"aciklama\": \"\",\n  \"bildirim\": {\n    \"aciliyet\": \"normal\",\n    \"kategori\": null,\n    \"onceki_referans_no\": \"\",\n    \"teror_orgut_turu\": null,\n    \"tur\": \"yeni\"\n  },\n  \"gercek_kisiler\": [\n    {\n      \"ad\": null,\n      \"adres\": null,\n      \"anne_adi\": null,\n      \"baba_adi\": null,\n      \"baglanti\": null,\n      \"baglanti_aciklamasi\": null,\n      \"dogum_tarihi\": null,\n      \"dogum_yeri\": null,\n      \"ek_bilgi\": null,\n      \"eposta\": null,\n      \"is_meslek\": null,\n      \"kaynak_varlik_id\": null,\n      \"kimlik_belgeleri\": null,\n      \"kimlik_sahte\": null,\n      \"soyad\": null,\n      \"tckn\": null,\n      \"telefon\": null,\n      \"uyruk\": null,\n      \"vkn\": null,\n      \"yabanci_kimlik_veya_pasaport\": null\n    }\n  ],\n  \"islemler\": [\n    {\n      \"aciklama\": null,\n      \"bitis_tarihi\": null,\n      \"cesit\": null,\n      \"durum\": null,\n      \"il\": null,\n      \"ilce\": null,\n      \"para_birimi\": null,\n      \"tarih\": null,\n      \"tutar\": null,\n      \"tutar_tl\": null,\n      \"ulke\": null\n    }\n  ],\n  \"sk_kodlari\": [\n    \"\"\n  ],\n  \"tuzel_kisiler\": [\n    {\n      \"adres\": null,\n      \"baglanti\": null,\n      \"baglanti_aciklamasi\": null,\n      \"belge_sahte\": null,\n      \"ek_bilgi\": null,\n      \"eposta\": null,\n      \"faaliyet_konusu\": null,\n      \"isletme_adi\": null,\n      \"kaynak_varlik_id\": null,\n      \"kurulus_nevi\": null,\n      \"kurulus_tarihi\": null,\n      \"kurulus_ulkesi\": null,\n      \"kurulus_yeri\": null,\n      \"sicil_no\": null,\n      \"telefon\": null,\n      \"unvan\": null,\n      \"vkn\": null,\n      \"web_sitesi\": null\n    }\n  ],\n  \"yukumlu\": {\n    \"ad_unvan\": \"\",\n    \"kimlik_no\": \"\",\n    \"temsilci_ad_soyad\": \"\",\n    \"temsilci_kimlik_no\": \"\"\n  }\n}"
+            },
+            "description": "Formu kaydeder; hatalar yanıtta döner (kayıt engellenmez).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PUT",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sib-drafts",
+                ":draft_id"
+              ],
+              "raw": "{{baseUrl}}/sib-drafts/:draft_id"
+            }
+          }
+        },
+        {
+          "name": "Iptal",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"neden\": \"\"\n}"
+            },
+            "description": "Taslağı gerekçeyle iptal eder; silmez (saklama yükümlülüğü).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sib-drafts",
+                ":draft_id",
+                "cancel"
+              ],
+              "raw": "{{baseUrl}}/sib-drafts/:draft_id/cancel"
+            }
+          }
+        },
+        {
+          "name": "Disa Aktar",
+          "request": {
+            "description": "Doğrulanmış taslağı düzenlenebilir Word belgesi olarak indirir (denetim izine yazılır).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sib-drafts",
+                ":draft_id",
+                "export"
+              ],
+              "raw": "{{baseUrl}}/sib-drafts/:draft_id/export"
+            }
+          }
+        },
+        {
+          "name": "Kod Listeleri",
+          "request": {
+            "description": "Formun seçmeli alanları (rehberdeki etiketleriyle) ve sınırları.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sib",
+                "kodlar"
+              ],
+              "raw": "{{baseUrl}}/sib/kodlar"
+            }
+          }
+        }
+      ],
+      "name": "sib"
+    },
+    {
+      "item": [
+        {
+          "name": "Version",
+          "request": {
+            "description": "Servis adı, sürümü ve çalışma ortamını döndürür.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "system",
+                "version"
+              ],
+              "raw": "{{baseUrl}}/system/version"
+            }
+          }
+        }
+      ],
+      "name": "system"
+    },
+    {
+      "item": [
+        {
+          "name": "Latest",
+          "request": {
+            "description": "Son UBO hesabı (graf, yollar, gerekçe).",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "ubo"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/ubo"
+            }
+          }
+        },
+        {
+          "name": "Compute",
+          "request": {
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"inclusive\": false,\n  \"threshold_percent\": 0.0\n}"
+            },
+            "description": "Sahiplik zincirinden UBO'yu hesaplar ve anlık görüntü olarak saklar.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "ubo"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/ubo"
+            }
+          }
+        },
+        {
+          "name": "History",
+          "request": {
+            "description": "Geçmiş hesaplar — \"o gün ne biliyorduk\" sorusunun cevabı.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "entities",
+                ":entity_id",
+                "ubo",
+                "history"
+              ],
+              "raw": "{{baseUrl}}/entities/:entity_id/ubo/history"
+            }
+          }
+        }
+      ],
+      "name": "ubo"
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://aegis.example.com/api/v1"
+    },
+    {
+      "key": "apiKey",
+      "value": ""
+    }
+  ]
+}

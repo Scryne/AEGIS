@@ -365,6 +365,23 @@ async def _finalize(
             "error": error,
         },
     )
+    # E3.4: abone webhook'lara olay (aynı transaction, giden kutusu). Yük kişisel veri taşımaz.
+    from aegis_core.webhooks import service as webhook_service
+
+    await webhook_service.emit(
+        session,
+        tenant_id=screening.tenant_id,
+        event="screening.completed",
+        data={
+            "screening_id": str(screening.id),
+            "entity_id": str(screening.entity_id) if screening.entity_id else None,
+            "status": screening.status,
+            "candidate_count": candidate_count,
+            "flagged": summary.flagged,
+            "sanction_hits": summary.sanction_hits,
+            "pep_hits": summary.pep_hits,
+        },
+    )
     logger.info(
         "screening_tamamlandi",
         screening_id=str(screening.id),

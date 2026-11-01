@@ -44,6 +44,7 @@ from aegis_core.screening import service as screening_service
 from aegis_core.screening.entity_run import load_thresholds, subjects_for_entity
 from aegis_core.screening.yente import YenteClient
 from aegis_core.services import audit as audit_service
+from aegis_core.webhooks import service as webhook_service
 
 logger = get_logger("aegis.monitoring")
 
@@ -215,10 +216,23 @@ async def monitor_entity(
         "recorded_new": created,
     }
 
+    case = None
     if RANK[severity] >= RANK[Severity.HIGH]:
-        await case_service.open_from_alert(
+        case = await case_service.open_from_alert(
             session, tenant_id=tenant_id, alert=alert, entity=entity, severity=severity.value
         )
+    await webhook_service.emit(
+        session,
+        tenant_id=tenant_id,
+        event="alert.raised",
+        data={
+            "alert_id": str(alert.id),
+            "entity_id": str(entity.id),
+            "severity": severity.value,
+            "kinds": sorted({i.kind for i in diff.items}),
+            "case_id": str(case.id) if case else None,
+        },
+    )
     await session.flush()
     return alert
 

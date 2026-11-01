@@ -7,6 +7,24 @@
 **Tek cümle:** İlk kez uçtan uca çalıştırıldı (API + Celery worker + Docling + yente + web);
 259 birim + 79 izolasyon/entegrasyon + 36 uçtan uca recall testi yeşil, bağımlılık açığı 0.
 
+## 2026-11-01: E3.4 genel API — API anahtarı + webhook (ADR-0016)
+
+- API anahtarı: rol kapsamlı (analist/denetçi; karar rolleri anahtara verilmez), yalnız özet
+  saklanır, bir kez gösterilir, iptal anında etkili, anahtar başına dakikada 120 istek, taramalar
+  kotaya sayılır. `X-API-Key` ya da `Bearer aeg_…`.
+- Webhook: giden kutusu (işle aynı transaction), worker 30 sn'de bir teslim, HMAC imza,
+  30 sn → 6 sa yeniden deneme, `dead` + elle yeniden gönderim, sır yenileme, test (ping), teslim
+  kaydı. Yük kişisel veri taşımaz. SSRF: https + herkese açık adres, kayıtta ve her teslimde.
+- Belge: `docs/api/README.md` (Türkçe hızlı başlangıç, Python/Node imza doğrulama), Postman
+  koleksiyonu şemadan üretilir. Göç 0014 (`api_key` kimlik denetim düzlemi; webhook tabloları RLS).
+- Testler: birim 12 + entegrasyon 4; tüm paket yeşil; 8/8 sabotaj (ilk turda kaçan 2 için test
+  eklendi). Canlı (aegis_dev): Entegrasyonlar sayfasında anahtar açıldı, terminalden anahtarla
+  /cases /batches /screenings 200, yönetim ucu 403, iptal → 401; iç ağ adresli webhook arayüzde
+  doğru mesajla reddedildi. Dışarı istek atabilecek gerçek webhook bilinçli olarak eklenmedi.
+- Not (demo verisi): aegis_dev'deki kurgusal kişi kaydının TCKN'si bilinen iki anahtarla da
+  açılmıyor (eski bir oturumun geçici anahtarı); /entities bu DB'de 500 veriyor. Ürün bilinçli
+  olarak kapalı başarısız oluyor; demo kaydı silinmedi.
+
 ## 2026-11-01: E3.3 toplu tarama (ADR-0015)
 
 - CSV (UTF-8/Windows-1254, `;`/`,`), durumsuz önizleme + önerilen sütun eşlemesi, TCKN sütunu

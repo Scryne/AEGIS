@@ -52,6 +52,7 @@ from aegis_core.screening import service as screening_service
 from aegis_core.screening.entity_run import load_thresholds, subjects_for_entity
 from aegis_core.screening.yente import YenteClient
 from aegis_core.services import audit as audit_service
+from aegis_core.webhooks import service as webhook_service
 
 logger = get_logger("aegis.batch")
 
@@ -389,6 +390,13 @@ async def _finish(session: AsyncSession, batch: ScreeningBatch) -> None:
     batch.status = BatchStatus.COMPLETED.value
     batch.finished_at = datetime.now(UTC)
     await session.flush()
+    counts = await row_counts(session, batch.id)
+    await webhook_service.emit(
+        session,
+        tenant_id=batch.tenant_id,
+        event="batch.completed",
+        data={"batch_id": str(batch.id), "counts": counts, **await risk_counts(session, batch.id)},
+    )
     await _audit(
         session,
         batch,

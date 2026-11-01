@@ -13,6 +13,7 @@ from aegis_api.routers.v1 import (
     cases,
     documents,
     entities,
+    integrations,
     members,
     monitoring,
     reports,
@@ -33,6 +34,7 @@ api_v1_router.include_router(billing.router)
 api_v1_router.include_router(cases.router)
 api_v1_router.include_router(documents.router)
 api_v1_router.include_router(entities.router)
+api_v1_router.include_router(integrations.router)
 api_v1_router.include_router(members.router)
 api_v1_router.include_router(monitoring.router)
 api_v1_router.include_router(reports.router)

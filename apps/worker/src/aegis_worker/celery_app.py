@@ -19,6 +19,7 @@ from aegis_core.queueing import (
     TASK_MONITORING_NIGHTLY,
     TASK_RETENTION_DISPOSE,
     TASK_SANCTIONS_SYNC,
+    TASK_WEBHOOKS_DELIVER,
 )
 
 # Görevler ``asyncio.run`` ile async psycopg kullanır; Windows'un varsayılan Proactor
@@ -44,6 +45,7 @@ def create_celery_app() -> Celery:
             "aegis_worker.tasks.documents",
             "aegis_worker.tasks.monitoring",
             "aegis_worker.tasks.batch",
+            "aegis_worker.tasks.webhooks",
         ],
     )
     app.conf.update(
@@ -72,6 +74,11 @@ def create_celery_app() -> Celery:
             "monitoring-nightly": {
                 "task": TASK_MONITORING_NIGHTLY,
                 "schedule": crontab(hour=2, minute=45),
+            },
+            # E3.4 webhook teslimi: zamanı gelen teslimler (yeniden deneme takvimi dahil).
+            "webhooks-deliver": {
+                "task": TASK_WEBHOOKS_DELIVER,
+                "schedule": 30.0,
             },
         },
     )

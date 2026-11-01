@@ -126,6 +126,9 @@ def test_cross_tenant_isolation_api_and_direct_sql(
         # E3.3 toplu tarama
         "screening_batch",
         "screening_batch_row",
+        # E3.4 webhook (api_key kimlik denetim düzlemidir, RLS'siz; uç testleri kapsar)
+        "webhook_endpoint",
+        "webhook_delivery",
     )
     engine = create_engine(app_database_url)
     try:

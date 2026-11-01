@@ -22,6 +22,7 @@ from aegis_core.models.entity import (
     RelationshipType,
     SourceType,
 )
+from aegis_core.models.integration import ApiKey, WebhookDelivery, WebhookEndpoint
 from aegis_core.models.membership import Membership, Role
 from aegis_core.models.monitoring import AlertStatus, MonitoringAlert
 from aegis_core.models.organization import Organization
@@ -49,6 +50,7 @@ __all__ = [
     "AdverseMediaItem",
     "AdverseMediaStatus",
     "AlertStatus",
+    "ApiKey",
     "AuditAction",
     "AuditEvent",
     "BatchStatus",
@@ -91,4 +93,6 @@ __all__ = [
     "TenantSetting",
     "UboComputation",
     "User",
+    "WebhookDelivery",
+    "WebhookEndpoint",
 ]

@@ -143,6 +143,14 @@ class Settings(BaseSettings):
     # altyapı (Next proxy / LB) tarafından eklendiği. 0 = XFF yok sayılır.
     trusted_proxy_count: int = 0
 
+    # ── API anahtarı ve webhook (E3.4, ADR-0016) ─────────────────────────────
+    # Anahtar başına dakikalık istek sınırı (Redis; Redis yoksa sınır atlanır, fail-open).
+    api_key_rate_limit_per_minute: int = 120
+    # Webhook hedefi: üretimde yalnız https ve herkese açık adres (SSRF). Geliştirme/test için
+    # açılabilir; üretimde açık bırakılırsa müşteri URL'si iç ağa istek attırabilir.
+    webhook_allow_http: bool = False
+    webhook_allow_private: bool = False
+
     @field_validator("cors_origins", "high_risk_countries", mode="before")
     @classmethod
     def _split_csv_list(cls, value: object) -> object:

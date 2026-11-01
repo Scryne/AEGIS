@@ -557,12 +557,12 @@ integrate via API + webhooks, get monitored continuously, and are billed automat
 - [x] Batch results view: sortable by risk, bulk review actions, exportable summary
 - [x] Quota integration: batch rows count against plan quotas (→ E3.5)
 
-**E3.4 — API productization** *(M–L · ~1–1.5 weeks)*
-- [ ] API keys per tenant (scoped, revocable, hashed at rest); key management UI
-- [ ] Per-tenant rate limiting; usage metering events (→ E3.5)
-- [ ] Webhooks: `screening.completed`, `alert.raised`, `case.updated` — HMAC-signed, retried with backoff, delivery log UI
-- [ ] Public API docs from OpenAPI schema: quickstart, auth, Postman collection (fintech segment's front door, per plan §4.2)
-- [ ] Semantic versioning + `/v1` namespace freeze
+**E3.4 — API productization** *(M–L · ~1–1.5 weeks)* — **shipped 2026-11-01 (ADR-0016)**; usage metering beyond the quota counter → E3.5
+- [x] API keys per tenant (scoped, revocable, hashed at rest); key management UI — role-scoped (analyst/auditor), decision roles never on a key
+- [~] Per-tenant rate limiting; usage metering events (→ E3.5) — per-key limit done; key screenings count in the quota counter
+- [x] Webhooks: `screening.completed`, `alert.raised`, `case.updated` — HMAC-signed, retried with backoff, delivery log UI (+ `batch.completed`, outbox, SSRF guard)
+- [x] Public API docs from OpenAPI schema: quickstart, auth, Postman collection (fintech segment's front door, per plan §4.2) — `docs/api/`
+- [x] Semantic versioning + `/v1` namespace freeze
 
 **E3.5 — Billing automation (critical path)** *(M · ~1 week)*
 - [ ] Metering: screening queries, monitored entities, batch rows → usage records

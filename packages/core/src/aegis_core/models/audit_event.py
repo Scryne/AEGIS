@@ -94,6 +94,11 @@ class AuditAction(StrEnum):
     BATCH_ROW_RESOLVE = "batch.row_resolve"
     BATCH_CANCEL = "batch.cancel"
     BATCH_COMPLETE = "batch.complete"
+    # E3.4 API anahtarı ve webhook yönetimi (tam anahtar ve imza sırrı olaya girmez).
+    API_KEY_CREATE = "api_key.create"
+    API_KEY_REVOKE = "api_key.revoke"
+    WEBHOOK_CREATE = "webhook.create"
+    WEBHOOK_UPDATE = "webhook.update"
 
 
 class AuditEvent(UUIDPKMixin, TenantMixin, Base):

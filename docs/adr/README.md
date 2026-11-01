@@ -18,3 +18,4 @@ işaretlenir), silinmez.
 - [0013 — Olumsuz haber betası — toplama + elle ayıklama, puan dışı](0013-olumsuz-haber-betasi.md)
 - [0014 — Tam izleme çekirdeği ve vaka yönetimi](0014-tam-izleme-ve-vaka-yonetimi.md)
 - [0015 — Toplu tarama — CSV, kütük çözümlemesi, parça parça sürdürülebilir işleme](0015-toplu-tarama.md)
+- [0016 — Genel API: rol kapsamlı API anahtarı, giden kutulu imzalı webhook](0016-api-anahtari-ve-webhook.md)

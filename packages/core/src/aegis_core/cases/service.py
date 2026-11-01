@@ -30,6 +30,7 @@ from aegis_core.models import (
 )
 from aegis_core.reports import score_service
 from aegis_core.services import audit as audit_service
+from aegis_core.webhooks import service as webhook_service
 
 OBJECT_TYPE = "compliance_case"
 
@@ -58,6 +59,21 @@ async def _audit(
     actor: Actor,
     payload: dict[str, Any],
 ) -> None:
+    if action in (AuditAction.CASE_OPEN, AuditAction.CASE_TRANSITION, AuditAction.CASE_ASSIGN):
+        # E3.4 ``case.updated``: açılış, durum değişimi ve atama (yorum/madde gürültü yapmasın).
+        await webhook_service.emit(
+            session,
+            tenant_id=case.tenant_id,
+            event="case.updated",
+            data={
+                "case_id": str(case.id),
+                "entity_id": str(case.entity_id),
+                "status": case.status,
+                "severity": case.severity,
+                "edd": case.edd,
+                "change": action.value,
+            },
+        )
     await audit_service.record_event(
         session,
         tenant_id=case.tenant_id,

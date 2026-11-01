@@ -72,7 +72,8 @@ workspace** (`@aegis/web`, `@aegis/api-client`).
 
 ### Identity / control-plane tables are RLS-exempt (deliberate)
 
-`organization`, `user_account`, `membership` are the tenancy **control plane**, queried
+`organization`, `user_account`, `membership` (and since E3.4 `api_key`, looked up by prefix before
+any tenant context exists) are the tenancy **control plane**, queried
 **pre-auth** (register by slug, login by email → membership) via the *no-tenant* session.
 RLS on them would make login fail-closed (no context yet ⇒ zero rows) or reject
 registration (`WITH CHECK` sees NULL context). They are therefore **not** RLS-protected;

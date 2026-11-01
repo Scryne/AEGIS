@@ -25,6 +25,13 @@ const NAV: { label: string; href: string; roles: Role[]; enabled: boolean }[] = 
     enabled: true,
   },
   {
+    // E3.3: denetçi sonuçları görür, yükleyemez (sayfa içinde kapılı).
+    label: "Toplu Tarama",
+    href: "/batches",
+    roles: ["owner", "compliance_officer", "analyst", "auditor"],
+    enabled: true,
+  },
+  {
     label: "Varlıklar",
     href: "/entities",
     roles: ["owner", "compliance_officer", "analyst", "auditor"],

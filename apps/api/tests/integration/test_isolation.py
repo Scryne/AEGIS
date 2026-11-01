@@ -123,6 +123,9 @@ def test_cross_tenant_isolation_api_and_direct_sql(
         # E3.2 vaka yönetimi
         "compliance_case",
         "case_comment",
+        # E3.3 toplu tarama
+        "screening_batch",
+        "screening_batch_row",
     )
     engine = create_engine(app_database_url)
     try:

@@ -551,11 +551,11 @@ integrate via API + webhooks, get monitored continuously, and are billed automat
 - [x] Case events in the append-only audit trail; SLA timestamps for reporting
 - [x] Dashboard: open cases, aging, alert queue per role (case queue summary: open / overdue / mine / unassigned / EDD)
 
-**E3.3 — Batch screening** *(M · ~1 week)*
-- [ ] CSV import with column mapping + validation preview; dedupe against existing entities via ER pipeline (E1.4)
-- [ ] Chunked Celery batch jobs with progress tracking, partial-failure recovery, resumability
-- [ ] Batch results view: sortable by risk, bulk review actions, exportable summary
-- [ ] Quota integration: batch rows count against plan quotas (→ E3.5)
+**E3.3 — Batch screening** *(M · ~1 week)* — **shipped 2026-11-01 (ADR-0015)**
+- [x] CSV import with column mapping + validation preview; dedupe against existing entities via ER pipeline (E1.4) — ambiguous rows go to a human; national ID columns refused
+- [x] Chunked Celery batch jobs with progress tracking, partial-failure recovery, resumability
+- [x] Batch results view: sortable by risk, bulk review actions, exportable summary
+- [x] Quota integration: batch rows count against plan quotas (→ E3.5)
 
 **E3.4 — API productization** *(M–L · ~1–1.5 weeks)*
 - [ ] API keys per tenant (scoped, revocable, hashed at rest); key management UI

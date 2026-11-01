@@ -43,6 +43,7 @@ def create_celery_app() -> Celery:
             "aegis_worker.tasks.screening",
             "aegis_worker.tasks.documents",
             "aegis_worker.tasks.monitoring",
+            "aegis_worker.tasks.batch",
         ],
     )
     app.conf.update(

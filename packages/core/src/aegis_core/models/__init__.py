@@ -2,6 +2,7 @@
 
 from aegis_core.models.adverse_media import AdverseMediaItem, AdverseMediaStatus
 from aegis_core.models.audit_event import AuditAction, AuditEvent
+from aegis_core.models.batch import BatchStatus, RowStatus, ScreeningBatch, ScreeningBatchRow
 from aegis_core.models.case import CaseComment, ComplianceCase
 from aegis_core.models.discrepancy import Discrepancy, DiscrepancySeverity, DiscrepancyStatus
 from aegis_core.models.document import (
@@ -50,6 +51,7 @@ __all__ = [
     "AlertStatus",
     "AuditAction",
     "AuditEvent",
+    "BatchStatus",
     "CaseComment",
     "ComplianceCase",
     "Discrepancy",
@@ -76,8 +78,11 @@ __all__ = [
     "ReportType",
     "RiskScoreSnapshot",
     "Role",
+    "RowStatus",
     "SanctionsDataset",
     "Screening",
+    "ScreeningBatch",
+    "ScreeningBatchRow",
     "ScreeningStatus",
     "SibDraft",
     "SibStatus",

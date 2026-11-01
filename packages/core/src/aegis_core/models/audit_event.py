@@ -87,6 +87,13 @@ class AuditAction(StrEnum):
     CASE_DUE = "case.due"
     CASE_EDD_ITEM = "case.edd_item"
     CASE_COMMENT = "case.comment"
+    # E3.3 toplu tarama: dosya alındı (özetiyle), başlatıldı/yeniden denendi, belirsiz satıra insan
+    # kararı, iptal, bitiş. Her satırın taraması ayrıca kendi ``screening.run`` olayını yazar.
+    BATCH_CREATE = "batch.create"
+    BATCH_START = "batch.start"
+    BATCH_ROW_RESOLVE = "batch.row_resolve"
+    BATCH_CANCEL = "batch.cancel"
+    BATCH_COMPLETE = "batch.complete"
 
 
 class AuditEvent(UUIDPKMixin, TenantMixin, Base):

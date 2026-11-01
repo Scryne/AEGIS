@@ -8,6 +8,7 @@ from aegis_api.routers.v1 import (
     adverse_media,
     audit,
     auth,
+    batches,
     billing,
     cases,
     documents,
@@ -27,6 +28,7 @@ api_v1_router = APIRouter()
 api_v1_router.include_router(adverse_media.router)
 api_v1_router.include_router(audit.router)
 api_v1_router.include_router(auth.router)
+api_v1_router.include_router(batches.router)
 api_v1_router.include_router(billing.router)
 api_v1_router.include_router(cases.router)
 api_v1_router.include_router(documents.router)

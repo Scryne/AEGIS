@@ -7,6 +7,20 @@
 **Tek cümle:** İlk kez uçtan uca çalıştırıldı (API + Celery worker + Docling + yente + web);
 259 birim + 79 izolasyon/entegrasyon + 36 uçtan uca recall testi yeşil, bağımlılık açığı 0.
 
+## 2026-11-01: E3.3 toplu tarama (ADR-0015)
+
+- CSV (UTF-8/Windows-1254, `;`/`,`), durumsuz önizleme + önerilen sütun eşlemesi, TCKN sütunu
+  reddedilir; satırlar ER'den geçer (mevcut / yeni / belirsiz → insana), sonra elle taramayla aynı
+  yol. Worker 25'lik parçalar, satır başına alt işlem, `SKIP LOCKED`, yeniden deneme; kota başlatırken.
+- Sonuç: riske göre sıralı, süzgeçler, toplu vaka/izleme, Excel'e uygun CSV özet (formül korumalı).
+  Göç 0013 (`screening_batch`, `screening_batch_row`, RLS, izolasyon kapısında).
+- Testler: birim 10 + entegrasyon 4 yeni, tüm paket yeşil; 7/7 sabotaj yakalandı.
+- Canlı (aegis_dev): 8 satırlık kurgusal CSV arayüzden yüklendi, eşleme önerisi doğru, başlatıldı.
+  Bu makinede yente yok: "şimdi işle" satırları "yeniden denenebilir" diye düşürdü (doğru davranış),
+  yeniden deneme + taklit motorla 6/6 tarandı, yaptırım satırı en üstte, toplu vaka açıldı, CSV indi.
+  Görülen iki kusur düzeltildi: yeniden denemede eski hata metni kalıyordu; tümü başarısızken başlık
+  yalnız "Tamamlandı" diyordu. 1440/390 taşma yok.
+
 ## 2026-11-01: Phase 3 — E3.1 tam izleme çekirdeği + E3.2 vaka yönetimi (ADR-0014)
 
 - Alarm derecesi (yaptırım → kritik, PEP / onaylı eşleşmenin düşmesi → yüksek), alarm anında risk

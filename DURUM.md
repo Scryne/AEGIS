@@ -7,6 +7,17 @@
 **Tek cümle:** İlk kez uçtan uca çalıştırıldı (API + Celery worker + Docling + yente + web);
 259 birim + 79 izolasyon/entegrasyon + 36 uçtan uca recall testi yeşil, bağımlılık açığı 0.
 
+## 2026-11-01: E3.7 sertleştirme (yerel kısım)
+
+- Yetki taraması (otomatik, OpenAPI'den): her /api/v1 ucu kimliksiz 401; denetçi hiçbir yazma ucunda
+  2xx alamıyor. İlk yazımda tarama 0 uç görüyordu (bu FastAPI sürümü router'ları sarmalıyor) ve boşuna
+  geçiyordu; alt sınır kontrolü yakaladı, şemadan okumaya geçildi.
+- pip-audit: pypdf 6.21.2'de 7 açık → 6.21.4. gitleaks: 31 commit, sızıntı yok.
+- 1.000 satırlık toplu iş: 20,8 sn, tüm satırlar sonuçlandı, kota = taranan satır (`scripts/load_batch_1k.py`).
+- Saklama: günlük görev kuru çalışma rapor moduna geçti (kiracı ve tablo başına aday, denetim olayı,
+  silme yok). İşletim el kitabı `docs/runbook.md`.
+- Sunucu gerektiren (açık): 50 eşzamanlı kiracı yük testi, ES yeniden indeksleme tatbikatı.
+
 ## 2026-11-01: E3.5 kullanım ölçümü iskeleti (ADR-0018)
 
 - Kullanım kaynağa göre (ekran / API / toplu), %80 uyarısı, ay sonu dökümü (`usage_statement`, göç

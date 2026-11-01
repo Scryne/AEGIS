@@ -578,12 +578,12 @@ integrate via API + webhooks, get monitored continuously, and are billed automat
 - [~] Adverse-media precision re-measured; promote out of beta / into risk score if it clears the bar — measured, bar shown (≥100 reviewed, ≥80%); promotion is a human call
 - [x] Feedback loop: every dismissed false positive enriches the eval set automatically
 
-**E3.7 — Hardening & operations** *(M · ~1 week, interleaved)*
-- [ ] Load test: 50 concurrent tenants, 1k-row batches; fix hot indexes/queries
+**E3.7 — Hardening & operations** *(M · ~1 week, interleaved)* — **local part done 2026-11-01**; multi-tenant load and restore drill need the deploy host
+- [~] Load test: 50 concurrent tenants, 1k-row batches; fix hot indexes/queries — 1k-row batch measured locally (20.8 s, per-row status, quota = rows); 50-tenant concurrency needs the deploy host
 - [ ] Second restore drill incl. Elasticsearch reindex-from-scratch runbook
-- [ ] Security pass: dependency + secret scanning in CI, authz review on all new endpoints (API keys, webhooks), rate-limit verification
-- [ ] Retention execution: activate scheduled disposal job (E1.2 stub) with dry-run report mode first
-- [ ] Ops runbook: dataset sync failure, ES outage, queue backlog, payment webhook failure — each with detection alert + recovery steps
+- [x] Security pass: dependency + secret scanning in CI, authz review on all new endpoints (API keys, webhooks), rate-limit verification — automated sweep: every /api/v1 endpoint 401 without auth, auditor gets no 2xx on any write; pypdf CVEs fixed; gitleaks clean
+- [~] Retention execution: activate scheduled disposal job (E1.2 stub) with dry-run report mode first — dry-run report mode live (audited per tenant); real deletion awaits a separate decision
+- [x] Ops runbook: dataset sync failure, ES outage, queue backlog, payment webhook failure — each with detection alert + recovery steps — `docs/runbook.md` (payment section waits for a provider)
 
 ### Technical setup introduced
 Payment provider recurring-billing integration; webhook delivery infrastructure; metering

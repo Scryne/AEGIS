@@ -101,6 +101,8 @@ class AuditAction(StrEnum):
     WEBHOOK_UPDATE = "webhook.update"
     # E3.6 eşleşme kalitesi ölçümünün kayda geçirilmesi (eğilim; eşik değişikliği ayrı olaydır).
     QUALITY_SNAPSHOT = "quality.snapshot"
+    # E3.7 saklama süresi kuru çalışma raporu (tablo başına aday sayısı; silme yok).
+    RETENTION_DRY_RUN = "retention.dry_run"
 
 
 class AuditEvent(UUIDPKMixin, TenantMixin, Base):

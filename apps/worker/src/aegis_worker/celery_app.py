@@ -17,6 +17,7 @@ from aegis_core.observability import init_sentry
 from aegis_core.queueing import (
     QUEUE_DEFAULT,
     TASK_MONITORING_NIGHTLY,
+    TASK_QUALITY_WEEKLY,
     TASK_RETENTION_DISPOSE,
     TASK_SANCTIONS_SYNC,
     TASK_WEBHOOKS_DELIVER,
@@ -46,6 +47,7 @@ def create_celery_app() -> Celery:
             "aegis_worker.tasks.monitoring",
             "aegis_worker.tasks.batch",
             "aegis_worker.tasks.webhooks",
+            "aegis_worker.tasks.quality",
         ],
     )
     app.conf.update(
@@ -76,6 +78,11 @@ def create_celery_app() -> Celery:
                 "schedule": crontab(hour=2, minute=45),
             },
             # E3.4 webhook teslimi: zamanı gelen teslimler (yeniden deneme takvimi dahil).
+            # E3.6 haftalık eşleşme kalitesi ölçümü (Pazartesi 04:00 UTC): eğilim kaydı.
+            "quality-weekly": {
+                "task": TASK_QUALITY_WEEKLY,
+                "schedule": crontab(hour=4, minute=0, day_of_week=1),
+            },
             "webhooks-deliver": {
                 "task": TASK_WEBHOOKS_DELIVER,
                 "schedule": 30.0,

@@ -25,3 +25,5 @@ TASK_MONITORING_NIGHTLY = "monitoring.nightly"
 TASK_BATCH_PROCESS = "batch.process"
 # E3.4 webhook teslimi: zamanı gelen teslimleri dener (beat, 30 sn).
 TASK_WEBHOOKS_DELIVER = "webhooks.deliver"
+# E3.6 haftalık eşleşme kalitesi ölçümü (eğilim için kayıt).
+TASK_QUALITY_WEEKLY = "quality.weekly"

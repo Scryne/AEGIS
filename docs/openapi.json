@@ -2808,6 +2808,48 @@
         "title": "Environment",
         "type": "string"
       },
+      "EvalRunResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "label_count": {
+            "title": "Label Count",
+            "type": "integer"
+          },
+          "metrics": {
+            "additionalProperties": true,
+            "title": "Metrics",
+            "type": "object"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "thresholds": {
+            "additionalProperties": true,
+            "title": "Thresholds",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id",
+          "created_at",
+          "reason",
+          "thresholds",
+          "label_count",
+          "metrics"
+        ],
+        "title": "EvalRunResponse",
+        "type": "object"
+      },
       "EventCatalogResponse": {
         "properties": {
           "events": {
@@ -3983,6 +4025,40 @@
           "resulting_entity_id"
         ],
         "title": "ProposalResponse",
+        "type": "object"
+      },
+      "QualityResponse": {
+        "properties": {
+          "adverse_media": {
+            "additionalProperties": true,
+            "title": "Adverse Media",
+            "type": "object"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/EvalRunResponse"
+            },
+            "title": "History",
+            "type": "array"
+          },
+          "matching": {
+            "additionalProperties": true,
+            "title": "Matching",
+            "type": "object"
+          },
+          "thresholds": {
+            "additionalProperties": true,
+            "title": "Thresholds",
+            "type": "object"
+          }
+        },
+        "required": [
+          "thresholds",
+          "matching",
+          "adverse_media",
+          "history"
+        ],
+        "title": "QualityResponse",
         "type": "object"
       },
       "ReadinessComponent": {
@@ -12473,6 +12549,136 @@
         "summary": "Run Now",
         "tags": [
           "monitoring"
+        ]
+      }
+    },
+    "/api/v1/quality/matching": {
+      "get": {
+        "operationId": "matching_quality_api_v1_quality_matching_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QualityResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Matching Quality",
+        "tags": [
+          "quality"
+        ]
+      }
+    },
+    "/api/v1/quality/matching/snapshot": {
+      "post": {
+        "operationId": "snapshot_api_v1_quality_matching_snapshot_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EvalRunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Snapshot",
+        "tags": [
+          "quality"
         ]
       }
     },

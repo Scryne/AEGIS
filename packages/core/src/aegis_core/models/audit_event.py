@@ -99,6 +99,8 @@ class AuditAction(StrEnum):
     API_KEY_REVOKE = "api_key.revoke"
     WEBHOOK_CREATE = "webhook.create"
     WEBHOOK_UPDATE = "webhook.update"
+    # E3.6 eşleşme kalitesi ölçümünün kayda geçirilmesi (eğilim; eşik değişikliği ayrı olaydır).
+    QUALITY_SNAPSHOT = "quality.snapshot"
 
 
 class AuditEvent(UUIDPKMixin, TenantMixin, Base):

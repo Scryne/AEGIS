@@ -64,6 +64,13 @@ const NAV: { label: string; href: string; roles: Role[]; enabled: boolean }[] = 
     enabled: true,
   },
   {
+    // E3.6: insan kararlarından ölçüm; analist göremez (backend ile aynı rol kümesi).
+    label: "Eşleşme Kalitesi",
+    href: "/quality",
+    roles: ["owner", "compliance_officer", "auditor"],
+    enabled: true,
+  },
+  {
     // E3.4: anahtar/webhook yönetimi; analist göremez (backend ile aynı rol kümesi).
     label: "Entegrasyonlar",
     href: "/integrations",

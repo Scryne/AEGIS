@@ -16,6 +16,7 @@ from aegis_api.routers.v1 import (
     integrations,
     members,
     monitoring,
+    quality,
     reports,
     risk_score,
     screenings,
@@ -37,6 +38,7 @@ api_v1_router.include_router(entities.router)
 api_v1_router.include_router(integrations.router)
 api_v1_router.include_router(members.router)
 api_v1_router.include_router(monitoring.router)
+api_v1_router.include_router(quality.router)
 api_v1_router.include_router(reports.router)
 api_v1_router.include_router(risk_score.router)
 api_v1_router.include_router(screenings.router)

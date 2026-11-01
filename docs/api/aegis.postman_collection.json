@@ -1792,6 +1792,58 @@
     {
       "item": [
         {
+          "name": "Matching Quality",
+          "request": {
+            "description": "Matching Quality",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "quality",
+                "matching"
+              ],
+              "raw": "{{baseUrl}}/quality/matching"
+            }
+          }
+        },
+        {
+          "name": "Snapshot",
+          "request": {
+            "description": "Snapshot",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "POST",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "quality",
+                "matching",
+                "snapshot"
+              ],
+              "raw": "{{baseUrl}}/quality/matching/snapshot"
+            }
+          }
+        }
+      ],
+      "name": "quality"
+    },
+    {
+      "item": [
+        {
           "name": "List Reports",
           "request": {
             "description": "Üretilmiş raporları en yeniden eskiye listeler.",

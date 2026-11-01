@@ -570,13 +570,13 @@ integrate via API + webhooks, get monitored continuously, and are billed automat
 - [ ] Entitlement enforcement replaces Phase 2 manual flags; grace behavior on quota exhaustion (warn → soft-block; never silently drop a compliance screening)
 - [ ] Dunning basics + payment-failure alerts; revenue dashboard (MRR, per-tenant usage)
 
-**E3.6 — Matching quality program (per R4)** *(M · ~1 week + ongoing)*
-- [ ] Evaluation harness over the labeled set accumulated from HITL decisions since Phase 1
-- [ ] Precision/recall + review-rate dashboard (plan KPIs: false-positive rate, human-review rate)
-- [ ] Tune normalization, thresholds, review band from data
-- [ ] **Decision gate:** add embedding-based candidate generation to internal ER only where metrics show deterministic+fuzzy misses; implement if justified
-- [ ] Adverse-media precision re-measured; promote out of beta / into risk score if it clears the bar
-- [ ] Feedback loop: every dismissed false positive enriches the eval set automatically
+**E3.6 — Matching quality program (per R4)** *(M · ~1 week + ongoing)* — **harness shipped 2026-11-01 (ADR-0017)**; tuning iterations need real decisions
+- [x] Evaluation harness over the labeled set accumulated from HITL decisions since Phase 1
+- [x] Precision/recall + review-rate dashboard (plan KPIs: false-positive rate, human-review rate)
+- [~] Tune normalization, thresholds, review band from data — threshold sweep + safe recommendation shipped; actual tuning waits for ≥ 30 real decisions
+- [ ] **Decision gate:** add embedding-based candidate generation to internal ER only where metrics show deterministic+fuzzy misses; implement if justified — *not justified yet: no miss data*
+- [~] Adverse-media precision re-measured; promote out of beta / into risk score if it clears the bar — measured, bar shown (≥100 reviewed, ≥80%); promotion is a human call
+- [x] Feedback loop: every dismissed false positive enriches the eval set automatically
 
 **E3.7 — Hardening & operations** *(M · ~1 week, interleaved)*
 - [ ] Load test: 50 concurrent tenants, 1k-row batches; fix hot indexes/queries

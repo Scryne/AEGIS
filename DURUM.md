@@ -7,6 +7,16 @@
 **Tek cümle:** İlk kez uçtan uca çalıştırıldı (API + Celery worker + Docling + yente + web);
 259 birim + 79 izolasyon/entegrasyon + 36 uçtan uca recall testi yeşil, bağımlılık açığı 0.
 
+## 2026-11-01: E3.6 eşleşme kalitesi programı (ADR-0017)
+
+- İnsan kararlarından yanlış pozitif ve inceleme oranı, işaret isabeti/duyarlılığı; otomatik
+  elenenler ayrı sayılır (doğrusu bilinmez). Eşik taraması + güvenli öneri (≥ 30 karar, 0,05 pay;
+  eşiği insan değiştirir). Olumsuz haber isabeti ve puana alınma ön koşulu. Haftalık worker + elle
+  kayıt → eğilim (`match_eval_run`, göç 0015, RLS, izolasyon kapısında).
+- Testler: birim 7 + entegrasyon 2; tüm paket yeşil. Canlı (aegis_dev): 6 demo kararıyla /quality
+  sayfası, grafik, eğilim; 1440/390 taşma ve konsol hatası yok.
+- Açık: gerçek kararlar birikince en az iki ayar turu (çıkış ölçütü 5); embedding kapısı veri bekliyor.
+
 ## 2026-11-01: E3.4 genel API — API anahtarı + webhook (ADR-0016)
 
 - API anahtarı: rol kapsamlı (analist/denetçi; karar rolleri anahtara verilmez), yalnız özet

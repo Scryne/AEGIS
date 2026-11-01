@@ -19,3 +19,4 @@ işaretlenir), silinmez.
 - [0014 — Tam izleme çekirdeği ve vaka yönetimi](0014-tam-izleme-ve-vaka-yonetimi.md)
 - [0015 — Toplu tarama — CSV, kütük çözümlemesi, parça parça sürdürülebilir işleme](0015-toplu-tarama.md)
 - [0016 — Genel API: rol kapsamlı API anahtarı, giden kutulu imzalı webhook](0016-api-anahtari-ve-webhook.md)
+- [0017 — Eşleşme kalitesi programı: insan kararından ölçüm, öneri olarak eşik](0017-eslesme-kalitesi.md)

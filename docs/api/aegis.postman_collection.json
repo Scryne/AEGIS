@@ -524,6 +524,29 @@
     {
       "item": [
         {
+          "name": "Statements",
+          "request": {
+            "description": "Kapanmış dönemlerin dökümü (en yeni üstte); dönem kapandıktan sonra değişmez.",
+            "header": [
+              {
+                "key": "X-API-Key",
+                "value": "{{apiKey}}"
+              }
+            ],
+            "method": "GET",
+            "url": {
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "billing",
+                "statements"
+              ],
+              "raw": "{{baseUrl}}/billing/statements"
+            }
+          }
+        },
+        {
           "name": "Usage",
           "request": {
             "description": "Kiracının planı ve bu takvim ayındaki (UTC) sorgu ve izleme kullanımı.",

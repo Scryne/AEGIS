@@ -24,7 +24,29 @@ interface Usage {
   overage_queries: number;
   monitored_entities: number;
   blocked: boolean;
+  warning: "ok" | "near" | "exhausted" | "overage";
+  breakdown: {
+    queries_total: number;
+    queries_screen: number;
+    queries_api: number;
+    queries_batch: number;
+    batch_rows: number;
+  };
 }
+
+interface Statement {
+  period_start: string;
+  plan_code: string;
+  included_queries: number;
+  used_queries: number;
+  overage_queries: number;
+  monitored_entities: number;
+  breakdown: Usage["breakdown"];
+  closed_at: string;
+}
+
+const ay = (iso: string) =>
+  new Date(iso).toLocaleDateString("tr-TR", { month: "long", year: "numeric", timeZone: "Europe/Istanbul" });
 
 const sayi = (n: number) => n.toLocaleString("tr-TR");
 const gun = (iso: string) =>
@@ -55,6 +77,9 @@ export default async function PlanPage() {
   ]);
   const u = res.ok ? ((await res.json()) as Usage) : null;
   const beta = betaRes.ok ? ((await betaRes.json()) as { enabled: boolean }).enabled : false;
+  const canStatements = user.role !== "analyst";
+  const stRes = canStatements ? await serverFetch("/billing/statements") : null;
+  const statements = stRes?.ok ? ((await stRes.json()) as Statement[]) : [];
 
   if (u === null) {
     return (
@@ -89,6 +114,15 @@ export default async function PlanPage() {
         </p>
       )}
 
+      {u.warning === "near" && (
+        <p role="status" className="rounded-card border border-warning bg-warning/10 p-4 text-sm text-fg">
+          Bu ayın sorgu hakkının %80&apos;i kullanıldı ({sayi(u.used_queries)} / {sayi(u.plan.included_queries)}).
+          {u.plan.overage_allowed
+            ? " Hak dolduktan sonra tarama sürer, aşım ayrıca faturalanır."
+            : " Hak dolunca yeni tarama başlatılamaz; toplu işleri buna göre planlayın."}
+        </p>
+      )}
+
       <section className="rounded-card border border-border bg-surface p-5">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-base font-medium text-fg">{u.plan.name} planı</h2>
@@ -110,6 +144,20 @@ export default async function PlanPage() {
               ? `Dahil kota ${sayi(u.overage_queries)} sorgu aşıldı.`
               : `Bu ay ${sayi(u.remaining_queries)} sorgu kaldı.`}
           </p>
+          <dl className="grid grid-cols-3 gap-3 pt-2 text-xs">
+            {(
+              [
+                ["Ekrandan", u.breakdown.queries_screen],
+                ["API anahtarıyla", u.breakdown.queries_api],
+                [`Toplu tarama (${sayi(u.breakdown.batch_rows)} satır)`, u.breakdown.queries_batch],
+              ] as [string, number][]
+            ).map(([k, v]) => (
+              <div key={k}>
+                <dt className="text-muted">{k}</dt>
+                <dd className="font-mono text-fg tabular-nums">{sayi(v)}</dd>
+              </div>
+            ))}
+          </dl>
         </div>
 
         <div className="mt-6 space-y-2">
@@ -132,6 +180,49 @@ export default async function PlanPage() {
           </p>
         </div>
       </section>
+
+      {canStatements && (
+        <section aria-labelledby="donem-baslik" className="rounded-card border border-border bg-surface p-5">
+          <h2 id="donem-baslik" className="text-base font-medium text-fg">
+            Kapanmış dönemler
+          </h2>
+          <p className="mt-1 text-xs text-muted">
+            Her ayın kullanımı ay bitince dondurulur ve sonradan değişmez. Tutar ve tahsilat sözleşmenizdedir.
+          </p>
+          {statements.length === 0 ? (
+            <p className="mt-3 text-sm text-muted">Henüz kapanmış dönem yok.</p>
+          ) : (
+            <div className="mt-3 overflow-x-auto">
+              <table className="w-full min-w-[30rem] text-left text-sm">
+                <thead className="text-xs text-muted">
+                  <tr>
+                    <th className="py-1 font-medium">Dönem</th>
+                    <th className="py-1 font-medium">Plan</th>
+                    <th className="py-1 text-right font-medium">Sorgu</th>
+                    <th className="py-1 text-right font-medium">Aşım</th>
+                    <th className="py-1 text-right font-medium">İzlenen</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border font-mono text-xs tabular-nums">
+                  {statements.map((st) => (
+                    <tr key={st.period_start}>
+                      <td className="py-1.5 font-sans text-fg">{ay(st.period_start)}</td>
+                      <td className="py-1.5 font-sans text-muted">{st.plan_code}</td>
+                      <td className="py-1.5 text-right">
+                        {sayi(st.used_queries)} / {sayi(st.included_queries)}
+                      </td>
+                      <td className={`py-1.5 text-right ${st.overage_queries > 0 ? "text-danger" : ""}`}>
+                        {sayi(st.overage_queries)}
+                      </td>
+                      <td className="py-1.5 text-right">{sayi(st.monitored_entities)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      )}
 
       {user.role === "owner" && (
         <section aria-label="Beta özellikler" className="rounded-card border border-border bg-surface p-5">

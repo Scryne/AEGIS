@@ -7,6 +7,15 @@
 **Tek cümle:** İlk kez uçtan uca çalıştırıldı (API + Celery worker + Docling + yente + web);
 259 birim + 79 izolasyon/entegrasyon + 36 uçtan uca recall testi yeşil, bağımlılık açığı 0.
 
+## 2026-11-01: E3.5 kullanım ölçümü iskeleti (ADR-0018)
+
+- Kullanım kaynağa göre (ekran / API / toplu), %80 uyarısı, ay sonu dökümü (`usage_statement`, göç
+  0016, RLS, worker her gün önceki dönemi kapatır, idempotent). Plan sayfasında döküm ve dönemler.
+- Bulunan hata düzeltildi: motora ulaşılamayan tarama kotadan düşüyordu (toplu işin yeniden
+  denemesinde aynı satır iki kez sayılıyordu). Kota sayacı ve döküm artık `failed`ı saymıyor;
+  sabotajla sınandı.
+- Açık (Scryne): fiyat, ödeme sağlayıcısı, tahsilat takibi, gelir panosu.
+
 ## 2026-11-01: E3.6 eşleşme kalitesi programı (ADR-0017)
 
 - İnsan kararlarından yanlış pozitif ve inceleme oranı, işaret isabeti/duyarlılığı; otomatik

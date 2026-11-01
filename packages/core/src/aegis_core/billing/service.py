@@ -20,7 +20,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from aegis_core.billing.plans import Plan, get_plan
-from aegis_core.models import Entity, Organization, Screening
+from aegis_core.models import Entity, Organization, Screening, ScreeningStatus
 
 
 class QuotaExceededError(Exception):
@@ -75,6 +75,8 @@ async def used_queries(session: AsyncSession, tenant_id: uuid.UUID, now: datetim
         select(func.coalesce(func.sum(func.jsonb_array_length(Screening.subjects)), 0)).where(
             Screening.tenant_id == tenant_id,
             Screening.requested_by_user_id.is_not(None),
+            # Motora ulaşılamadığı için yapılamayan tarama hak tüketmez (E3.5 düzeltmesi).
+            Screening.status != ScreeningStatus.FAILED.value,
             Screening.created_at >= start,
             Screening.created_at < end,
         )

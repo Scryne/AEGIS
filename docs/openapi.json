@@ -6034,6 +6034,63 @@
         "title": "SibOzet",
         "type": "object"
       },
+      "StatementResponse": {
+        "properties": {
+          "breakdown": {
+            "additionalProperties": true,
+            "title": "Breakdown",
+            "type": "object"
+          },
+          "closed_at": {
+            "format": "date-time",
+            "title": "Closed At",
+            "type": "string"
+          },
+          "included_queries": {
+            "title": "Included Queries",
+            "type": "integer"
+          },
+          "monitored_entities": {
+            "title": "Monitored Entities",
+            "type": "integer"
+          },
+          "overage_queries": {
+            "title": "Overage Queries",
+            "type": "integer"
+          },
+          "period_end": {
+            "format": "date-time",
+            "title": "Period End",
+            "type": "string"
+          },
+          "period_start": {
+            "format": "date-time",
+            "title": "Period Start",
+            "type": "string"
+          },
+          "plan_code": {
+            "title": "Plan Code",
+            "type": "string"
+          },
+          "used_queries": {
+            "title": "Used Queries",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "period_start",
+          "period_end",
+          "plan_code",
+          "included_queries",
+          "used_queries",
+          "overage_queries",
+          "monitored_entities",
+          "breakdown",
+          "closed_at"
+        ],
+        "title": "StatementResponse",
+        "type": "object"
+      },
       "SubjectRequest": {
         "description": "Taranacak bir özne (şirket, yönetici ya da gerçek faydalanıcı).",
         "properties": {
@@ -6722,6 +6779,14 @@
             "title": "Blocked",
             "type": "boolean"
           },
+          "breakdown": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "default": {},
+            "title": "Breakdown",
+            "type": "object"
+          },
           "monitored_entities": {
             "title": "Monitored Entities",
             "type": "integer"
@@ -6750,6 +6815,11 @@
           "used_queries": {
             "title": "Used Queries",
             "type": "integer"
+          },
+          "warning": {
+            "default": "ok",
+            "title": "Warning",
+            "type": "string"
           }
         },
         "required": [
@@ -9067,6 +9137,76 @@
         "summary": "Start Batch",
         "tags": [
           "batches"
+        ]
+      }
+    },
+    "/api/v1/billing/statements": {
+      "get": {
+        "description": "Kapanmış dönemlerin dökümü (en yeni üstte); dönem kapandıktan sonra değişmez.",
+        "operationId": "statements_api_v1_billing_statements_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StatementResponse"
+                  },
+                  "title": "Response Statements Api V1 Billing Statements Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Statements",
+        "tags": [
+          "billing"
         ]
       }
     },

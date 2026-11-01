@@ -16,6 +16,7 @@ from aegis_core.config import get_settings
 from aegis_core.observability import init_sentry
 from aegis_core.queueing import (
     QUEUE_DEFAULT,
+    TASK_BILLING_CLOSE,
     TASK_MONITORING_NIGHTLY,
     TASK_QUALITY_WEEKLY,
     TASK_RETENTION_DISPOSE,
@@ -48,6 +49,7 @@ def create_celery_app() -> Celery:
             "aegis_worker.tasks.batch",
             "aegis_worker.tasks.webhooks",
             "aegis_worker.tasks.quality",
+            "aegis_worker.tasks.billing",
         ],
     )
     app.conf.update(
@@ -79,6 +81,11 @@ def create_celery_app() -> Celery:
             },
             # E3.4 webhook teslimi: zamanı gelen teslimler (yeniden deneme takvimi dahil).
             # E3.6 haftalık eşleşme kalitesi ölçümü (Pazartesi 04:00 UTC): eğilim kaydı.
+            # E3.5 önceki dönemin kullanım dökümü (her gün denenir; dönem başına tek satır).
+            "billing-close-period": {
+                "task": TASK_BILLING_CLOSE,
+                "schedule": crontab(hour=3, minute=15),
+            },
             "quality-weekly": {
                 "task": TASK_QUALITY_WEEKLY,
                 "schedule": crontab(hour=4, minute=0, day_of_week=1),

@@ -564,10 +564,10 @@ integrate via API + webhooks, get monitored continuously, and are billed automat
 - [x] Public API docs from OpenAPI schema: quickstart, auth, Postman collection (fintech segment's front door, per plan §4.2) — `docs/api/`
 - [x] Semantic versioning + `/v1` namespace freeze
 
-**E3.5 — Billing automation (critical path)** *(M · ~1 week)*
-- [ ] Metering: screening queries, monitored entities, batch rows → usage records
+**E3.5 — Billing automation (critical path)** *(M · ~1 week)* — **metering skeleton shipped 2026-11-01 (ADR-0018)**; price, payment provider and dunning are open commercial decisions
+- [x] Metering: screening queries, monitored entities, batch rows → usage records (by source; frozen monthly statement)
 - [ ] Plans per plan §12: Başlangıç / Profesyonel / İş (API) — base + quota + overage + monitoring add-on; provider integration (iyzico/PayTR recurring or invoice-based per E2.6 learnings)
-- [ ] Entitlement enforcement replaces Phase 2 manual flags; grace behavior on quota exhaustion (warn → soft-block; never silently drop a compliance screening)
+- [~] Entitlement enforcement replaces Phase 2 manual flags; grace behavior on quota exhaustion (warn → soft-block; never silently drop a compliance screening) — 80% warning + 402 block (no partial run); failed runs no longer consume quota; plan assignment still manual
 - [ ] Dunning basics + payment-failure alerts; revenue dashboard (MRR, per-tenant usage)
 
 **E3.6 — Matching quality program (per R4)** *(M · ~1 week + ongoing)* — **harness shipped 2026-11-01 (ADR-0017)**; tuning iterations need real decisions

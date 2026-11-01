@@ -131,6 +131,8 @@ def test_cross_tenant_isolation_api_and_direct_sql(
         "webhook_delivery",
         # E3.6 eşleşme kalitesi
         "match_eval_run",
+        # E3.5 kullanım dökümü
+        "usage_statement",
     )
     engine = create_engine(app_database_url)
     try:

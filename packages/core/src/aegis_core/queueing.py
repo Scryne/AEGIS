@@ -27,3 +27,5 @@ TASK_BATCH_PROCESS = "batch.process"
 TASK_WEBHOOKS_DELIVER = "webhooks.deliver"
 # E3.6 haftalık eşleşme kalitesi ölçümü (eğilim için kayıt).
 TASK_QUALITY_WEEKLY = "quality.weekly"
+# E3.5 ay sonu kullanım dökümü (önceki dönemi dondurur; idempotent).
+TASK_BILLING_CLOSE = "billing.close_period"

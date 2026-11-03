@@ -7,6 +7,21 @@
 **Tek cümle:** İlk kez uçtan uca çalıştırıldı (API + Celery worker + Docling + yente + web);
 259 birim + 79 izolasyon/entegrasyon + 36 uçtan uca recall testi yeşil, bağımlılık açığı 0.
 
+## 2026-11-03: ön yüz, izleme güvenilirliği, dosyada puan, ortaklık belgesi
+
+- **Ön yüz:** "denetim dosyası" kimliği (DESIGN.md): gruplu gezinme, dar ekranda çekmece, panel günün tek cümlesiyle açılır.
+  Hiçbir ekran kalkmadı. 22 ekran 1440/390 gözle görüldü, taşma 0.
+- **Okunamayan şifreli kayıt:** tek kayıt Varlıklar ve ŞİB listelerini 500 yapıyordu; artık satırında işaretlenir, detay 503 ile sebebini söyler.
+- **İzleme (ADR-0019):** koşu kaydı, bir yeniden deneme, görev yeniden tesliminde tekrar taramama, derece başına hemen/özet e-posta tercihi.
+  Taranamayan varlık ekranda: sonuç YOK, temiz değil. Parola sıfırlama e-postası da bağlandı.
+- **Dosyada puan dökümü (E2.3):** PDF ve Word; etken, puan, gerekçe, dayanak, ağırlık sürümü.
+- **Ortaklık belgesi (E2.1):** yeni belge türü, oran belgede yazıldığı gibi; toplam 100 değilse güven düşer. Regresyon: kimlik sütunu oran sanılıyordu.
+- Testler: 370 birim + 121 entegrasyon, mypy ve ruff temiz.
+- **Doğrulanmadı:** gerçek SMTP teslimi; ortaklık çıkarımı gerçek pilot belgesiyle.
+- **Bilerek yapılmadı:** olumsuz haber LLM hattı. Invariant 3 müşteri kişisel verisinin dışarı çıkmasını yasaklıyor; kişi adını dış modele göndermek
+  proje kararı ister. Etiketli pilot seti de yok, eşik seçilemez. Karar Scryne'da: yerel model ya da kuralın açıkça değişmesi.
+- Yol haritasında E0/E1 kutuları tarihsel olarak işaretsiz; E1.1–E1.5 yapılmış durumda, E0 görüşmeleri ve E1.6 kurulum değil.
+
 ## 2026-11-01: E3.7 sertleştirme (yerel kısım)
 
 - Yetki taraması (otomatik, OpenAPI'den): her /api/v1 ucu kimliksiz 401; denetçi hiçbir yazma ucunda

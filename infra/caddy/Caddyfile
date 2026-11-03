@@ -1,0 +1,44 @@
+# AEGIS kenar sunucusu (E1.6). Otomatik TLS: Caddy sertifikayı ACME ile alır ve yeniler;
+# 80'e gelen her istek 443'e yönlenir. Alan adları ve ACME e-postası ortamdan gelir
+# (docker-compose.prod.yml → caddy.environment); bu dosyada sır yok.
+{
+	email {$ACME_EMAIL}
+	# Yönetim ucu yalnız konteynerin içinden (sağlık kontrolü).
+	admin 127.0.0.1:2019
+}
+
+(guvenlik_basliklari) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+	encode zstd gzip
+	log {
+		output stdout
+		format json
+	}
+}
+
+# Kullanıcı arayüzü (Next.js). Tarayıcı API'ye aynı-origin /api/v1 vekili üzerinden gider;
+# erişim jetonu httpOnly çerezde kalır.
+{$AEGIS_DOMAIN} {
+	import guvenlik_basliklari
+	request_body {
+		# Belge yükleme sınırı (MAX_DOCUMENT_SIZE_MB=25) + çok parçalı gövde payı.
+		max_size 30MB
+	}
+	reverse_proxy web:3000
+}
+
+# Genel API (E3.4: X-API-Key ile entegrasyonlar). /docs ve /readyz de buradan.
+{$AEGIS_API_DOMAIN} {
+	import guvenlik_basliklari
+	request_body {
+		max_size 30MB
+	}
+	reverse_proxy api:8000
+}

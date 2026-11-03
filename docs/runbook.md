@@ -5,7 +5,9 @@ ne yapılır). Ürün davranışı hep aynı ilkeye dayanır: **yapılamayan iş
 `failed` kalır, izleme alarm üretmez ama günlüğe düşer, webhook `dead` olur. Hiçbir arıza sessizce
 "risk yok" sonucuna dönüşmez.
 
-Komutlar Docker Compose kurulumuna göredir (`infra/compose/docker-compose.yml`).
+Komutlar Docker Compose kurulumuna göredir. Üretimde `docker compose` yerine
+`docker compose -p aegis -f infra/compose/docker-compose.prod.yml --env-file /etc/aegis/aegis.env`
+kullanılır; kurulum, dağıtım, yedek ve geri yükleme `docs/deploy.md`'de.
 
 ## 1. Yaptırım veri kümesi senkronu başarısız / bayat
 
@@ -85,6 +87,21 @@ Komutlar Docker Compose kurulumuna göredir (`infra/compose/docker-compose.yml`)
 - `retention.dispose` her gün **kuru çalışır**: süresi geçmiş adayları tablo başına sayar ve
   `retention.dry_run` denetim olayı yazar; hiçbir şey silmez. Gerçek silme ayrı bir kararla açılır
   (ilişki bitişi, nesne deposu sırası, yasal saklama istisnaları). Rapor Denetim İzi'nden okunur.
+
+## 9. Veri kaybı / yedekten dönüş
+
+- **Belirti:** veritabanı hacmi bozuk ya da yanlışlıkla silinmiş; sunucu kaybı.
+- **Tespit:** `saglik.sh` uyarısı (servis düşük, `/readyz` hazır değil); Postgres günlüğünde bozulma.
+- **Kurtarma:** `docs/deploy.md` → "Geri yükleme": `geri_yukle.sh liste` → `indir` → önce
+  `tatbikat` (zincir doğrulaması geçmeli) → `uretim --onayla --nesneler`. Aynı
+  `FIELD_ENCRYPTION_KEY` şart (§7). Son yedekten sonraki işlemler kaybolur; müşteriye ve
+  gerekiyorsa KVKK sürecine göre bildirim yapılır.
+
+## 10. Uyarı geldi (saglik.sh)
+
+- Uyarı metni hangi kontrolün düştüğünü söyler. Yedek uyarısı: `/var/log/aegis-yedek.log`.
+  TLS uyarısı: `docker compose … logs caddy` (DNS kaydı, 80/443 erişimi, ACME sınırı). Disk:
+  önce `docker system df`, sonra ES indeks boyutu.
 
 ## Ölçümler (2026-11-01, yerel)
 

@@ -38,6 +38,7 @@ class SibOzet(BaseModel):
     category: str | None
     errors: int
     warnings: int
+    unreadable: bool = False
     export_count: int
     last_exported_at: datetime | None
     updated_at: datetime
@@ -152,7 +153,7 @@ async def listele(
     limit: Annotated[int, Query(ge=1, le=200)] = 100,
 ) -> SibListe:
     satirlar = await sib_service.listele(session, entity_id=entity_id, limit=limit)
-    return SibListe(items=[SibOzet(**sib_service.ozet(t, ad)) for t, ad in satirlar])
+    return SibListe(items=[SibOzet(**o) for o in await sib_service.ozetler(session, satirlar)])
 
 
 @router.get("/sib-drafts/{draft_id}", response_model=SibDetay)

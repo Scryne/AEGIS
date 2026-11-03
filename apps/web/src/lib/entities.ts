@@ -22,6 +22,7 @@ export interface Entity {
   lei_code: string | null;
   trade_registry_number: string | null;
   national_id_masked: string | null;
+  national_id_unreadable?: boolean;
   country: string | null;
   address: string | null;
   incorporation_date: string | null;

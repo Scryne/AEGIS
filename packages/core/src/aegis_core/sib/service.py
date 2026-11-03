@@ -16,12 +16,15 @@ import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import func, select, text
+from sqlalchemy import Text, func, select, text, type_coerce
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import defer
 
+from aegis_core.logging import get_logger
 from aegis_core.models import AuditAction, Entity, Organization, SibDraft, SibStatus
 from aegis_core.models.entity import EntitySchema
 from aegis_core.reports.dossier import build_dossier
+from aegis_core.security.encryption import DecryptionError, get_secret_box
 from aegis_core.services.audit import record_event
 from aegis_core.sib.form import (
     YER_TUTUCU,
@@ -38,6 +41,8 @@ from aegis_core.sib.kodlar import REHBER
 from aegis_core.ubo import service as ubo_service
 
 OBJECT_TYPE = "sib_draft"
+
+logger = get_logger(__name__)
 
 
 class SibStateError(ValueError):
@@ -316,8 +321,10 @@ async def iptal_et(
 async def listele(
     session: AsyncSession, *, entity_id: uuid.UUID | None = None, limit: int = 100
 ) -> list[tuple[SibDraft, str]]:
+    # Form satır satır çözülür (ozetler): okunamayan tek taslak listeyi düşürmesin.
     sorgu = (
         select(SibDraft, Entity.name)
+        .options(defer(SibDraft.form_encrypted))
         .join(Entity, Entity.id == SibDraft.entity_id)
         .order_by(SibDraft.updated_at.desc())
         .limit(limit)
@@ -327,8 +334,44 @@ async def listele(
     return [(t, ad) for t, ad in (await session.execute(sorgu)).all()]
 
 
-def ozet(taslak: SibDraft, entity_name: str) -> dict[str, Any]:
-    denetim = taslak_denetle(taslak)
+async def ozetler(
+    session: AsyncSession, satirlar: list[tuple[SibDraft, str]]
+) -> list[dict[str, Any]]:
+    """Liste özetleri. Çözülemeyen taslak yalnız kendi satırında işaretlenir, loglanır."""
+    if not satirlar:
+        return []
+    ham = dict(
+        (
+            await session.execute(
+                select(SibDraft.id, type_coerce(SibDraft.form_encrypted, Text)).where(
+                    SibDraft.id.in_([t.id for t, _ in satirlar])
+                )
+            )
+        )
+        .tuples()
+        .all()
+    )
+    sonuc: list[dict[str, Any]] = []
+    for taslak, ad in satirlar:
+        try:
+            form = SibFormu.model_validate_json(get_secret_box().decrypt(ham[taslak.id]))
+        except DecryptionError:
+            logger.error("sib_formu_cozulemedi", draft_id=str(taslak.id))
+            sonuc.append(ozet(taslak, ad, okunamadi=True))
+            continue
+        sonuc.append(ozet(taslak, ad, denetim=denetle(form, iskelet_ozeti=taslak.skeleton_sha256)))
+    return sonuc
+
+
+def ozet(
+    taslak: SibDraft,
+    entity_name: str,
+    *,
+    denetim: Denetim | None = None,
+    okunamadi: bool = False,
+) -> dict[str, Any]:
+    if denetim is None and not okunamadi:
+        denetim = taslak_denetle(taslak)
     return {
         "id": taslak.id,
         "entity_id": taslak.entity_id,
@@ -336,8 +379,9 @@ def ozet(taslak: SibDraft, entity_name: str) -> dict[str, Any]:
         "reference_no": taslak.reference_no,
         "status": taslak.status,
         "category": taslak.category,
-        "errors": len(denetim.hatalar),
-        "warnings": len(denetim.uyarilar),
+        "errors": len(denetim.hatalar) if denetim else 0,
+        "warnings": len(denetim.uyarilar) if denetim else 0,
+        "unreadable": okunamadi,
         "export_count": taslak.export_count,
         "last_exported_at": taslak.last_exported_at,
         "updated_at": taslak.updated_at,

@@ -18,6 +18,7 @@ from pydantic import BaseModel
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from aegis_core.logging import get_logger
+from aegis_core.security.encryption import DecryptionError
 
 logger = get_logger("aegis.api.errors")
 
@@ -27,6 +28,7 @@ class ErrorCode(StrEnum):
 
     VALIDATION_ERROR = "validation_error"
     NOT_FOUND = "not_found"
+    DATA_UNREADABLE = "data_unreadable"
     UNAUTHORIZED = "unauthorized"
     FORBIDDEN = "forbidden"
     CONFLICT = "conflict"
@@ -177,6 +179,16 @@ def register_exception_handlers(app: FastAPI) -> None:
         code = _HTTP_STATUS_TO_CODE.get(exc.status_code, ErrorCode.INTERNAL_ERROR)
         message = exc.detail if isinstance(exc.detail, str) else "HTTP hatası."
         return _error_response(exc.status_code, code, message)
+
+    @app.exception_handler(DecryptionError)
+    async def _handle_decryption_error(_request: Request, exc: DecryptionError) -> JSONResponse:
+        # Kapalı başarısız: veri açılmaz, ama sebep "beklenmeyen hata" diye gizlenmez.
+        logger.error("sifre_cozulemedi", error=str(exc))
+        return _error_response(
+            status.HTTP_503_SERVICE_UNAVAILABLE,
+            ErrorCode.DATA_UNREADABLE,
+            "Bu kayıt mevcut şifreleme anahtarıyla açılamıyor; anahtar ayarını denetleyin.",
+        )
 
     @app.exception_handler(Exception)
     async def _handle_unexpected_error(_request: Request, exc: Exception) -> JSONResponse:

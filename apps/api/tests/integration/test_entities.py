@@ -13,6 +13,7 @@ from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, text
 
 from aegis_core.security.tokens import create_access_token
 
@@ -501,3 +502,39 @@ def test_ada_gore_arama_turkce_normalizasyon_kullanir(api_client: TestClient) ->
     found = api_client.get("/api/v1/entities?q=yildiz insaat", headers=_auth(token)).json()
     assert found["total"] >= 1
     assert any("Yıldız" in item["name"] for item in found["items"])
+
+
+def test_okunamayan_tckn_listeyi_dusurmez(api_client: TestClient, app_database_url: str) -> None:
+    """Çözülemeyen tek kayıt yalnız kendi satırında işaretlenir; değer düz metin dönmez."""
+    tenant, token = _register_and_login(api_client, slug="tckn-bozuk", email="t@tckn-bozuk.com")
+    govde = {"name": "Ahmet Yılmaz", "schema_type": "Person", "national_id": GECERLI_TCKN}
+    bozuk = api_client.post("/api/v1/entities", json=govde, headers=_auth(token)).json()["entity"]
+    saglam = api_client.post(
+        "/api/v1/entities",
+        json={**govde, "name": "Ayşe Demir", "national_id": "10000000078"},
+        headers=_auth(token),
+    ).json()["entity"]
+
+    engine = create_engine(app_database_url)
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("SELECT set_config('app.current_tenant', :t, true)"), {"t": tenant})
+            conn.execute(
+                text("UPDATE entity SET national_id = 'Ym96dWsgdmVyaQ==' WHERE id = :i"),
+                {"i": bozuk["id"]},
+            )
+    finally:
+        engine.dispose()
+
+    liste = api_client.get("/api/v1/entities", headers=_auth(token))
+    assert liste.status_code == 200, liste.text
+    durum = {o["id"]: o for o in liste.json()["items"]}
+    assert durum[bozuk["id"]]["national_id_unreadable"] is True
+    assert durum[bozuk["id"]]["national_id_masked"] is None
+    assert durum[saglam["id"]]["national_id_masked"] == "*******0078"
+    assert durum[saglam["id"]]["national_id_unreadable"] is False
+    assert GECERLI_TCKN not in liste.text
+    # Tek kayıt detayı kapalı başarısız kalır ve sebebini söyler.
+    detay = api_client.get(f"/api/v1/entities/{bozuk['id']}", headers=_auth(token))
+    assert detay.status_code == 503
+    assert detay.json()["error"]["code"] == "data_unreadable"

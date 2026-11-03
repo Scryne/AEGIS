@@ -96,6 +96,7 @@ export interface SibOzet {
   category: string | null;
   errors: number;
   warnings: number;
+  unreadable?: boolean;
   export_count: number;
   last_exported_at: string | null;
   updated_at: string;

@@ -114,6 +114,7 @@ class EntityResponse(BaseModel):
     lei_code: str | None
     trade_registry_number: str | None
     national_id_masked: str | None
+    national_id_unreadable: bool = False
     country: str | None
     address: str | None
     incorporation_date: date | None
@@ -265,7 +266,9 @@ class GleifEnrichResponse(BaseModel):
 # ── Dönüştürücüler ───────────────────────────────────────────────────────────
 
 
-def _entity_response(entity: Entity) -> EntityResponse:
+def _entity_response(
+    entity: Entity, mask: entity_service.NationalIdMask | None = None
+) -> EntityResponse:
     return EntityResponse(
         id=entity.id,
         schema_type=entity.schema_type,
@@ -277,8 +280,13 @@ def _entity_response(entity: Entity) -> EntityResponse:
         trade_registry_number=entity.trade_registry_number,
         # TCKN asla düz metin dönmez — arayüz de görmemelidir.
         national_id_masked=(
-            entity_service.mask_identifier(entity.national_id) if entity.national_id else None
+            mask.masked
+            if mask is not None
+            else (
+                entity_service.mask_identifier(entity.national_id) if entity.national_id else None
+            )
         ),
+        national_id_unreadable=mask.unreadable if mask is not None else False,
         country=entity.country,
         address=entity.address,
         incorporation_date=entity.incorporation_date,
@@ -467,7 +475,14 @@ async def list_entities(
         offset=offset,
     )
     total = await entity_service.count_entities(session)
-    return EntityListResponse(total=total, items=[_entity_response(entity) for entity in entities])
+    masks = await entity_service.national_id_masks(session, [entity.id for entity in entities])
+    return EntityListResponse(
+        total=total,
+        items=[
+            _entity_response(entity, masks.get(entity.id, entity_service.NationalIdMask()))
+            for entity in entities
+        ],
+    )
 
 
 @router.get("/{entity_id}", response_model=EntityResponse)

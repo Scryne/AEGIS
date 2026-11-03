@@ -262,3 +262,31 @@ def test_kod_listeleri(api_client: TestClient) -> None:
     assert len(r["sk_kodlari"]) == 41
     assert r["kategori_zorunlu_sk"] == {"kis": ["SK-36"], "teror": ["SK-23", "SK-35"]}
     assert r["aciklama_en_az"] == 300
+
+
+def test_okunamayan_taslak_listeyi_dusurmez(api_client: TestClient, app_database_url: str) -> None:
+    tenant, token = _register(api_client, "sib-bozuk")
+    sirket = _sirket_ve_ubo(api_client, token)
+    bozuk = api_client.post(f"/api/v1/entities/{sirket}/sib-drafts", headers=_auth(token)).json()
+    saglam = api_client.post(f"/api/v1/entities/{sirket}/sib-drafts", headers=_auth(token)).json()
+
+    engine = create_engine(app_database_url)
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("SELECT set_config('app.current_tenant', :t, true)"), {"t": tenant})
+            conn.execute(
+                text("UPDATE sib_draft SET form_encrypted = 'Ym96dWsgdmVyaQ==' WHERE id = :i"),
+                {"i": bozuk["id"]},
+            )
+    finally:
+        engine.dispose()
+
+    liste = api_client.get("/api/v1/sib-drafts", headers=_auth(token))
+    assert liste.status_code == 200
+    durum = {o["id"]: o for o in liste.json()["items"]}
+    assert durum[bozuk["id"]]["unreadable"] is True
+    assert durum[saglam["id"]]["unreadable"] is False
+    # Detay kapalı başarısız kalır ve sebebini söyler.
+    detay = api_client.get(f"/api/v1/sib-drafts/{bozuk['id']}", headers=_auth(token))
+    assert detay.status_code == 503
+    assert detay.json()["error"]["code"] == "data_unreadable"

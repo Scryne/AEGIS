@@ -25,8 +25,9 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import func, select, update
+from sqlalchemy import Text, func, select, type_coerce, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import defer
 
 from aegis_core.entities.identifiers import IdentifierKind, check_identifier
 from aegis_core.logging import get_logger
@@ -47,7 +48,7 @@ from aegis_core.models import (
 )
 from aegis_core.models.entity import NATIONAL_ID_DOMAIN
 from aegis_core.screening.normalization import SubjectType, canonicalize, normalize_name
-from aegis_core.security.encryption import blind_index
+from aegis_core.security.encryption import DecryptionError, blind_index, get_secret_box
 from aegis_core.services import audit as audit_service
 
 logger = get_logger("aegis.entities.service")
@@ -553,7 +554,12 @@ async def list_entities(
     offset: int = 0,
 ) -> list[Entity]:
     """Varlıkları listeler; ``query`` verilirse ada göre (ASCII, ILIKE) süzer."""
-    statement = select(Entity).where(Entity.status == EntityStatus.ACTIVE.value)
+    # TCKN satır satır çözülür (national_id_masks): okunamayan tek kayıt listeyi düşürmesin.
+    statement = (
+        select(Entity)
+        .options(defer(Entity.national_id))
+        .where(Entity.status == EntityStatus.ACTIVE.value)
+    )
     if schema_type is not None:
         statement = statement.where(Entity.schema_type == schema_type.value)
     if query and query.strip():
@@ -564,6 +570,42 @@ async def list_entities(
         statement.order_by(Entity.created_at.desc()).limit(limit).offset(offset)
     )
     return list(result)
+
+
+@dataclass(frozen=True)
+class NationalIdMask:
+    """Liste görünümü için TCKN durumu: maskeli değer ya da okunamadı işareti."""
+
+    masked: str | None = None
+    unreadable: bool = False
+
+
+async def national_id_masks(
+    session: AsyncSession, entity_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, NationalIdMask]:
+    """Şifreli TCKN'leri satır satır çözer.
+
+    Çözülemeyen kayıt (eski anahtar, bozuk veri) yalnız kendi satırında işaretlenir ve loglanır;
+    değer hiçbir koşulda düz metin dönmez. Tek kayıt detayı kapalı başarısız kalır.
+    """
+    if not entity_ids:
+        return {}
+    rows = await session.execute(
+        select(Entity.id, type_coerce(Entity.national_id, Text)).where(Entity.id.in_(entity_ids))
+    )
+    masks: dict[uuid.UUID, NationalIdMask] = {}
+    for entity_id, token in rows.all():
+        if token is None:
+            masks[entity_id] = NationalIdMask()
+            continue
+        try:
+            masks[entity_id] = NationalIdMask(
+                masked=mask_identifier(get_secret_box().decrypt(token))
+            )
+        except DecryptionError:
+            logger.error("tckn_cozulemedi", entity_id=str(entity_id))
+            masks[entity_id] = NationalIdMask(unreadable=True)
+    return masks
 
 
 async def count_entities(session: AsyncSession) -> int:

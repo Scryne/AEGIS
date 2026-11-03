@@ -24,7 +24,7 @@ from aegis_core.models.entity import (
 )
 from aegis_core.models.integration import ApiKey, WebhookDelivery, WebhookEndpoint
 from aegis_core.models.membership import Membership, Role
-from aegis_core.models.monitoring import AlertStatus, MonitoringAlert
+from aegis_core.models.monitoring import AlertStatus, MonitoringAlert, MonitoringRun
 from aegis_core.models.organization import Organization
 from aegis_core.models.quality import MatchEvalRun
 from aegis_core.models.report import (
@@ -73,6 +73,7 @@ __all__ = [
     "MatchEvalRun",
     "Membership",
     "MonitoringAlert",
+    "MonitoringRun",
     "Organization",
     "ProposalKind",
     "ProposalStatus",

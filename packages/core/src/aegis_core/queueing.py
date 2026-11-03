@@ -21,6 +21,7 @@ TASK_DOCUMENT_EXTRACT = "document.extract"
 
 # E2.4 izleme-lite gece koşusu.
 TASK_MONITORING_NIGHTLY = "monitoring.nightly"
+TASK_MONITORING_DIGEST = "monitoring.digest"
 # E3.3 toplu tarama: bir toplu işin bekleyen satırlarını parça parça işler.
 TASK_BATCH_PROCESS = "batch.process"
 # E3.4 webhook teslimi: zamanı gelen teslimleri dener (beat, 30 sn).

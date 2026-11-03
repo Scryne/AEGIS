@@ -18,8 +18,9 @@ başarısız olursa alarm da yazılmaz, gece koşusu ertesi gün aynı farkı ye
 
 from __future__ import annotations
 
+import time
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,6 +35,7 @@ from aegis_core.models import (
     EntityStatus,
     MatchCandidate,
     MonitoringAlert,
+    MonitoringRun,
     Screening,
     ScreeningStatus,
 )
@@ -129,6 +131,13 @@ async def _previous_completed(session: AsyncSession, entity_id: uuid.UUID) -> Sc
     return row
 
 
+class _Unavailable:
+    """Varlık taranamadı: temiz sonuçtan ayrı tutulur, koşu kaydına yazılır."""
+
+
+UNAVAILABLE = _Unavailable()
+
+
 async def monitor_entity(
     session: AsyncSession,
     client: YenteClient,
@@ -136,7 +145,7 @@ async def monitor_entity(
     tenant_id: uuid.UUID,
     entity: Entity,
     settings: Settings,
-) -> MonitoringAlert | None:
+) -> MonitoringAlert | _Unavailable | None:
     """Varlığı yeniden tarar; önceki koşuya göre önemli fark varsa alarm yazar."""
     previous = await _previous_completed(session, entity.id)
     screening = await screening_service.run_screening(
@@ -155,7 +164,9 @@ async def monitor_entity(
     )
     if screening.status != ScreeningStatus.COMPLETED.value:
         logger.warning("izleme_taramasi_basarisiz", entity_id=str(entity.id))
-        return None
+        # Sonuç YOK temiz demek değildir. Hata fırlatılmaz: başarısız tarama kaydı ve
+        # denetim olayı savepoint geri alınınca kaybolurdu.
+        return UNAVAILABLE
     if previous is None:
         logger.info("izleme_taban_koşusu", entity_id=str(entity.id))
         return None  # ilk koşu taban çizgisidir; karşılaştıracak bir şey yok
@@ -246,22 +257,127 @@ async def monitored_entities(session: AsyncSession) -> list[Entity]:
     return list(rows)
 
 
+async def _recently_checked(
+    session: AsyncSession, entity_id: uuid.UUID, *, since: datetime
+) -> bool:
+    found = await session.scalar(
+        select(Screening.id)
+        .where(
+            Screening.entity_id == entity_id,
+            # Kullanıcısız koşu izleme ya da sistem taramasıdır; elle tarama tekrarı engellemez.
+            Screening.requested_by_user_id.is_(None),
+            Screening.status == ScreeningStatus.COMPLETED.value,
+            Screening.created_at >= since,
+        )
+        .limit(1)
+    )
+    return found is not None
+
+
+async def _attempt(
+    session: AsyncSession,
+    client: YenteClient,
+    *,
+    tenant_id: uuid.UUID,
+    entity: Entity,
+    settings: Settings,
+) -> tuple[bool, str | None]:
+    """Tek varlık, tek deneme: (alarm üretti mi, hata nedeni)."""
+    try:
+        async with session.begin_nested():
+            alert = await monitor_entity(
+                session, client, tenant_id=tenant_id, entity=entity, settings=settings
+            )
+        if isinstance(alert, _Unavailable):
+            return False, "Tarama motoruna ulaşılamadı; sonuç yok."
+        return alert is not None, None
+    except Exception:  # bir varlığın hatası diğerlerini durdurmaz
+        logger.exception("izleme_varlik_hatasi", entity_id=str(entity.id))
+        return False, "Beklenmeyen hata; ayrıntı sunucu kaydında."
+
+
 async def run_for_tenant(
-    session: AsyncSession, client: YenteClient, *, tenant_id: uuid.UUID, settings: Settings
+    session: AsyncSession,
+    client: YenteClient,
+    *,
+    tenant_id: uuid.UUID,
+    settings: Settings,
+    trigger: str = "manual",
 ) -> dict[str, int]:
-    checked = alerts = failed = 0
+    """İzlenen varlıkları tarar, koşu kaydını yazar.
+
+    Gece koşusu görev yeniden teslim edilirse aynı varlığı iki kez taramaz; elle koşu hep tarar.
+    Düşen varlıklar döngü sonunda bir kez daha denenir: geçici motor kesintisi dosyayı kaçırmasın.
+    Kalıcı hata ``failures`` içinde kalır (işlenemeyen iş kuyruğu); sonraki koşu yeniden dener.
+    """
+    started = datetime.now(UTC)
+    clock = time.monotonic()
+    since = started - timedelta(hours=settings.monitoring_recheck_after_hours)
+    checked = alerts = skipped = 0
+    pending: list[tuple[Entity, str]] = []
     for entity in await monitored_entities(session):
+        if trigger == "nightly" and await _recently_checked(session, entity.id, since=since):
+            skipped += 1
+            continue
         checked += 1
-        try:
-            async with session.begin_nested():
-                if await monitor_entity(
-                    session, client, tenant_id=tenant_id, entity=entity, settings=settings
-                ):
-                    alerts += 1
-        except Exception:  # bir varlığın hatası diğerlerini durdurmaz
-            failed += 1
-            logger.exception("izleme_varlik_hatasi", entity_id=str(entity.id))
-    return {"checked": checked, "alerts": alerts, "failed": failed}
+        raised, reason = await _attempt(
+            session, client, tenant_id=tenant_id, entity=entity, settings=settings
+        )
+        alerts += int(raised)
+        if reason is not None:
+            pending.append((entity, reason))
+    first_pass_ms = int((time.monotonic() - clock) * 1000)
+
+    retried = len(pending)
+    failures: list[dict[str, str]] = []
+    for entity, _first_reason in pending:
+        raised, reason = await _attempt(
+            session, client, tenant_id=tenant_id, entity=entity, settings=settings
+        )
+        alerts += int(raised)
+        if reason is not None:
+            failures.append(
+                {"entity_id": str(entity.id), "entity_name": entity.name, "reason": reason}
+            )
+
+    finished = datetime.now(UTC)
+    duration_ms = int((time.monotonic() - clock) * 1000)
+    session.add(
+        MonitoringRun(
+            tenant_id=tenant_id,
+            trigger=trigger,
+            started_at=started,
+            finished_at=finished,
+            duration_ms=duration_ms,
+            checked=checked,
+            skipped=skipped,
+            alerts=alerts,
+            failed=len(failures),
+            retried=retried,
+            failures=failures,
+            stages={"first_pass_ms": first_pass_ms, "retry_ms": duration_ms - first_pass_ms},
+        )
+    )
+    await session.flush()
+    logger.info(
+        "izleme_kosusu",
+        tenant_id=str(tenant_id),
+        trigger=trigger,
+        checked=checked,
+        skipped=skipped,
+        alerts=alerts,
+        failed=len(failures),
+        retried=retried,
+        duration_ms=duration_ms,
+    )
+    return {"checked": checked, "alerts": alerts, "failed": len(failures), "skipped": skipped}
+
+
+async def latest_runs(session: AsyncSession, *, limit: int = 7) -> list[MonitoringRun]:
+    rows = await session.scalars(
+        select(MonitoringRun).order_by(MonitoringRun.started_at.desc()).limit(limit)
+    )
+    return list(rows)
 
 
 def severity_of(alert: MonitoringAlert) -> Severity:

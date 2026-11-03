@@ -538,11 +538,11 @@ integrate via API + webhooks, get monitored continuously, and are billed automat
 
 **E3.1 — Full continuous monitoring (critical path)** *(L · ~2 weeks)* — **core shipped 2026-11-01 (ADR-0014)**; registry/adverse-media sources and routing open
 - [ ] Generalize E2.4 diff engine: sanctions/watchlist diffs + registry/gazette change detection (scope per E0.3 verdict) + adverse-media re-checks (if E2.5 cleared)
-- [~] Alert severity model (critical: new sanctions hit / high: ownership change / info) + per-tenant routing & digest preferences — *severity done (sanction → critical, PEP / removed confirmed → high); ownership change waits for a registry source; routing/digest wait for email infra*
+- [x] Alert severity model (critical: new sanctions hit / high: ownership change / info) + per-tenant routing & digest preferences — ADR-0019; ownership-change severity waits for a registry source; real SMTP delivery untested
 - [x] Auto re-assessment: material alert → recompute risk score → snapshot delta in dossier (alert carries before/after; case decision re-scores)
 - [x] EDD escalation trigger: threshold-crossing alerts open an EDD-flagged case (→ E3.2) — critical → EDD case, high → plain case, one case per alert (unique)
-- [ ] Monitoring entitlement enforcement: per-watched-entity metering (→ E3.5)
-- [ ] Idempotency + retry hardening on the full pipeline; dead-letter handling; per-stage metrics (plan NFR: reliability)
+- [x] Monitoring entitlement enforcement: per-watched-entity metering (→ E3.5) — plan slot gate + monthly statement
+- [x] Idempotency + retry hardening on the full pipeline; dead-letter handling; per-stage metrics (plan NFR: reliability) — ADR-0019: run record, one retry, failures list, stage timings; Prometheus arrives with the deploy host
 
 **E3.2 — Case management & workflow** *(L · ~1.5–2 weeks)* — **shipped 2026-11-01 (ADR-0014)**
 - [x] `Case` lifecycle: new → in review → approved / escalated (EDD) → closed; assignment, due dates, comments

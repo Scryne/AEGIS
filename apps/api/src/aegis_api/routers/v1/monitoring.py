@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Query, status
 from pydantic import BaseModel, Field
@@ -29,9 +29,12 @@ from aegis_api.errors import NotFoundError, PlanLimitError
 from aegis_core.billing import service as billing_service
 from aegis_core.cases import service as case_service
 from aegis_core.entities import service as entity_service
-from aegis_core.models import MonitoringAlert, Role
+from aegis_core.models import AuditAction, MonitoringAlert, Role
+from aegis_core.monitoring import notify as monitoring_notify
 from aegis_core.monitoring import service as monitoring_service
 from aegis_core.monitoring.severity import SEVERITY_LABELS
+from aegis_core.notifications.email import default_sender
+from aegis_core.services import audit as audit_service
 
 router = APIRouter(tags=["monitoring"])
 
@@ -176,6 +179,82 @@ async def acknowledge(
         actor_role=principal.role.value,
     )
     return await _alert_response(session, alert)
+
+
+class RunRow(BaseModel):
+    id: uuid.UUID
+    trigger: str
+    started_at: datetime
+    duration_ms: int
+    checked: int
+    skipped: int
+    alerts: int
+    failed: int
+    retried: int
+    failures: list[dict[str, str]]
+
+
+class RunListResponse(BaseModel):
+    items: list[RunRow]
+
+
+@router.get("/monitoring/runs", response_model=RunListResponse)
+async def runs(
+    _principal: PrincipalDep,
+    session: TenantSessionDep,
+    limit: Annotated[int, Query(ge=1, le=30)] = 7,
+) -> RunListResponse:
+    """Son koşular. Taranamayan varlıklar burada görünür: sonuç YOK, temiz değil."""
+    rows = await monitoring_service.latest_runs(session, limit=limit)
+    return RunListResponse(items=[RunRow.model_validate(r, from_attributes=True) for r in rows])
+
+
+class NotificationPreferences(BaseModel):
+    critical: Literal["immediate", "digest"]
+    high: Literal["immediate", "digest"]
+    info: Literal["immediate", "digest"]
+    roles: list[Literal["owner", "compliance_officer", "analyst", "auditor"]] = Field(min_length=1)
+
+
+class NotificationPreferencesResponse(NotificationPreferences):
+    email_configured: bool
+
+
+@router.get("/monitoring/notifications", response_model=NotificationPreferencesResponse)
+async def get_notifications(
+    principal: PrincipalDep, session: TenantSessionDep, settings: SettingsDep
+) -> NotificationPreferencesResponse:
+    prefs = await monitoring_notify.load_preferences(session, principal.tenant_id)
+    return NotificationPreferencesResponse(
+        **prefs.as_dict(), email_configured=default_sender(settings).configured
+    )
+
+
+@router.put("/monitoring/notifications", response_model=NotificationPreferencesResponse)
+async def put_notifications(
+    body: NotificationPreferences,
+    principal: RequireRunNow,
+    session: TenantSessionDep,
+    settings: SettingsDep,
+) -> NotificationPreferencesResponse:
+    """Yönlendirme tercihini kaydeder; değişiklik denetim izine yazılır."""
+    prefs = monitoring_notify.Preferences(
+        critical=body.critical, high=body.high, info=body.info, roles=tuple(body.roles)
+    )
+    await monitoring_notify.save_preferences(session, principal.tenant_id, prefs)
+    await audit_service.record_event(
+        session,
+        tenant_id=principal.tenant_id,
+        actor_user_id=principal.user_id,
+        actor_role=principal.role.value,
+        action=AuditAction.TENANT_SETTING_UPDATE,
+        object_type="tenant_setting",
+        object_id=monitoring_notify.SETTING_KEY,
+        payload=prefs.as_dict(),
+    )
+    return NotificationPreferencesResponse(
+        **prefs.as_dict(), email_configured=default_sender(settings).configured
+    )
 
 
 @router.post("/monitoring/run", response_model=RunResponse, status_code=status.HTTP_200_OK)

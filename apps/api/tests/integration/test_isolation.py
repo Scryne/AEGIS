@@ -133,6 +133,7 @@ def test_cross_tenant_isolation_api_and_direct_sql(
         "match_eval_run",
         # E3.5 kullanım dökümü
         "usage_statement",
+        "monitoring_run",
     )
     engine = create_engine(app_database_url)
     try:

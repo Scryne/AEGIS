@@ -17,6 +17,7 @@ from aegis_core.observability import init_sentry
 from aegis_core.queueing import (
     QUEUE_DEFAULT,
     TASK_BILLING_CLOSE,
+    TASK_MONITORING_DIGEST,
     TASK_MONITORING_NIGHTLY,
     TASK_QUALITY_WEEKLY,
     TASK_RETENTION_DISPOSE,
@@ -78,6 +79,11 @@ def create_celery_app() -> Celery:
             "monitoring-nightly": {
                 "task": TASK_MONITORING_NIGHTLY,
                 "schedule": crontab(hour=2, minute=45),
+            },
+            # E3.1 günlük özet: "özet" tercihli alarmlar ve gidememiş bildirimler (İstanbul 08:30).
+            "monitoring-digest-daily": {
+                "task": TASK_MONITORING_DIGEST,
+                "schedule": crontab(hour=5, minute=30),
             },
             # E3.4 webhook teslimi: zamanı gelen teslimler (yeniden deneme takvimi dahil).
             # E3.6 haftalık eşleşme kalitesi ölçümü (Pazartesi 04:00 UTC): eğilim kaydı.

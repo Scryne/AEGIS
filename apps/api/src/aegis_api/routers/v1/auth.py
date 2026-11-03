@@ -20,6 +20,7 @@ from aegis_api.errors import (
 from aegis_core.config import Settings
 from aegis_core.logging import get_logger
 from aegis_core.models import Role, User
+from aegis_core.notifications.email import EmailSendError, OutgoingEmail, default_sender
 from aegis_core.security.tokens import (
     TYPE_REFRESH,
     create_access_token,
@@ -312,6 +313,25 @@ async def password_reset_request(
         expires_in_minutes=settings.password_reset_expire_minutes,
     )
     logger.info("parola_sifirlama_talebi", user_id=str(user.id))
+    sender = default_sender(settings)
+    if sender.configured:
+        link = f"{settings.web_base_url.rstrip('/')}/reset-password?token={token}"
+        try:
+            await sender.send(
+                OutgoingEmail(
+                    to=(user.email,),
+                    subject="AEGIS parola sıfırlama",
+                    body=(
+                        "Parolanızı sıfırlamak için bağlantıyı açın:\n\n"
+                        f"{link}\n\n"
+                        f"Bağlantı {settings.password_reset_expire_minutes} dakika geçerlidir. "
+                        "Bu talebi siz yapmadıysanız e-postayı yok sayın."
+                    ),
+                )
+            )
+        except EmailSendError as exc:
+            # Yanıt değişmez: e-posta durumu hesabın varlığını ele vermemeli.
+            logger.error("parola_sifirlama_epostasi_gitmedi", error=str(exc))
     return PasswordResetResponse(reset_token=None if settings.is_production else token)
 
 

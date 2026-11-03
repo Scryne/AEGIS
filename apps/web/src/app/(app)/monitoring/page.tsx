@@ -3,6 +3,7 @@
 // Her alarm hangi kaydın neden değiştiğini düz Türkçe söyler ve iki koşuya (önceki/yeni)
 // bağlanır. Görülen alarm silinmez, gerekçesiyle "görüldü" olur.
 
+import { MonitoringPreferences, type NotificationPrefs } from "@/components/monitoring-preferences";
 import Link from "next/link";
 
 import { MonitoringAck } from "@/components/monitoring-ack";
@@ -10,6 +11,16 @@ import { serverFetch } from "@/lib/server/backend";
 import { getCurrentUser } from "@/lib/server/user";
 
 export const metadata = { title: "İzleme" };
+
+interface MonitoringRun {
+  id: string;
+  started_at: string;
+  duration_ms: number;
+  checked: number;
+  alerts: number;
+  failed: number;
+  failures: { entity_id: string; entity_name: string; reason: string }[];
+}
 
 export const dynamic = "force-dynamic";
 
@@ -72,8 +83,15 @@ export default async function MonitoringPage({
   const status = params.status === "acknowledged" ? "acknowledged" : params.status === "all" ? "" : "open";
   const query = new URLSearchParams({ limit: "100" });
   if (status) query.set("status", status);
-  const res = await serverFetch(`/monitoring/alerts?${query}`);
+  const [res, runsRes, prefsRes] = await Promise.all([
+    serverFetch(`/monitoring/alerts?${query}`),
+    serverFetch("/monitoring/runs?limit=1"),
+    serverFetch("/monitoring/notifications"),
+  ]);
   const data = res.ok ? ((await res.json()) as { items: Alert[]; open_count: number }) : null;
+  const lastRun = runsRes.ok ? ((await runsRes.json()) as { items: MonitoringRun[] }).items[0] : undefined;
+  const prefs = prefsRes.ok ? ((await prefsRes.json()) as NotificationPrefs) : null;
+  const canEditPrefs = user.role === "owner" || user.role === "compliance_officer";
   const canAck = user.role !== "auditor";
 
   const tabs = [
@@ -96,6 +114,23 @@ export default async function MonitoringPage({
         </p>
       </div>
 
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,5fr)_minmax(0,2fr)]">
+      <div className="min-w-0 space-y-6">
+      {lastRun && lastRun.failed > 0 && (
+        <div role="alert" className="rounded-card border border-danger/40 bg-danger-soft p-4 text-sm text-danger">
+          <strong className="font-semibold">{lastRun.failed} varlık son koşuda taranamadı.</strong>{" "}
+          Bu varlıklar için sonuç YOK, temiz değil. Sonraki koşu yeniden dener.
+          <ul className="mt-2 space-y-0.5">
+            {lastRun.failures.slice(0, 5).map((f) => (
+              <li key={f.entity_id}>
+                <Link href={`/entities/${f.entity_id}`} className="underline underline-offset-2">
+                  {f.entity_name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <nav aria-label="Alarm durumu" className="flex gap-1">
         {tabs.map((tab) => (
           <Link
@@ -191,6 +226,42 @@ export default async function MonitoringPage({
           ))}
         </ul>
       )}
+      </div>
+      <aside className="min-w-0 space-y-6">
+        <section className="panel p-5">
+          <h2 className="eyebrow mb-3">Son koşu</h2>
+          {lastRun ? (
+            <dl className="grid grid-cols-2 gap-3 text-sm">
+              <div className="col-span-2">
+                <dt className="text-xs text-muted">Zaman</dt>
+                <dd className="font-mono text-fg">
+                  {new Date(lastRun.started_at).toLocaleString("tr-TR", { dateStyle: "short", timeStyle: "short" })}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted">Taranan</dt>
+                <dd className="font-mono text-fg">{lastRun.checked}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted">Alarm</dt>
+                <dd className="font-mono text-fg">{lastRun.alerts}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted">Taranamayan</dt>
+                <dd className={`font-mono ${lastRun.failed > 0 ? "text-danger" : "text-fg"}`}>{lastRun.failed}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted">Süre</dt>
+                <dd className="font-mono text-fg">{(lastRun.duration_ms / 1000).toFixed(1)} sn</dd>
+              </div>
+            </dl>
+          ) : (
+            <p className="text-sm text-muted">Henüz koşu yok. İlk gece koşusundan sonra burada görünür.</p>
+          )}
+        </section>
+        {prefs && <MonitoringPreferences initial={prefs} canEdit={canEditPrefs} />}
+      </aside>
+      </div>
     </div>
   );
 }

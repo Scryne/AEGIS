@@ -90,6 +90,18 @@ class Settings(BaseSettings):
     # Worker (derin koşu) daha uzun bekleyebilir: kullanıcı ekran başında değil.
     yente_worker_timeout_seconds: float = 120.0
 
+    # E-posta (SMTP). Boşsa gönderim kapalıdır; arayüz bunu açıkça gösterir.
+    smtp_host: str | None = None
+    smtp_port: int = 587
+    smtp_username: str | None = None
+    smtp_password: str | None = None
+    smtp_from: str | None = None
+    smtp_starttls: bool = True
+    smtp_timeout_seconds: float = 20.0
+    web_base_url: str = "http://localhost:3000"
+    # Gece koşusu aynı varlığı bu süre içinde yeniden taramaz (görev yeniden teslim edilirse).
+    monitoring_recheck_after_hours: int = 18
+
     # ── Tarama davranışı — E1.3 ──────────────────────────────────────────────
     # Özne başına yente'den istenen azami aday sayısı.
     screening_candidate_limit: int = 10

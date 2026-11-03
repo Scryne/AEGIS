@@ -28,6 +28,8 @@ out/
 *.tsbuildinfo
 .vercel/
 next-env.d.ts
+# `next dev` bu dosyayı her açılışta yeniden yazar (Next 16 ajan kuralları); depo değil araç çıktısı.
+apps/web/AGENTS.md
 
 # --- Environment & secrets ---
 .env

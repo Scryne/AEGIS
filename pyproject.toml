@@ -107,7 +107,7 @@ warn_required_dynamic_aliases = true
 # ── Pytest ───────────────────────────────────────────────────────────────────
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["packages", "apps", "evals"]
+testpaths = ["packages", "apps", "evals", "infra"]
 # Varsayılan koşu: hızlı katman. Docker gerektiren kapılar kendi işaretleriyle ayrı
 # koşar (integration: Postgres/Redis; screening: yente + Elasticsearch).
 addopts = "-q --strict-markers --import-mode=importlib -m 'not integration and not screening'"

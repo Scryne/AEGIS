@@ -1,0 +1,354 @@
+# AEGIS — üretim (tek sunucu, R6: Kubernetes yok). E1.6.
+#
+# Geliştirme dosyasından (docker-compose.yml) farkları:
+#   - İmajlar sunucuda derlenmez; CI'ın GHCR'a ittiği etiket çekilir (AEGIS_IMAGE_TAG).
+#   - SIRLAR YALNIZ ORTAM DOSYASINDAN gelir: bu dosyada tek bir parola/anahtar yok; her
+#     sır `${AD:?…}` ile zorunludur — eksikse compose hiç başlamaz (sessiz varsayılan yok).
+#   - Dışarı yalnız Caddy açılır (80/443, otomatik TLS). Postgres, Redis, ES, yente, MinIO
+#     ve API'nin hiçbir portu sunucuya bağlanmaz.
+#   - Her serviste bellek/CPU sınırı, yeniden başlatma ilkesi, sağlık kontrolü ve döngüsel
+#     günlük. Toplam sınır ≈ 15 GB → en az 16 GB RAM, 4 vCPU, 100 GB SSD (ES 10–30 GB).
+#   - Celery beat ayrı servis: worker çoğaltılırsa zamanlanmış işler iki kez koşmaz.
+#
+# Kullanım (sunucuda, depo kökünden; ayrıntı docs/deploy.md):
+#   docker compose -f infra/compose/docker-compose.prod.yml --env-file /etc/aegis/aegis.env up -d
+# Tek komutluk dağıtım: infra/ops/deploy.sh <imaj-etiketi>
+
+name: aegis
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "5"
+
+# api + worker + beat ortak çalışma ortamı. Uygulama RLS'ye TABİ aegis_app rolüyle bağlanır
+# (Invariant 1, ADR-0002); ayrıcalıklı aegis rolünü yalnız migrate görür.
+x-app-env: &app-env
+  ENVIRONMENT: production
+  DEBUG: "false"
+  DATABASE_URL: postgresql+psycopg://aegis_app:${AEGIS_APP_DB_PASSWORD:?AEGIS_APP_DB_PASSWORD eksik}@postgres:5432/aegis
+  REDIS_URL: redis://:${REDIS_PASSWORD:?REDIS_PASSWORD eksik}@redis:6379/0
+  AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET eksik}
+  FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY:?FIELD_ENCRYPTION_KEY eksik}
+  CORS_ORIGINS: https://${AEGIS_DOMAIN:?AEGIS_DOMAIN eksik}
+  WEB_BASE_URL: https://${AEGIS_DOMAIN:?AEGIS_DOMAIN eksik}
+  # Tarama motoru: self-host yente; KVKK gereği kişi verisi dışarı çıkmaz (Invariant 3).
+  YENTE_URL: http://yente:8000
+  YENTE_DATASET: aegis_all
+  YENTE_UPDATE_TOKEN: ${YENTE_UPDATE_TOKEN:?YENTE_UPDATE_TOKEN eksik}
+  MASAK_ENTITIES_PATH: /manifests/masak/entities.ftm.json
+  MASAK_SOURCE_URL: ${MASAK_SOURCE_URL:-}
+  OBJECT_STORAGE_ENDPOINT_URL: http://minio:9000
+  OBJECT_STORAGE_BUCKET: aegis-documents
+  OBJECT_STORAGE_ACCESS_KEY_ID: ${MINIO_ROOT_USER:?MINIO_ROOT_USER eksik}
+  OBJECT_STORAGE_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD eksik}
+  DOCUMENT_RETENTION_YEARS: ${DOCUMENT_RETENTION_YEARS:-5}
+  SENTRY_DSN: ${SENTRY_DSN:-}
+  SMTP_HOST: ${SMTP_HOST:-}
+  SMTP_PORT: ${SMTP_PORT:-587}
+  SMTP_USERNAME: ${SMTP_USERNAME:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  SMTP_FROM: ${SMTP_FROM:-}
+  SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
+  # Caddy → (web →) api: X-Forwarded-For'un son girdisini Caddy yazar.
+  TRUSTED_PROXY_COUNT: "1"
+
+services:
+  # ── Kenar: otomatik TLS (Let's Encrypt / ZeroSSL), HTTP→HTTPS, güvenlik başlıkları ──
+  caddy:
+    image: caddy:2.11.7-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      AEGIS_DOMAIN: ${AEGIS_DOMAIN:?AEGIS_DOMAIN eksik}
+      AEGIS_API_DOMAIN: ${AEGIS_API_DOMAIN:?AEGIS_API_DOMAIN eksik}
+      ACME_EMAIL: ${ACME_EMAIL:?ACME_EMAIL eksik}
+    volumes:
+      - ../caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    healthcheck:
+      # Yönetim ucu yalnız konteyner içinden (localhost:2019) dinler.
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2019/config/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    deploy:
+      resources:
+        limits: { memory: 256m, cpus: "0.50" }
+    depends_on:
+      web:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    logging: *logging
+
+  web:
+    image: ${AEGIS_IMAGE_REGISTRY:?AEGIS_IMAGE_REGISTRY eksik}/aegis-web:${AEGIS_IMAGE_TAG:?AEGIS_IMAGE_TAG eksik}
+    restart: unless-stopped
+    environment:
+      API_URL: http://api:8000
+      NODE_ENV: production
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    deploy:
+      resources:
+        limits: { memory: 512m, cpus: "1.0" }
+    depends_on:
+      api:
+        condition: service_healthy
+    logging: *logging
+
+  api:
+    image: ${AEGIS_IMAGE_REGISTRY:?AEGIS_IMAGE_REGISTRY eksik}/aegis-api:${AEGIS_IMAGE_TAG:?AEGIS_IMAGE_TAG eksik}
+    restart: unless-stopped
+    command: ["uvicorn", "aegis_api.main:app", "--host", "0.0.0.0", "--port", "8000",
+              "--workers", "2", "--proxy-headers", "--forwarded-allow-ips", "*"]
+    environment:
+      <<: *app-env
+    healthcheck:
+      # /readyz: veritabanı + Redis zorunlu; yente bilgi amaçlı (düşmesi hazırlığı bozmaz).
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/readyz', timeout=5)"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits: { memory: 1g, cpus: "1.5" }
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    logging: *logging
+
+  # Tek seferlik: ayrıcalıklı rolle `alembic upgrade head`, sonra çıkar.
+  migrate:
+    image: ${AEGIS_IMAGE_REGISTRY:?AEGIS_IMAGE_REGISTRY eksik}/aegis-api:${AEGIS_IMAGE_TAG:?AEGIS_IMAGE_TAG eksik}
+    command: ["alembic", "upgrade", "head"]
+    restart: "no"
+    environment:
+      ENVIRONMENT: production
+      AUTH_SECRET: ${AUTH_SECRET:?AUTH_SECRET eksik}
+      FIELD_ENCRYPTION_KEY: ${FIELD_ENCRYPTION_KEY:?FIELD_ENCRYPTION_KEY eksik}
+      DATABASE_URL: postgresql+psycopg://aegis:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD eksik}@postgres:5432/aegis
+      DATABASE_ADMIN_URL: postgresql+psycopg://aegis:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD eksik}@postgres:5432/aegis
+    deploy:
+      resources:
+        limits: { memory: 512m, cpus: "1.0" }
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *logging
+
+  worker:
+    image: ${AEGIS_IMAGE_REGISTRY:?AEGIS_IMAGE_REGISTRY eksik}/aegis-worker:${AEGIS_IMAGE_TAG:?AEGIS_IMAGE_TAG eksik}
+    restart: unless-stopped
+    # -B YOK: zamanlayıcı ayrı `beat` servisinde.
+    command: ["celery", "-A", "aegis_worker.celery_app:celery_app", "worker",
+              "--loglevel=info", "--queues=aegis", "--concurrency=2"]
+    environment:
+      <<: *app-env
+    volumes:
+      # Günlük sanctions.sync MASAK FtM dosyasını yazar; yente salt-okunur bağlar.
+      - masakdata:/manifests/masak
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A aegis_worker.celery_app:celery_app inspect ping -d celery@$$HOSTNAME --timeout 10 | grep -q pong"]
+      interval: 60s
+      timeout: 20s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        # Docling (PyTorch) belge çıkarımı belleği en çok kullanan iş.
+        limits: { memory: 3g, cpus: "2.0" }
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    logging: *logging
+
+  beat:
+    image: ${AEGIS_IMAGE_REGISTRY:?AEGIS_IMAGE_REGISTRY eksik}/aegis-worker:${AEGIS_IMAGE_TAG:?AEGIS_IMAGE_TAG eksik}
+    restart: unless-stopped
+    command: ["celery", "-A", "aegis_worker.celery_app:celery_app", "beat",
+              "--loglevel=info", "--schedule=/var/lib/celery/beat-schedule"]
+    environment:
+      <<: *app-env
+    volumes:
+      - beatdata:/var/lib/celery
+    healthcheck:
+      # Beat çalışırken zamanlama dosyasını düzenli yazar; dosya 10 dk'dan eskiyse takılmıştır.
+      test: ["CMD-SHELL", "test -n \"$$(find /var/lib/celery -name 'beat-schedule*' -mmin -10)\""]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    deploy:
+      resources:
+        limits: { memory: 384m, cpus: "0.25" }
+    depends_on:
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    logging: *logging
+
+  postgres:
+    image: postgres:16.15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: aegis
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD eksik}
+      POSTGRES_DB: aegis
+      # initdb-prod/10-app-role.sh okur (yalnız ilk kurulumda, boş hacimde).
+      AEGIS_APP_DB_PASSWORD: ${AEGIS_APP_DB_PASSWORD:?AEGIS_APP_DB_PASSWORD eksik}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./initdb-prod:/docker-entrypoint-initdb.d:ro
+    shm_size: 256m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegis -d aegis"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    deploy:
+      resources:
+        limits: { memory: 2g, cpus: "2.0" }
+    logging: *logging
+
+  redis:
+    image: redis:7.4.12-alpine
+    restart: unless-stopped
+    # AOF açık: kuyruk mesajları yeniden başlatmada kaybolmasın. noeviction: Celery broker'ı
+    # bellek dolunca iş silmemeli, hata vermeli.
+    command: ["sh", "-c", "exec redis-server --requirepass \"$$REDIS_PASSWORD\" --appendonly yes --maxmemory 400mb --maxmemory-policy noeviction"]
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD eksik}
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?REDIS_PASSWORD eksik}
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    deploy:
+      resources:
+        limits: { memory: 512m, cpus: "0.50" }
+    logging: *logging
+
+  # S3-uyumlu belge deposu. İMAJ ETİKETİ DOĞRULANMADI: Docker Hub'daki minio/minio 2026-11-03'te
+  # 404 dönüyor; kurulumdan önce `docker pull` ile denetleyin ya da AEGIS_MINIO_IMAGE ile
+  # erişilebilir bir S3-uyumlu imaj verin (bkz. docs/deploy.md).
+  minio:
+    image: ${AEGIS_MINIO_IMAGE:-quay.io/minio/minio:RELEASE.2025-09-07T16-13-09Z}
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", ":9001"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:?MINIO_ROOT_USER eksik}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:?MINIO_ROOT_PASSWORD eksik}
+      MINIO_BROWSER: "off"
+    volumes:
+      - miniodata:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits: { memory: 1g, cpus: "1.0" }
+    logging: *logging
+
+  # ── Tarama motoru (E1.3) — sürümler yente 5.5.0'ın kendi compose'undan ──────────
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.2
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+      # Ağ dışına açılmıyor (port yok); güvenlik katmanı iç ağda kapalı, dev ile aynı.
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms${ES_HEAP:-4g} -Xmx${ES_HEAP:-4g}"
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s --fail 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 90s
+    deploy:
+      resources:
+        # Heap 4g + off-heap + Lucene payı. Sınır yoksa ES Postgres'i OOM'a sürükleyebilir.
+        limits: { memory: 6g, cpus: "2.0" }
+        reservations: { memory: 5g }
+    logging: *logging
+
+  yente:
+    image: ghcr.io/opensanctions/yente:5.5.0
+    restart: unless-stopped
+    environment:
+      YENTE_INDEX_TYPE: elasticsearch
+      YENTE_INDEX_URL: http://elasticsearch:9200
+      YENTE_MANIFEST: /manifests/manifest.yml
+      # AÇIK olmalı: kapalıyken ilk indeksleme de atlanır, /readyz sonsuza dek 503.
+      YENTE_AUTO_REINDEX: "true"
+      YENTE_UPDATE_TOKEN: ${YENTE_UPDATE_TOKEN:?YENTE_UPDATE_TOKEN eksik}
+      # KVKK: sorgu içerikleri dışarı gönderilmez.
+      YENTE_STATEMENT_API: "false"
+    volumes:
+      - ../yente/manifest.yml:/manifests/manifest.yml:ro
+      - masakdata:/manifests/masak:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s --fail http://localhost:8000/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
+    deploy:
+      resources:
+        limits: { memory: 2g, cpus: "1.0" }
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    logging: *logging
+
+volumes:
+  pgdata:
+  redisdata:
+  miniodata:
+  esdata:
+  masakdata:
+  beatdata:
+  caddy_data:
+  caddy_config:

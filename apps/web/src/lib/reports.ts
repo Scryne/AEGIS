@@ -107,6 +107,8 @@ export const ACTION_LABELS: Record<string, string> = {
   "monitoring.toggle": "İzleme durumu değişti",
   "monitoring.alert": "İzleme alarmı üretildi",
   "monitoring.acknowledge": "İzleme alarmı görüldü",
+  "tenant.provision": "Kurum hesabı açıldı",
+  "tenant.invite": "Sahibe davet gönderildi",
 };
 
 export const OBJECT_TYPE_LABELS: Record<string, string> = {
@@ -119,6 +121,7 @@ export const OBJECT_TYPE_LABELS: Record<string, string> = {
   extraction_proposal: "Öneri",
   discrepancy: "Tutarsızlık",
   report: "Rapor",
+  organization: "Kurum",
 };
 
 export function actionLabel(action: string): string {

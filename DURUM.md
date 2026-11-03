@@ -7,6 +7,38 @@
 **Tek cümle:** İlk kez uçtan uca çalıştırıldı (API + Celery worker + Docling + yente + web);
 259 birim + 79 izolasyon/entegrasyon + 36 uçtan uca recall testi yeşil, bağımlılık açığı 0.
 
+## 2026-11-03 (2): E1.6'nın sunucu gerektirmeyen kısmı + yol haritası dürüstlüğü
+
+- **Üretim dosyaları** (`docs/deploy.md`): 11 servisli üretim Compose (her serviste bellek/CPU sınırı,
+  yeniden başlatma, sağlık kontrolü, döngüsel günlük; dışarı yalnız Caddy; beat ayrı servis), Caddy ile
+  otomatik TLS, sırlar yalnız `/etc/aegis/aegis.env`'den ve her biri zorunlu (`${AD:?}`), parolası
+  ortamdan gelen `aegis_app` rolü. Tek komutluk `infra/ops/deploy.sh` (+ `--geri-al`), yalnız elle
+  tetiklenen `deploy.yml` (derle → GHCR → SSH; sır adları belgede). Bilerek tetiklenmedi.
+- **Yedek:** gece `pg_dump` + okunabilirlik denetimi + SHA-256, döküm ve belgeler rclone ile istemci
+  tarafında şifreli ikinci konuma; `geri_yukle.sh tatbikat` dökümü ayrı veritabanına yükleyip her
+  kiracının denetim izi zincirini doğrular (`scripts/denetim_zinciri_dogrula.py`). `saglik.sh`: TLS,
+  `/readyz`, servisler, yedek yaşı, disk → `ALERT_WEBHOOK_URL`.
+- **Kiracı açma CLI'ı** (`scripts/kiraci_ac.py`): kurum + parolasız sahip + üyelik + kiracının ilk denetim
+  olayı tek transaction'da, uygulama rolüyle (RLS); davet = süreli parola belirleme bağlantısı, ayrı
+  olay, e-posta olaya girmez. SMTP yoksa hiçbir şey açmadan durur. 3 entegrasyon testi; 2/2 sabotaj
+  yakalandı (açılış olayı silinince, sahibe parola verilince).
+- **Bulunan açık:** parola sıfırlama e-postasındaki `/reset-password` sayfası web'de yoktu (bağlantı 404
+  veriyordu) → sayfa eklendi; davet de onu kullanır.
+- **Yol haritası:** Faz 0 ve E1.1–E1.4 kutuları koddan denetlendi; `[x]` yalnız kod + test varsa (dosya
+  atıflı), kısmi olan `[~]` ve neyin eksik olduğu yazılı. E1.6'da yalnız kiracı aracı `[x]`.
+- `apps/web/AGENTS.md` izlemeden çıktı (`next dev` her açılışta yeniden yazıyor), `.gitignore`'da.
+- Testler: 379 birim (+9 üretim dosyası değişmezi) + 124 entegrasyon, ruff/mypy temiz, web
+  lint/tsc/build temiz, shellcheck + actionlint temiz. CI'a `deploy-files` işi eklendi.
+- **Yerel tatbikat** (Docker, yalnız Postgres): `initdb-prod` rolü süper kullanıcısız kurdu; 2 kiracı CLI
+  ile açıldı; `yedek.sh --yalniz-yerel` → `geri_yukle.sh tatbikat` 1 sn, zincir 2/2 sağlam; kurcalanan
+  olay `row_hash_mismatch` ile yakalandı. Eksik sırla compose başlamıyor.
+- **Doğrulanmadı:** gerçek sunucu, alan adı, TLS sertifikası, Caddy'nin kendisi (bu ortamdan Docker
+  Hub 429), imajların derlenip GHCR'a itilmesi (GHCR blob'ları bu ortamdan engelli), rclone uzak kopyası,
+  MinIO imaj etiketi (Docker Hub'daki `minio/minio` 404), telefon bildirimi, bellek sınırlarının yük altında
+  yeterliliği, gerçek SMTP ile davet teslimi.
+- **Sahibinde (Scryne):** Türkiye veri merkezli sunucu, alan adı, uzak yedek hedefi (KVKK yurt dışı
+  aktarım), dış uptime izleyicisi, pilotlar. Olumsuz haber LLM hattı ve embedding'e girilmedi (Invariant 3).
+
 ## 2026-11-03: ön yüz, izleme güvenilirliği, dosyada puan, ortaklık belgesi
 
 - **Ön yüz:** "denetim dosyası" kimliği (DESIGN.md): gruplu gezinme, dar ekranda çekmece, panel günün tek cümlesiyle açılır.
@@ -201,7 +233,7 @@
 
 ## Ne yarım / bilinçli açık
 
-- E1.6 (production deploy, TLS, şifreli hacimler, pilot) açık.
+- E1.6: sunucusuz kod 11-03'te yazıldı (yukarıda); sunucu, TLS, şifreli hacimler, uzak yedek, üretimde geri yükleme tatbikatı ve pilotlar açık.
 - Docling PDF yolu üretilmiş belgeyle doğrulandı; **gerçek pilot belgeleri** hâlâ gerekli. VKN
   kontrol basamağı resmî spesifikasyona karşı doğrulanmadı.
 - MASAK kaynak dosya düzeni ve `aegis_all` birleşik kapsamı canlı kurulumda teyit edilecek.

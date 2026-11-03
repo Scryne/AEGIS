@@ -103,6 +103,10 @@ class AuditAction(StrEnum):
     QUALITY_SNAPSHOT = "quality.snapshot"
     # E3.7 saklama süresi kuru çalışma raporu (tablo başına aday sayısı; silme yok).
     RETENTION_DRY_RUN = "retention.dry_run"
+    # E1.6 kiracı açma (operatör CLI'ı): kiracının zincirindeki ilk halka açılıştır; davet
+    # (sahibe parola belirleme bağlantısı) ayrı olaydır, teslim kanalıyla. E-posta olaya girmez.
+    TENANT_PROVISION = "tenant.provision"
+    TENANT_INVITE = "tenant.invite"
 
 
 class AuditEvent(UUIDPKMixin, TenantMixin, Base):

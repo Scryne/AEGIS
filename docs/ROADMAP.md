@@ -276,6 +276,8 @@ licensing budget.
 
 ### Epics & tasks
 
+*2026-11-03: Phase 0 and E1.1–E1.4 boxes re-checked against the code; `[x]` only where code **and** a test exist (file references inline), `[~]` where code exists but a part is unverified or not built. Interviews, licence, legal review, domain and other human/money tasks stay open.*
+
 **E0.1 — Customer discovery** *(M · spread across all 3 weeks · calendar-bound: start day 1)*
 - [ ] Write a discovery script: current manual KYB/MASAK workflow, time per file, tools used, audit anxiety, price anchoring (hours saved, not TL)
 - [ ] Source 10–15 SMMM/YMM & audit-office interviewees (chambers, LinkedIn, referrals)
@@ -284,23 +286,23 @@ licensing budget.
 - [ ] If segment fails validation, run 3–5 interviews with fallback segment (mid-size companies doing supplier onboarding) before the go/no-go memo
 
 **E0.2 — Screening feasibility PoC (critical path)** *(M · ~4–6 days)*
-- [ ] Stand up yente + Elasticsearch via Docker Compose locally; load the OpenSanctions default dataset
+- [~] Stand up yente + Elasticsearch via Docker Compose locally; load the OpenSanctions default dataset — *2026-11-03 code check: yente 5.5.0 + ES 9.4.2 run locally and in CI on the 34-entity fixture (`infra/compose/docker-compose.evals.yml`, `evals/test_screening_recall.py`, CI job `screening-recall`); a load of the full OpenSanctions default dataset is not recorded anywhere*
 - [ ] Verify dataset update mechanism (delta sync) and measure sync duration + disk/RAM footprint
-- [ ] Build a Turkish test set (30–50 cases): transliteration variants, ı/i casing, legal-form suffixes, old/new company titles, partial names; record match/miss + scores
+- [x] Build a Turkish test set (30–50 cases): transliteration variants, ı/i casing, legal-form suffixes, old/new company titles, partial names; record match/miss + scores — `evals/turkish_screening/cases.json` (34 cases + 6 distinct pairs); gates `evals/test_normalization_recall.py` (every push) and `evals/test_screening_recall.py` (real yente, 36/36)
 - [ ] Measure match latency under burst (batch of 100 queries)
 - [ ] Request OpenSanctions commercial license quote; document cost per tier → feeds pricing model
-- [ ] Locate MASAK asset-freeze lists; confirm format and that they can be injected as a custom yente/FtM dataset
+- [~] Locate MASAK asset-freeze lists; confirm format and that they can be injected as a custom yente/FtM dataset — *injection proven with converter + manifest (`aegis_core/screening/masak.py`, `scripts/masak_dataset.py`, `packages/core/tests/test_masak.py`); the real MASAK file's column layout is not yet confirmed*
 
 **E0.3 — Local data-source feasibility** *(M · ~4–5 days, parallelizable with E0.1 gaps)*
 - [ ] MERSIS: enumerate access options (official API/protocol, e-Devlet, Ticaret Bakanlığı agreements); document lawful basis, cost, stability; verdict: integrate / defer / drop
 - [ ] Ticaret Sicil Gazetesi: test programmatic query + extraction on 10 real companies; document robustness and terms of use
-- [ ] GLEIF LEI API: smoke-test lookup + enrichment (open data, low risk)
-- [ ] News/media source scan for adverse media (candidates: Event Registry, GDELT, targeted CSE): Turkish coverage, cost, terms → shortlist for Phase 2
+- [~] GLEIF LEI API: smoke-test lookup + enrichment (open data, low risk) — *client + enrichment built and tested against recorded responses (`aegis_core/entities/gleif.py`, `packages/core/tests/test_gleif.py`); no recorded live smoke test*
+- [~] News/media source scan for adverse media (candidates: Event Registry, GDELT, targeted CSE): Turkish coverage, cost, terms → shortlist for Phase 2 — *GDELT vs Google News RSS compared and chosen in ADR-0013 §1; Event Registry / CSE cost and terms not evaluated*
 - [ ] Written legal-usage summary per source (feeds KVKK processing inventory in Phase 1)
 
 **E0.4 — Throwaway interview demo (per R9)** *(S · 2–3 days, hard time-box)*
-- [ ] Thin UI over yente: input name/company → matches with scores and "why matched" features
-- [ ] Seed with recognizable Turkish screening cases for demo effect
+- [~] Thin UI over yente: input name/company → matches with scores and "why matched" features — *no separate throwaway demo was built; the product's screening UI covers it (`apps/web/src/app/(app)/screenings/`, `components/screening-form.tsx`)*
+- [~] Seed with recognizable Turkish screening cases for demo effect — *`scripts/demo_verisi.py` seeds three fictional KYB cases against the eval yente; deliberately no real persons*
 - [ ] Use in every interview from week 2 onward; log reactions in E0.1 notes
 
 **E0.5 — Name & brand** *(S · 1–2 days)*
@@ -348,44 +350,44 @@ time-per-file measured against their manual baseline.
 ### Epics & tasks
 
 **E1.1 — Platform skeleton from TenderIQ (critical path)** *(L · ~2 weeks)*
-- [ ] Initialize monorepo + git: `api/` (FastAPI), `web/` (Next.js), `workers/` (Celery), `infra/` (compose, deploy), `docs/`; import TenderIQ lint/format/test conventions; write `CLAUDE.md` capturing them
-- [ ] Port FastAPI skeleton: settings, async SQLAlchemy + Alembic, error handling, structured logging (JSON, request-id)
-- [ ] Auth: JWT access+refresh, password reset, tenant resolution middleware (token claim → `SET app.tenant_id` per request/connection)
-- [ ] **Migration 0001**: tenants, users, roles + `tenant_id` on every tenant-scoped table + **RLS policies enabled from the first migration**
-- [ ] RBAC: Owner, Compliance Officer, Analyst, Read-only Auditor; permission dependency for FastAPI routes
-- [ ] **Automated cross-tenant isolation test harness** (two seeded tenants; assert zero leakage across every endpoint and direct SQL under app role) — runs in CI on every push
-- [ ] Celery + Redis wiring, one demo task, Celery beat scaffold; idempotent job pattern + retry policy as shared utilities
-- [ ] Next.js app shell: auth flow, tenant-aware layout, role-gated navigation, design tokens (no hardcoded branding, per R7)
-- [ ] Docker Compose dev environment (api, web, worker, beat, postgres, redis, elasticsearch, yente, minio)
-- [ ] GitHub Actions CI: lint + typecheck + tests + image build on every push
-- [ ] Sentry (api + web) and basic uptime check
+- [x] Initialize monorepo + git: `api/` (FastAPI), `web/` (Next.js), `workers/` (Celery), `infra/` (compose, deploy), `docs/`; import TenderIQ lint/format/test conventions; write `CLAUDE.md` capturing them — `apps/api`, `apps/web`, `apps/worker`, `packages/core`, `infra/`, `CLAUDE.md`, ADR-0001
+- [x] Port FastAPI skeleton: settings, async SQLAlchemy + Alembic, error handling, structured logging (JSON, request-id) — `aegis_core/config.py`, `aegis_core/db/`, `migrations/`, `aegis_api/errors.py`, `aegis_core/logging.py`, `aegis_api/middleware.py` (X-Request-ID); `packages/core/tests/test_config.py`
+- [x] Auth: JWT access+refresh, password reset, tenant resolution middleware (token claim → `SET app.tenant_id` per request/connection) — `aegis_api/routers/v1/auth.py`, `aegis_core/security/tokens.py`, `aegis_core/db/tenant.py` (transaction-local `set_config`); `apps/api/tests/integration/test_auth_flow.py`; web page `/reset-password` added 2026-11-03
+- [x] **Migration 0001**: tenants, users, roles + `tenant_id` on every tenant-scoped table + **RLS policies enabled from the first migration** — `migrations/versions/0001_core_schema_rls.py` (ENABLE + FORCE RLS), ADR-0002
+- [x] RBAC: Owner, Compliance Officer, Analyst, Read-only Auditor; permission dependency for FastAPI routes — `require_role` in `aegis_api/dependencies.py`; `apps/api/tests/integration/test_authz_sweep.py` (auditor gets no 2xx on any write)
+- [x] **Automated cross-tenant isolation test harness** (two seeded tenants; assert zero leakage across every endpoint and direct SQL under app role) — runs in CI on every push — `apps/api/tests/integration/test_isolation.py`, CI step "KİRACI İZOLASYON KAPISI"
+- [~] Celery + Redis wiring, one demo task, Celery beat scaffold; idempotent job pattern + retry policy as shared utilities — *wired (`aegis_worker/celery_app.py`: acks_late, beat schedule; `tasks/system.py` ping); idempotency and retry are implemented per task (documents, screening, batch, billing), not as a shared helper*
+- [x] Next.js app shell: auth flow, tenant-aware layout, role-gated navigation, design tokens (no hardcoded branding, per R7) — `apps/web/src/proxy.ts`, `app/login`, `app/(app)/layout.tsx` (NAV roles), `app/globals.css` tokens; CI frontend lint/tsc/build
+- [x] Docker Compose dev environment (api, web, worker, beat, postgres, redis, elasticsearch, yente, minio) — `infra/compose/docker-compose.yml` (beat embedded in the dev worker via `-B`; ES + yente behind `--profile screening`)
+- [~] GitHub Actions CI: lint + typecheck + tests + image build on every push — *lint, mypy, tests, isolation gate, recall gate, OpenAPI drift, audits, and (2026-11-03) deploy-file checks run in `.github/workflows/ci.yml`; Docker images are built only by the manual `deploy.yml`, not on every push*
+- [~] Sentry (api + web) and basic uptime check — *API/worker Sentry with PII scrubbing (`aegis_core/observability.py`); no Sentry in the web app; uptime check script `infra/ops/saglik.sh` (2026-11-03) not yet running on a host*
 
 **E1.2 — Compliance foundation** *(M · ~1 week — before any pilot data exists)*
-- [ ] `audit_events` table: append-only via `REVOKE UPDATE/DELETE` from app role + BEFORE trigger raising on mutation; fields: actor, tenant, action, object, source reference, timestamp; optional hash chain for tamper evidence
-- [ ] Audit middleware/helper so services emit events uniformly; every risk-affecting action (screening run, match confirm/dismiss, report export, entity edit) writes one
-- [ ] Retention scaffolding: `retention_until` on documents/dossiers (≥5 years post-relationship); scheduled disposal job stub (execution activates later; schema now)
-- [ ] Encryption: TLS everywhere; at-rest = encrypted volumes + pgcrypto for sensitive columns (national IDs); secrets via SOPS/age or Docker secrets — never in git
-- [ ] KVKK artifacts v1: aydınlatma metni, data-processing inventory (from E0.3 legal summaries), VERBİS registration prep, DPA template for pilot agreements
-- [ ] Pilot agreement template incl. decision-support liability clause (per plan §8.3)
+- [x] `audit_events` table: append-only via `REVOKE UPDATE/DELETE` from app role + BEFORE trigger raising on mutation; fields: actor, tenant, action, object, source reference, timestamp; optional hash chain for tamper evidence — `migrations/versions/0002_audit_event.py`, `aegis_core/services/audit.py`, `apps/api/tests/integration/test_audit_trail.py`, ADR-0004
+- [x] Audit middleware/helper so services emit events uniformly; every risk-affecting action (screening run, match confirm/dismiss, report export, entity edit) writes one — `record_event` in `aegis_core/services/audit.py`; asserted in `test_screening.py`, `test_entities.py`, `test_reports.py`
+- [x] Retention scaffolding: `retention_until` on documents/dossiers (≥5 years post-relationship); scheduled disposal job stub (execution activates later; schema now) — `RetentionMixin` (`aegis_core/db/mixins.py`), `aegis_worker/tasks/retention.py` (dry-run), `apps/api/tests/integration/test_retention.py`
+- [~] Encryption: TLS everywhere; at-rest = encrypted volumes + pgcrypto for sensitive columns (national IDs); secrets via SOPS/age or Docker secrets — never in git — *national IDs: app-level AES-256-GCM instead of pgcrypto (ADR-0005, `test_encryption.py`); public TLS via Caddy and secrets only from a root-only env file in production compose (2026-11-03, `infra/`, `infra/tests/test_uretim_dosyalari.py`); container-to-container traffic is plain on the private Docker network; encrypted volumes and SOPS/age not done; gitleaks in CI*
+- [~] KVKK artifacts v1: aydınlatma metni, data-processing inventory (from E0.3 legal summaries), VERBİS registration prep, DPA template for pilot agreements — *drafts in `docs/kvkk/` and `docs/legal/dpa-sablonu.md` with placeholders; legal review and the E0.3 per-source legal summaries are outstanding*
+- [~] Pilot agreement template incl. decision-support liability clause (per plan §8.3) — *draft `docs/legal/pilot-sozlesmesi.md`; not reviewed by a lawyer*
 
 **E1.3 — Screening service — M3 (critical path)** *(L · ~2 weeks)*
-- [ ] Production-grade yente + Elasticsearch in Compose: resource limits, health checks, restart policy
-- [ ] Celery beat job: daily OpenSanctions delta sync; freshness metric + staleness alert (>24h)
-- [ ] Inject MASAK asset-freeze lists as custom FtM dataset; automate refresh
-- [ ] Turkish normalization module (shared, heavily unit-tested): İ/ı-correct casefolding, transliteration table, legal-form suffix stripping (A.Ş., Ltd. Şti., San. ve Tic. …), whitespace/punctuation canonicalization — built against the E0.2 test set
-- [ ] `POST /screen`: normalize → yente match (entity + directors/UBOs) → persist `Screening` + `MatchCandidate` rows (score, matched features, dataset, source URL)
-- [ ] Match review workflow (HITL): pending / confirmed / dismissed states, threshold config (auto-clear low, auto-flag high, review band between); every decision → audit event **and label store** (feeds E3.6 evaluation set, per R4)
-- [ ] Screening UI: run screening from entity page, results with score + "why matched" features, review actions
-- [ ] Sync-path performance: single-entity screening summary < 30s (plan NFR); deep runs async via Celery
+- [x] Production-grade yente + Elasticsearch in Compose: resource limits, health checks, restart policy — `infra/compose/docker-compose.prod.yml` (and the dev `screening` profile); asserted by `infra/tests/test_uretim_dosyalari.py`
+- [x] Celery beat job: daily OpenSanctions delta sync; freshness metric + staleness alert (>24h) — `aegis_worker/tasks/sanctions.py`, beat `sanctions-sync-daily`; staleness covered in `test_screening.py` / `test_yente_client.py`
+- [~] Inject MASAK asset-freeze lists as custom FtM dataset; automate refresh — *converter + manifest + daily refresh step built and tested (`test_masak.py`); the real source file layout is unverified (see E0.2)*
+- [x] Turkish normalization module (shared, heavily unit-tested): İ/ı-correct casefolding, transliteration table, legal-form suffix stripping (A.Ş., Ltd. Şti., San. ve Tic. …), whitespace/punctuation canonicalization — built against the E0.2 test set — `aegis_core/screening/normalization.py`, `packages/core/tests/test_normalization.py`, `evals/test_normalization_recall.py`
+- [x] `POST /screen`: normalize → yente match (entity + directors/UBOs) → persist `Screening` + `MatchCandidate` rows (score, matched features, dataset, source URL) — `POST /screenings`, `/screenings/from-entity/{id}` (`routers/v1/screenings.py`), migration 0003, `apps/api/tests/integration/test_screening.py`
+- [x] Match review workflow (HITL): pending / confirmed / dismissed states, threshold config (auto-clear low, auto-flag high, review band between); every decision → audit event **and label store** (feeds E3.6 evaluation set, per R4) — `aegis_core/screening/thresholds.py`, `test_thresholds.py`, `test_screening.py`; decisions read as labels by `aegis_core/quality/` (ADR-0017)
+- [x] Screening UI: run screening from entity page, results with score + "why matched" features, review actions — `app/(app)/screenings/`, `components/screening-form.tsx`, `components/match-review.tsx`
+- [~] Sync-path performance: single-entity screening summary < 30s (plan NFR); deep runs async via Celery — *enforced by design (yente client timeout 20 s, > 5 subjects go to `POST /screenings/deep` on Celery); not measured against the full production dataset*
 
 **E1.4 — Entity registry & verification — M1 + Docling (per R1/R2)** *(L · ~1.5–2 weeks)*
-- [ ] FtM-aligned schema: `Entity` (person/company; vergi no, MERSIS no, LEI as deterministic identifiers), `Relationship` (ownership %, control, officer, family), provenance on every attribute (source + timestamp)
-- [ ] Company profile CRUD: manual entry of unvan, vergi no, address, officers, declared shareholders
-- [ ] Document upload → S3-compatible storage → Docling extraction (imza sirküleri, faaliyet belgesi only) → suggested officers/owners as proposals requiring user confirmation before entering the graph
-- [ ] Ticaret Sicil Gazetesi integration per E0.3 verdict: automated lookup if proven, else guided manual attach with source reference
-- [ ] GLEIF LEI enrichment for companies with an LEI
-- [ ] Discrepancy flagging: declared vs. extracted/registry data mismatches surfaced on profile + report (MASAK suspicious-transaction precondition)
-- [ ] Internal entity resolution v1 (per R4): deterministic identifier match + normalized-name `pg_trgm` similarity → merge-or-create with review on ambiguity
+- [x] FtM-aligned schema: `Entity` (person/company; vergi no, MERSIS no, LEI as deterministic identifiers), `Relationship` (ownership %, control, officer, family), provenance on every attribute (source + timestamp) — migration 0004, `aegis_core/models/entity.py`, ADR-0007
+- [x] Company profile CRUD: manual entry of unvan, vergi no, address, officers, declared shareholders — `routers/v1/entities.py`, `apps/api/tests/integration/test_entities.py`, `packages/core/tests/test_identifiers.py`
+- [x] Document upload → S3-compatible storage → Docling extraction (imza sirküleri, faaliyet belgesi only) → suggested officers/owners as proposals requiring user confirmation before entering the graph — `aegis_core/documents/`, `test_documents.py`, `test_extraction.py`, `test_storage.py`; PDF path verified on a generated document only, real pilot documents outstanding
+- [x] Ticaret Sicil Gazetesi integration per E0.3 verdict: automated lookup if proven, else guided manual attach with source reference — guided manual attach (E0.3 has no verdict, so the fallback applies): gazette document type in `routers/v1/documents.py`
+- [x] GLEIF LEI enrichment for companies with an LEI — `aegis_core/entities/gleif.py` (only the LEI leaves, audited), `test_gleif.py`
+- [x] Discrepancy flagging: declared vs. extracted/registry data mismatches surfaced on profile + report (MASAK suspicious-transaction precondition) — `models/discrepancy.py`, `components/discrepancy-review.tsx`, `test_entities.py`, dossier in `test_report_render.py`
+- [x] Internal entity resolution v1 (per R4): deterministic identifier match + normalized-name `pg_trgm` similarity → merge-or-create with review on ambiguity — `aegis_core/entities/resolution.py`, `test_entities.py`
 
 **E1.5 — Reports, risk summary & dossier — M5 basic** *(M · ~1 week)* — **DONE** (ADR-0008)
 - [x] Rule-based risk summary v1 (transparent, no ML): confirmed sanctions hit → High; PEP → Elevated; unresolved discrepancies → flag; each with plain-language rationale
@@ -393,12 +395,12 @@ time-per-file measured against their manual baseline.
 - [x] Audit-trail viewer (read-only, auditor role): who/what/when/on-what-basis
 - [x] Dossiers stored under retention policy with hash for integrity evidence
 
-**E1.6 — Production deploy & pilot onboarding (critical path)** *(M · ~1 week)*
+**E1.6 — Production deploy & pilot onboarding (critical path)** *(M · ~1 week)* — **server-free code shipped 2026-11-03** (`docs/deploy.md`); host, domain, TLS, offsite target, restore drill on prod, phone alerting and pilots open
 - [ ] Select VPS with Turkey data-center option (KVKK locality); provision single host
-- [ ] Production Compose + Caddy/Traefik (auto-TLS); GitHub Actions deploy job (build → push → `compose up`) — one-command deploy from day one
-- [ ] Automated nightly Postgres backups + object storage copy to a second location; **restore drill performed once before pilots**
-- [ ] Health checks + uptime alerting to phone
-- [ ] Tenant provisioning CLI (create tenant + owner + send invite)
+- [~] Production Compose + Caddy/Traefik (auto-TLS); GitHub Actions deploy job (build → push → `compose up`) — one-command deploy from day one — *2026-11-03: `infra/compose/docker-compose.prod.yml`, `infra/caddy/Caddyfile`, `infra/ops/deploy.sh`, `.github/workflows/deploy.yml` (manual only); statically verified (`infra/tests/test_uretim_dosyalari.py`, CI `deploy-files`, actionlint); never run on a server, no certificate issued yet (`docs/deploy.md`)*
+- [~] Automated nightly Postgres backups + object storage copy to a second location; **restore drill performed once before pilots** — *2026-11-03: `infra/ops/yedek.sh` (pg_dump + verify + SHA-256 + rclone-encrypted offsite copy), `infra/ops/geri_yukle.sh` (drill into a separate DB + audit-chain verification via `scripts/denetim_zinciri_dogrula.py`), cron in `infra/ops/aegis.cron`; local drill done (Postgres only, no offsite); offsite target not chosen, production drill not performed*
+- [~] Health checks + uptime alerting to phone — *container health checks in prod compose; `infra/ops/saglik.sh` (TLS, /readyz, services, backup age, disk → `ALERT_WEBHOOK_URL`); phone channel and an external uptime monitor not set up*
+- [x] Tenant provisioning CLI (create tenant + owner + send invite) — `scripts/kiraci_ac.py` + `aegis_core/provisioning/` (app role under RLS, one transaction with the tenant's first audit event `tenant.provision`, invite as `tenant.invite`); `apps/api/tests/integration/test_provisioning.py`; real SMTP delivery untested
 - [ ] Onboard 3–5 pilots: Turkish quick-start guide, kickoff call each, signed pilot agreement + DPA
 - [ ] Feedback loop: weekly check-ins; in-app feedback link; measure time-per-file vs. manual baseline from E0.1
 

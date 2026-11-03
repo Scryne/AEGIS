@@ -1,0 +1,8 @@
+# AEGIS zamanlanmış işletim işleri — /etc/cron.d/aegis olarak kurulur (docs/deploy.md).
+# Saatler UTC. Yedek, 02:00'deki yaptırım senkronundan ve 03:30'daki saklama işinden önce koşar.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+AEGIS_ENV_FILE=/etc/aegis/aegis.env
+
+30 1 * * *   root  /opt/aegis/infra/ops/yedek.sh   >>/var/log/aegis-yedek.log 2>&1
+*/5 * * * *  root  /opt/aegis/infra/ops/saglik.sh  >>/var/log/aegis-saglik.log 2>&1

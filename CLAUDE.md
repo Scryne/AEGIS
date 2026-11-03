@@ -311,4 +311,13 @@ Apache AGE, Kubernetes). If a Phase 1 task tempts toward one, stop and note it f
   - [x] Audit-trail viewer: `GET /audit/events` (paginated + filters, `seq`-ordered) and
     the `/audit` page with a chain-verification badge; analyst excluded
   - [x] Web: risk panel + export buttons + generated-reports list on the entity page
-- [ ] E1.6 Production deploy + pilot onboarding
+- [~] **E1.6** Production deploy + pilot onboarding — *server-free code done 2026-11-03; see `docs/deploy.md`*
+  - [x] Tenant provisioning CLI `scripts/kiraci_ac.py` (+ `aegis_core/provisioning/`): app role under RLS,
+    tenant + passwordless owner + membership + first audit event `tenant.provision` in one transaction;
+    invite = password-reset token link, recorded as `tenant.invite` (no e-mail in payload)
+  - [x] Production files: `infra/compose/docker-compose.prod.yml` (secrets only via `${VAR:?}` from
+    `/etc/aegis/aegis.env`, only Caddy publishes ports), `infra/caddy/Caddyfile`, `infra/ops/*.sh`
+    (deploy, backup, restore drill, health), manual-only `.github/workflows/deploy.yml`;
+    invariants in `infra/tests/test_uretim_dosyalari.py`
+  - [ ] *Needs the owner / a server:* host (Turkey DC), domain + TLS, offsite backup target,
+    restore drill on production, phone alerting + external uptime monitor, pilots

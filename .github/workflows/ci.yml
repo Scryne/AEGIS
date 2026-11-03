@@ -161,3 +161,21 @@ jobs:
           uv export --frozen --no-dev --no-emit-workspace -o /tmp/req.txt \
             || uv export --frozen --no-dev -o /tmp/req.txt
           uvx pip-audit -r /tmp/req.txt --disable-pip --no-deps
+
+  deploy-files:
+    name: Dağıtım dosyaları — compose · Caddyfile · shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Üretim compose'u çözümlenebilir mi (sahte değerlerle)
+        # Şablondaki her boş anahtar sahte bir değerle doldurulur; gerçek sır kullanılmaz.
+        run: |
+          sed -E 's/^([A-Z0-9_]+)=[[:space:]]*(#.*)?$/\1=ci-sahte/' infra/compose/aegis.env.example > /tmp/ci.env
+          AEGIS_IMAGE_TAG=ci docker compose -f infra/compose/docker-compose.prod.yml --env-file /tmp/ci.env config --quiet
+      - name: Caddyfile doğrulama
+        run: >-
+          docker run --rm -e AEGIS_DOMAIN=app.example.com -e AEGIS_API_DOMAIN=api.example.com
+          -e ACME_EMAIL=ops@example.com -v "$PWD/infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro"
+          caddy:2.11.7-alpine caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
+      - name: Shellcheck (işletim betikleri)
+        run: shellcheck -x -P infra/ops infra/ops/*.sh infra/compose/initdb-prod/*.sh

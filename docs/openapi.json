@@ -981,6 +981,7 @@
             "enum": [
               "imza_sirkuleri",
               "faaliyet_belgesi",
+              "ortaklik_yapisi",
               "ticaret_sicil_gazetesi",
               "other"
             ],
@@ -2668,6 +2669,11 @@
             ],
             "title": "National Id Masked"
           },
+          "national_id_unreadable": {
+            "default": false,
+            "title": "National Id Unreadable",
+            "type": "boolean"
+          },
           "notes": {
             "anyOf": [
               {
@@ -3741,6 +3747,111 @@
           "monitored"
         ],
         "title": "MonitoringToggleResponse",
+        "type": "object"
+      },
+      "NotificationPreferences": {
+        "properties": {
+          "critical": {
+            "enum": [
+              "immediate",
+              "digest"
+            ],
+            "title": "Critical",
+            "type": "string"
+          },
+          "high": {
+            "enum": [
+              "immediate",
+              "digest"
+            ],
+            "title": "High",
+            "type": "string"
+          },
+          "info": {
+            "enum": [
+              "immediate",
+              "digest"
+            ],
+            "title": "Info",
+            "type": "string"
+          },
+          "roles": {
+            "items": {
+              "enum": [
+                "owner",
+                "compliance_officer",
+                "analyst",
+                "auditor"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Roles",
+            "type": "array"
+          }
+        },
+        "required": [
+          "critical",
+          "high",
+          "info",
+          "roles"
+        ],
+        "title": "NotificationPreferences",
+        "type": "object"
+      },
+      "NotificationPreferencesResponse": {
+        "properties": {
+          "critical": {
+            "enum": [
+              "immediate",
+              "digest"
+            ],
+            "title": "Critical",
+            "type": "string"
+          },
+          "email_configured": {
+            "title": "Email Configured",
+            "type": "boolean"
+          },
+          "high": {
+            "enum": [
+              "immediate",
+              "digest"
+            ],
+            "title": "High",
+            "type": "string"
+          },
+          "info": {
+            "enum": [
+              "immediate",
+              "digest"
+            ],
+            "title": "Info",
+            "type": "string"
+          },
+          "roles": {
+            "items": {
+              "enum": [
+                "owner",
+                "compliance_officer",
+                "analyst",
+                "auditor"
+              ],
+              "type": "string"
+            },
+            "minItems": 1,
+            "title": "Roles",
+            "type": "array"
+          }
+        },
+        "required": [
+          "critical",
+          "high",
+          "info",
+          "roles",
+          "email_configured"
+        ],
+        "title": "NotificationPreferencesResponse",
         "type": "object"
       },
       "PasswordResetConfirm": {
@@ -5131,6 +5242,22 @@
         "title": "RowResponse",
         "type": "object"
       },
+      "RunListResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RunRow"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "RunListResponse",
+        "type": "object"
+      },
       "RunResponse": {
         "properties": {
           "alerts": {
@@ -5152,6 +5279,72 @@
           "failed"
         ],
         "title": "RunResponse",
+        "type": "object"
+      },
+      "RunRow": {
+        "properties": {
+          "alerts": {
+            "title": "Alerts",
+            "type": "integer"
+          },
+          "checked": {
+            "title": "Checked",
+            "type": "integer"
+          },
+          "duration_ms": {
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "failed": {
+            "title": "Failed",
+            "type": "integer"
+          },
+          "failures": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Failures",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "retried": {
+            "title": "Retried",
+            "type": "integer"
+          },
+          "skipped": {
+            "title": "Skipped",
+            "type": "integer"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "trigger": {
+            "title": "Trigger",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "trigger",
+          "started_at",
+          "duration_ms",
+          "checked",
+          "skipped",
+          "alerts",
+          "failed",
+          "retried",
+          "failures"
+        ],
+        "title": "RunRow",
         "type": "object"
       },
       "ScanResponse": {
@@ -5800,6 +5993,11 @@
             "title": "Status",
             "type": "string"
           },
+          "unreadable": {
+            "default": false,
+            "title": "Unreadable",
+            "type": "boolean"
+          },
           "updated_at": {
             "format": "date-time",
             "title": "Updated At",
@@ -6006,6 +6204,11 @@
           "status": {
             "title": "Status",
             "type": "string"
+          },
+          "unreadable": {
+            "default": false,
+            "title": "Unreadable",
+            "type": "boolean"
           },
           "updated_at": {
             "format": "date-time",
@@ -12626,6 +12829,145 @@
         ]
       }
     },
+    "/api/v1/monitoring/notifications": {
+      "get": {
+        "operationId": "get_notifications_api_v1_monitoring_notifications_get",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferencesResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Notifications",
+        "tags": [
+          "monitoring"
+        ]
+      },
+      "put": {
+        "description": "Yönlendirme tercihini kaydeder; değişiklik denetim izine yazılır.",
+        "operationId": "put_notifications_api_v1_monitoring_notifications_put",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationPreferences"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationPreferencesResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Put Notifications",
+        "tags": [
+          "monitoring"
+        ]
+      }
+    },
     "/api/v1/monitoring/run": {
       "post": {
         "description": "İzlenen tüm varlıkları şimdi yeniden tarar (gece görevinin aynısı).",
@@ -12687,6 +13029,84 @@
           }
         },
         "summary": "Run Now",
+        "tags": [
+          "monitoring"
+        ]
+      }
+    },
+    "/api/v1/monitoring/runs": {
+      "get": {
+        "description": "Son koşular. Taranamayan varlıklar burada görünür: sonuç YOK, temiz değil.",
+        "operationId": "runs_api_v1_monitoring_runs_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 7,
+              "maximum": 30,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Runs",
         "tags": [
           "monitoring"
         ]

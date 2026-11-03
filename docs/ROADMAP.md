@@ -468,7 +468,7 @@ value justifies it) → E2.5 last, time-boxed.
 - [x] Every factor renders reason + link to underlying evidence (screening record, registry data, document)
 - [x] Fixed global weights v1 (documented rationale); per-tenant tuning deferred until customers ask
 - [x] Score history timeline per entity; recompute triggers on data change
-- [ ] Dossier export upgraded: score breakdown page with per-factor evidence references
+- [x] Dossier export upgraded: score breakdown page with per-factor evidence references — PDF + DOCX, same data moment as the file
 
 **E2.4 — Monitoring-lite (per R3)** *(M · ~1 week)* — **shipped 2026-10-31**; email channel open (no SMTP infra yet)
 - [x] Watch flag per entity (`monitored: bool`, per-tenant)

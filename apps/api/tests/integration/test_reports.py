@@ -13,12 +13,15 @@ Bu dosyadaki iddialar ürünün savunulabilirliğine dairdir:
 
 from __future__ import annotations
 
+import io
 import os
 import uuid
 from typing import Any
 
 import pytest
+from docx import Document
 from fastapi.testclient import TestClient
+from pypdf import PdfReader
 
 from aegis_core.documents.storage import StoredObject, sha256_hex
 from aegis_core.security.tokens import create_access_token
@@ -136,6 +139,14 @@ def test_dosya_disa_aktarilir_saklanir_ve_denetlenir(
     assert sha256_hex(stored) == report["sha256"]
     magic = b"%PDF-" if report_format == "pdf" else b"PK"
     assert stored.startswith(magic)
+    # E2.3: gerçek akışta dosya puan dökümünü taşır.
+    if report_format == "docx":
+        belge = Document(io.BytesIO(stored))
+        assert any("Risk puanı" in paragraf.text for paragraf in belge.paragraphs)
+        assert any(" / 100" in paragraf.text for paragraf in belge.paragraphs)
+    else:
+        metin = " ".join(sayfa.extract_text() for sayfa in PdfReader(io.BytesIO(stored)).pages)
+        assert "Risk puanı" in " ".join(metin.split())
 
     # Tam olarak BİR report.export olayı; kaynak referansı dosyanın özetidir.
     events = api_client.get(

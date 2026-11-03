@@ -46,6 +46,7 @@ from aegis_core.logging import get_logger
 from aegis_core.reports import labels
 from aegis_core.reports.dossier import DossierData, dataset_version_rows
 from aegis_core.reports.risk import RiskLevel
+from aegis_core.reports.score import BAND_LABELS
 
 logger = get_logger("aegis.reports.render")
 
@@ -107,6 +108,7 @@ def render_dossier_html(data: DossierData) -> str:
         data=data,
         font_family=font_family,
         dataset_versions=dataset_version_rows(data.dataset_versions),
+        band_labels=BAND_LABELS,
     )
 
 
@@ -194,6 +196,27 @@ def render_dossier_docx(data: DossierData) -> bytes:
             document.add_paragraph(f"Kaynak: {' · '.join(finding.source_refs)}")
     if not data.risk.findings:
         document.add_paragraph("Kuralların ürettiği bulgu yok.")
+    if data.score is not None:
+        document.add_heading("Risk puanı", level=2)
+        puan = document.add_paragraph()
+        puan.add_run(f"{data.score.score} / 100 · {BAND_LABELS[data.score.band]}").bold = True
+        if not data.score.complete:
+            document.add_paragraph(
+                "Dosyada karar bekleyen bulgular var; puan tamamlanmış değerlendirme sayılmaz."
+            )
+        if data.score.factors:
+            _add_table(
+                document,
+                ["Etken", "Puan", "Gerekçe", "Dayanak"],
+                [
+                    [f.label, f"+{f.points}", f.reason, " · ".join(f.evidence) or "—"]
+                    for f in data.score.factors
+                ],
+            )
+        else:
+            document.add_paragraph("Puan üreten etken yok.")
+        ek = " ".join(data.score.notes)
+        document.add_paragraph(f"Ağırlık sürümü: {data.score.weights_version}. {ek}".strip())
     document.add_paragraph(
         "Bu rapor bir karar desteği çıktısıdır; müşteri kabul, ret ya da şüpheli işlem "
         "bildirimi kararı yükümlü kuruma aittir."

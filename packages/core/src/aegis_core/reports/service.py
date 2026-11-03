@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import asyncio
 import uuid
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import func, select
@@ -41,6 +42,7 @@ from aegis_core.models import (
     ReportFormat,
     ReportType,
 )
+from aegis_core.reports import score_service
 from aegis_core.reports.dossier import DossierData, build_dossier
 from aegis_core.reports.render import render_dossier_docx, render_dossier_pdf
 from aegis_core.services import audit as audit_service
@@ -90,6 +92,13 @@ async def create_dossier_report(
         entity,
         generated_by=generated_by,
         organization_name=organization_name,
+    )
+    # E2.3: denetçi puanın dökümünü ve dayanaklarını dosyanın kendisinde görür.
+    data = replace(
+        data,
+        score=await score_service.score_for_dossier(
+            session, entity, data, high_risk_countries=settings.high_risk_countries
+        ),
     )
 
     # reportlab/python-docx senkrondur; olay döngüsü bloke edilmez.

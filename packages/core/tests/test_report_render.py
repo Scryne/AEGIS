@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import io
 import uuid
+from dataclasses import replace
 from datetime import UTC, datetime
 
 import pytest
@@ -40,6 +41,7 @@ from aegis_core.reports.risk import (
     ScreeningView,
     assess_risk,
 )
+from aegis_core.reports.score import RiskScore, ScoreBand, ScoreFactor
 
 NOW = datetime(2026, 8, 8, 12, 0, tzinfo=UTC)
 
@@ -319,3 +321,41 @@ def test_bos_dosya_da_uretilebilir() -> None:
 def test_dataset_version_rows_bozuk_zaman_damgasini_ham_birakir() -> None:
     rows = dataset_version_rows({"x": {"version": "1", "last_export_at": "gecersiz"}})
     assert rows == (("x", "1", "gecersiz"),)
+
+
+def _puanli(dossier: DossierData) -> DossierData:
+    return replace(
+        dossier,
+        score=RiskScore(
+            score=35,
+            band=ScoreBand.MEDIUM,
+            factors=(
+                ScoreFactor(
+                    code="match.pep",
+                    label="Onaylı PEP eşleşmesi",
+                    points=25,
+                    occurrences=1,
+                    reason="Analist eşleşmeyi doğruladı.",
+                    evidence=("match:abc123",),
+                ),
+            ),
+            complete=False,
+            notes=("Yargı alanı bilinmiyor.",),
+        ),
+    )
+
+
+@pytest.mark.parametrize("renderer", [render_dossier_pdf, render_dossier_docx])
+def test_puan_dokumu_dayanagiyla_basilir(dossier: DossierData, renderer) -> None:  # type: ignore[no-untyped-def]
+    metin = _text(renderer(_puanli(dossier)))
+    assert "35 / 100" in metin
+    assert _normalize("Onaylı PEP eşleşmesi") in metin
+    assert "+25" in metin
+    assert "match:abc123" in metin
+    assert _normalize("karar bekleyen") in metin
+    assert _normalize("Yargı alanı bilinmiyor") in metin
+
+
+@pytest.mark.parametrize("renderer", [render_dossier_pdf, render_dossier_docx])
+def test_puansiz_dosyada_bolum_basilmaz(dossier: DossierData, renderer) -> None:  # type: ignore[no-untyped-def]
+    assert _normalize("Risk puanı") not in _text(renderer(dossier))

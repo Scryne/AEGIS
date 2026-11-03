@@ -97,6 +97,35 @@
       {% endif %}
     </div>
 
+    {# ── Risk puanı dökümü (E2.3): her etken gerekçesi ve dayanağıyla ── #}
+    {% if data.score %}
+      <div class="risk-box">
+        <div class="risk-level">Risk puanı: {{ data.score.score }} / 100 · {{ band_labels[data.score.band] }}</div>
+        {% if not data.score.complete %}
+          <p class="small">Dosyada karar bekleyen bulgular var; puan tamamlanmış değerlendirme sayılmaz.</p>
+        {% endif %}
+        {% if data.score.factors %}
+          <table>
+            <thead><tr><th>Etken</th><th>Puan</th><th>Gerekçe</th><th>Dayanak</th></tr></thead>
+            <tbody>
+              {% for factor in data.score.factors %}
+                <tr>
+                  <td>{{ factor.label }}</td>
+                  <td>+{{ factor.points }}</td>
+                  <td>{{ factor.reason }}</td>
+                  <td class="small">{{ factor.evidence | join(" · ") or "—" }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="muted">Puan üreten etken yok.</p>
+        {% endif %}
+        <p class="small muted">Ağırlık sürümü: {{ data.score.weights_version }}.
+          {% for note in data.score.notes %}{{ note }} {% endfor %}</p>
+      </div>
+    {% endif %}
+
     <div class="notice small">
       Bu rapor bir <b>karar desteği</b> çıktısıdır; müşteri kabul, ret ya da şüpheli işlem
       bildirimi kararı yükümlü kuruma aittir. Bulgular, üretim anındaki veri kümesi

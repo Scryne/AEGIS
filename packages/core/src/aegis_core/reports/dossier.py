@@ -47,6 +47,7 @@ from aegis_core.reports.risk import (
     ScreeningView,
     assess_risk,
 )
+from aegis_core.reports.score import RiskScore
 from aegis_core.screening.thresholds import MatchDecision
 
 # Dosyaya girecek en fazla tarama koşusu (en yeniden eskiye). Bir varlık için onlarca
@@ -195,6 +196,9 @@ class DossierData:
     def generated_at_label(self) -> str:
         """Üretim zamanı (rapor kapağında)."""
         return labels.format_datetime(self.generated_at)
+
+    # Dosyada risk puanı dökümü (E2.3). Önizleme gibi puansız kullanımlarda bölüm basılmaz.
+    score: RiskScore | None = None
 
 
 # ── Yardımcılar ──────────────────────────────────────────────────────────────

@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from aegis_core.models import AuditAction, Entity, EntitySchema
 from aegis_core.models.risk_score import RiskScoreSnapshot
-from aegis_core.reports.dossier import build_dossier
+from aegis_core.reports.dossier import DossierData, build_dossier
 from aegis_core.reports.score import RiskScore, UboView, score_risk
 from aegis_core.services import audit as audit_service
 from aegis_core.ubo import service as ubo_service
@@ -35,6 +35,13 @@ async def live_score(
     session: AsyncSession, entity: Entity, *, high_risk_countries: list[str]
 ) -> RiskScore:
     data = await build_dossier(session, entity)
+    return await score_for_dossier(session, entity, data, high_risk_countries=high_risk_countries)
+
+
+async def score_for_dossier(
+    session: AsyncSession, entity: Entity, data: DossierData, *, high_risk_countries: list[str]
+) -> RiskScore:
+    """Hazır dosya içeriğinden puan: dosya ile puan aynı veri anından çıkar."""
     ubo_view: UboView | None = None
     if entity.schema_type == EntitySchema.COMPANY.value:
         row = await ubo_service.latest(session, entity.id)

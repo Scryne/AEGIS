@@ -21,6 +21,9 @@ COPY packages ./packages
 COPY apps ./apps
 COPY migrations ./migrations
 COPY alembic.ini ./alembic.ini
+# İşletim CLI'ları (kiracı açma, plan atama, zincir doğrulama) konteynerde çalışır:
+#   docker compose ... run --rm api python scripts/kiraci_ac.py ...
+COPY scripts ./scripts
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-dev
 

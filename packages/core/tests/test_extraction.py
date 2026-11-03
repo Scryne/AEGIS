@@ -264,3 +264,65 @@ def test_satir_yapisi_zaten_duzgunse_degismez() -> None:
     from aegis_core.documents.extraction import restore_line_structure
 
     assert restore_line_structure(IMZA_SIRKULERI) == IMZA_SIRKULERI
+
+
+ORTAKLIK_TABLOSU = """
+DENİZ TİCARET ANONİM ŞİRKETİ PAY DEFTERİ DÖKÜMÜ
+| Ortak | Kimlik | Pay adedi | Oran |
+| --- | --- | --- | --- |
+| Ahmet Yılmaz | 10000000146 | 40.000 | %40 |
+| Ayşe Demir | - | 35.000 | 35,5% |
+| Liman Holding A.Ş. | 4840847211 | 24.500 | %24,5 |
+| Toplam |  | 100.000 | %100 |
+"""
+
+
+def test_ortaklik_tablosundan_pay_orani_okunur() -> None:
+    sonuc = extract_from_text(ORTAKLIK_TABLOSU, "ortaklik_yapisi")
+    ortaklar = {p.name: p for p in sonuc.persons if p.rel_type == "shareholder"}
+    assert set(ortaklar) == {"Ahmet Yılmaz", "Ayşe Demir", "Liman Holding A.Ş."}
+    assert ortaklar["Ahmet Yılmaz"].ownership_percent == 40
+    assert ortaklar["Ahmet Yılmaz"].national_id == "10000000146"
+    assert "10000000146" not in ortaklar["Ahmet Yılmaz"].evidence  # kanıt metni maskeli
+    assert ortaklar["Ayşe Demir"].ownership_percent == 35.5
+    assert ortaklar["Liman Holding A.Ş."].is_company is True
+    assert ortaklar["Liman Holding A.Ş."].national_id is None
+    assert all(p.confidence == 0.85 for p in ortaklar.values())
+    assert sonuc.warnings == []
+
+
+def test_duz_metin_satirlari_da_okunur() -> None:
+    metin = "1. Mehmet Kaya 10000000078 %60\n2) Zeynep Aydın %40\nGenel Toplam %100"
+    ortaklar = extract_from_text(metin, "ortaklik_yapisi").persons
+    assert {(p.name, p.ownership_percent) for p in ortaklar} == {
+        ("Mehmet Kaya", 60),
+        ("Zeynep Aydın", 40),
+    }
+
+
+def test_pay_toplami_tutmazsa_guven_duser_ve_uyarir_oran_degismez() -> None:
+    sonuc = extract_from_text("Ahmet Yılmaz %40\nAyşe Demir %35", "ortaklik_yapisi")
+    assert [p.ownership_percent for p in sonuc.persons] == [40, 35]
+    assert all(p.confidence == 0.6 for p in sonuc.persons)
+    assert any("%75.00" in w for w in sonuc.warnings)
+
+
+def test_pay_satiri_olmayan_metinden_ortak_uydurulmaz() -> None:
+    metin = "Şirketin KDV oranı %20 olarak uygulanır.\nSermaye artışı %150 oranında yapıldı."
+    sonuc = extract_from_text(metin, "ortaklik_yapisi")
+    assert [p for p in sonuc.persons if p.rel_type == "shareholder"] == []
+    assert any("ortak satırı bulunamadı" in w for w in sonuc.warnings)
+
+
+def test_baska_belge_turunde_pay_taramasi_yapilmaz() -> None:
+    sonuc = extract_from_text("Ahmet Yılmaz %40\nAyşe Demir %60", "faaliyet_belgesi")
+    assert all(p.rel_type != "shareholder" for p in sonuc.persons)
+
+
+def test_kimlik_ve_adet_sutunu_oran_sanilmaz() -> None:
+    """Regresyon: kimliğin son haneleri ile yüzdenin arasındaki boşluk oranı %78 okutuyordu."""
+    metin = "Mehmet Kaya 10000000078 %60\nZeynep Aydın 400 %25\nCan Tok 40.000 15 %"
+    oranlar = {
+        p.name: p.ownership_percent for p in extract_from_text(metin, "ortaklik_yapisi").persons
+    }
+    assert oranlar == {"Mehmet Kaya": 60, "Zeynep Aydın": 25, "Can Tok": 15}

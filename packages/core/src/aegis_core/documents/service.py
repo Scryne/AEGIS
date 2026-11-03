@@ -55,6 +55,7 @@ EXTRACTABLE_TYPES = frozenset(
     {
         DocumentType.IMZA_SIRKULERI.value,
         DocumentType.FAALIYET_BELGESI.value,
+        DocumentType.ORTAKLIK_YAPISI.value,
         DocumentType.TICARET_SICIL_GAZETESI.value,
     }
 )
@@ -262,6 +263,12 @@ async def store_extraction_result(
                     "person_name": person.name,
                     "rel_type": person.rel_type,
                     "role_title": person.role_title,
+                    **(
+                        {"ownership_percent": person.ownership_percent}
+                        if person.ownership_percent is not None
+                        else {}
+                    ),
+                    **({"is_company": True} if person.is_company else {}),
                     # TCKN öneride yalnız ŞİFRELİ tutulur (bkz. seal_national_id); kabul
                     # edilince şifreli varlık kolonuna yazılır. Reddedilen öneri satırla
                     # birlikte kalır — bu yüzden reddedilen öneriler saklama süresine tabidir.
@@ -389,6 +396,7 @@ async def _resolve_person(
     actor_user_id: uuid.UUID | None,
     actor_role: str | None,
     retention_years: int,
+    schema_type: EntitySchema = EntitySchema.PERSON,
 ) -> Entity:
     """Öneri edilen kişiyi kütükte bulur ya da oluşturur (belirsizlikte kullanıcıya sorar)."""
     if link_entity_id is not None:
@@ -402,7 +410,7 @@ async def _resolve_person(
         session,
         ResolutionQuery(
             name=name,
-            schema_type=EntitySchema.PERSON,
+            schema_type=schema_type,
             national_id_fingerprint=fingerprint,
         ),
     )
@@ -415,7 +423,7 @@ async def _resolve_person(
         session,
         tenant_id=tenant_id,
         name=name,
-        schema_type=EntitySchema.PERSON,
+        schema_type=schema_type,
         national_id=national_id,
         source_type=SourceType.DOCUMENT,
         source_ref=source_ref,
@@ -494,8 +502,12 @@ async def accept_proposal(
             actor_user_id=actor_user_id,
             actor_role=actor_role,
             retention_years=retention_years,
+            schema_type=(
+                EntitySchema.COMPANY if proposal.payload.get("is_company") else EntitySchema.PERSON
+            ),
         )
         role_title = proposal.payload.get("role_title")
+        ownership = proposal.payload.get("ownership_percent")
         await entity_service.create_relationship(
             session,
             tenant_id=proposal.tenant_id,
@@ -503,6 +515,7 @@ async def accept_proposal(
             target_entity_id=entity.id,
             rel_type=rel_type,
             role_title=str(role_title)[:255] if role_title else None,
+            ownership_percent=float(ownership) if isinstance(ownership, int | float) else None,
             source_type=SourceType.DOCUMENT,
             source_ref=source_ref,
             document_id=proposal.document_id,

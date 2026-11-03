@@ -19,7 +19,7 @@ pahalıdır — kullanıcı yanlışı tek tıkla reddeder, eksiği fark etmez.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from aegis_core.entities.identifiers import (
     is_valid_tckn,
@@ -167,6 +167,10 @@ class ExtractedPerson:
     confidence: float = CONF_PERSON_ONLY
     evidence: str = ""
     page: int | None = None
+    ownership_percent: float | None = None
+    """Yalnız hissedar önerisinde: belgede yazan pay oranı."""
+    is_company: bool = False
+    """Hissedar tüzel kişi (zincir UBO hesabında bir katman daha demektir)."""
 
 
 @dataclass(frozen=True)
@@ -408,6 +412,89 @@ def _extract_persons(text: str) -> list[ExtractedPerson]:
     return list(persons.values())
 
 
+# Önce "%40" aranır: "10000000078 %60" satırında sonek deseni kimliğin son hanelerini oran sanar.
+_SHARE_PERCENT_PREFIX = re.compile(r"%\s*(\d{1,3}(?:[.,]\d{1,4})?)")
+_SHARE_PERCENT_SUFFIX = re.compile(r"(?<![\d.,])(\d{1,3}(?:[.,]\d{1,4})?)\s*%")
+_SHARE_SKIP = re.compile(
+    r"^\W*(genel\s+toplam|toplam|sermaye|kdv|ortak\b|ortaklar\b|ad[ıi]\s+soyad)", re.I
+)
+_ROW_NUMBER = re.compile(r"^\s*\d{1,3}\s*[.)\-]\s*")
+PAY_TOPLAM_TOLERANS = 0.5
+CONF_SHARE_TOTAL_OK = 0.85
+CONF_SHARE_TOTAL_OFF = 0.6
+
+
+def _share_name(line: str, percent_start: int) -> str:
+    """Pay oranından önceki metinden adı alır: sıra no, kimlik, adet ve tutar sütunları düşer."""
+    head = line[:percent_start]
+    cells = [cell.strip() for cell in head.split("|") if cell.strip()] if "|" in head else [head]
+    for cell in cells:
+        cleaned = _ROW_NUMBER.sub("", cell)
+        # Ad ilk rakamda biter: ardından TCKN/VKN, pay adedi ya da tutar gelir.
+        match = re.match(r"[^\d]+", cleaned)
+        name = match.group(0).strip(" :;-–—\t") if match else ""
+        if name:
+            return name
+    return ""
+
+
+def _extract_shareholders(text: str) -> tuple[list[ExtractedPerson], list[str]]:
+    """Ortaklık tablosundan hissedar ve pay oranı çıkarır; çıkan her satır yalnız öneridir.
+
+    Pay toplamı 100 değilse belge eksik okunmuş olabilir: güven düşer ve uyarı yazılır, oranlar
+    düzeltilmez. Oranı hesaplayan değil belgede yazanı aktaran bir okuyucudur.
+    """
+    rows: dict[str, ExtractedPerson] = {}
+    warnings: list[str] = []
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line or set(line) <= set("|-: ") or _SHARE_SKIP.match(line.lstrip("| ")):
+            continue
+        percent_match = _SHARE_PERCENT_PREFIX.search(line) or _SHARE_PERCENT_SUFFIX.search(line)
+        if percent_match is None:
+            continue
+        percent = float(percent_match.group(1).replace(",", "."))
+        if not 0 < percent <= 100:
+            continue
+        # Yüzdeden sonra metin süren satır tablo satırı değil cümledir ("KDV %20 uygulanır").
+        if "|" not in line and re.search(r"[^\W\d_]", line[percent_match.end() :]):
+            continue
+        name = _share_name(line, percent_match.start())
+        if not name:
+            continue
+        is_company = _LEGAL_FORM_HINT.search(name) is not None
+        if not is_company and not _looks_like_person_name(name):
+            continue
+        key = normalize_name(name, _SubjectType.PERSON).sort_key
+        if key in rows:
+            warnings.append(f"'{name}' tabloda birden çok satırda geçiyor; ilk satır alındı.")
+            continue
+        tckn = None
+        if not is_company:
+            tckn = next(
+                (n for n in re.findall(r"(?<!\d)\d{11}(?!\d)", line) if is_valid_tckn(n)), None
+            )
+        rows[key] = ExtractedPerson(
+            name=name,
+            rel_type="shareholder",
+            national_id=tckn,
+            confidence=CONF_SHARE_TOTAL_OK,
+            evidence=redact_national_ids(line)[:500],
+            ownership_percent=percent,
+            is_company=is_company,
+        )
+    if not rows:
+        return [], warnings
+    total = sum(row.ownership_percent or 0 for row in rows.values())
+    if abs(total - 100) <= PAY_TOPLAM_TOLERANS:
+        return list(rows.values()), warnings
+    warnings.append(
+        f"Okunan pay toplamı %{total:.2f}, 100 değil. "
+        "Belge eksik okunmuş olabilir; oranları denetleyin."
+    )
+    return [replace(row, confidence=CONF_SHARE_TOTAL_OFF) for row in rows.values()], warnings
+
+
 def extract_from_text(text: str, doc_type: str) -> ExtractionResult:
     """Belge metninden öznitelik ve kişi önerileri çıkarır.
 
@@ -475,6 +562,21 @@ def extract_from_text(text: str, doc_type: str) -> ExtractionResult:
         # Faaliyet belgesinde de yetkili listesi olabilir; yalnız yetki ifadesi geçen
         # satırlardan çıkarılır (serbest ad taraması bu belgede çok gürültü üretir).
         persons = [person for person in _extract_persons(text) if person.role_title]
+
+    if doc_type == "ortaklik_yapisi":
+        shareholders, share_warnings = _extract_shareholders(text)
+        warnings.extend(share_warnings)
+        keys = {normalize_name(s.name, _SubjectType.PERSON).sort_key for s in shareholders}
+        # Yetkili ifadesi taşımayan ad, tablodaki hissedarın gürültülü kopyasıdır.
+        officers = [
+            person
+            for person in persons
+            if person.role_title
+            and normalize_name(person.name, _SubjectType.PERSON).sort_key not in keys
+        ]
+        persons = [*shareholders, *officers]
+        if not shareholders:
+            warnings.append("Pay oranlı ortak satırı bulunamadı; elle giriş gerekebilir.")
 
     if not attributes and not persons:
         warnings.append("Belgede tanınan bir alan bulunamadı; elle giriş gerekebilir.")

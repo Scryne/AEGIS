@@ -150,6 +150,7 @@ export const REL_TYPE_LABELS: Record<string, string> = {
 export const DOC_TYPE_LABELS: Record<string, string> = {
   imza_sirkuleri: "İmza sirküleri",
   faaliyet_belgesi: "Faaliyet belgesi",
+  ortaklik_yapisi: "Ortaklık yapısı",
   ticaret_sicil_gazetesi: "Ticaret Sicil Gazetesi",
   other: "Diğer",
 };

@@ -550,3 +550,42 @@ def test_belge_akisi_denetim_zincirini_bozmaz(
     )
     verify = api_client.get("/api/v1/audit/verify", headers=_auth(token))
     assert verify.json()["ok"] is True
+
+
+def test_ortak_onerisi_onayla_kutuge_ve_ubo_grafigine_girer(
+    api_client: TestClient, fake_storage: dict[str, bytes]
+) -> None:
+    """Belge kütüğü kendiliğinden değiştirmez; onaydan sonra pay oranlı bağ oluşur."""
+    tenant, token = _register_and_login(api_client, slug="ortak", email="o@ortak.com")
+    company = _create_company(api_client, token)
+    document = _upload(
+        api_client,
+        token,
+        entity_id=company["id"],
+        doc_type="ortaklik_yapisi",
+        content="| Mehmet Kaya | %60 |\n| Liman Holding A.Ş. | %40 |\n",
+        filename="ortaklar.txt",
+    )
+    _run_extraction(tenant, document["id"])
+    oneriler = api_client.get(
+        f"/api/v1/documents/{document['id']}/proposals", headers=_auth(token)
+    ).json()
+    ortaklar = [o for o in oneriler if o["payload"].get("rel_type") == "shareholder"]
+    assert len(ortaklar) == 2
+    assert (
+        api_client.get(
+            f"/api/v1/entities/{company['id']}/relationships", headers=_auth(token)
+        ).json()
+        == []
+    )
+    for oneri in ortaklar:
+        kabul = api_client.post(
+            f"/api/v1/documents/{document['id']}/proposals/{oneri['id']}/decision",
+            json={"decision": "accepted"},
+            headers=_auth(token),
+        )
+        assert kabul.status_code == 200, kabul.text
+    baglar = api_client.get(
+        f"/api/v1/entities/{company['id']}/relationships", headers=_auth(token)
+    ).json()
+    assert sorted(b["ownership_percent"] for b in baglar) == [40, 60]

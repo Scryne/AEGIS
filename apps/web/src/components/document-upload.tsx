@@ -12,6 +12,7 @@ import { useState } from "react";
 const DOC_TYPES = [
   { value: "imza_sirkuleri", label: "İmza sirküleri" },
   { value: "faaliyet_belgesi", label: "Faaliyet belgesi" },
+  { value: "ortaklik_yapisi", label: "Ortaklık yapısı (pay defteri, ortaklar tablosu)" },
   { value: "ticaret_sicil_gazetesi", label: "Ticaret Sicil Gazetesi" },
   { value: "other", label: "Diğer (çıkarım yapılmaz)" },
 ] as const;

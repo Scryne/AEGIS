@@ -52,7 +52,9 @@ RequireDocumentWrite = Annotated[
     Principal, Depends(require_role(Role.OWNER, Role.COMPLIANCE_OFFICER, Role.ANALYST))
 ]
 
-DocTypeLiteral = Literal["imza_sirkuleri", "faaliyet_belgesi", "ticaret_sicil_gazetesi", "other"]
+DocTypeLiteral = Literal[
+    "imza_sirkuleri", "faaliyet_belgesi", "ortaklik_yapisi", "ticaret_sicil_gazetesi", "other"
+]
 
 
 # ── Şemalar ──────────────────────────────────────────────────────────────────

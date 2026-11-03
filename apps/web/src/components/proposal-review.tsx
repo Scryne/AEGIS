@@ -25,6 +25,10 @@ function describe(proposal: ExtractionProposal): string {
     return `${attributeLabel(name)}: ${String(proposal.payload.value ?? "")}`;
   }
   const person = String(proposal.payload.person_name ?? "");
+  if (typeof proposal.payload.ownership_percent === "number") {
+    const kind = proposal.payload.is_company ? "şirket ortak" : "ortak";
+    return `${person} — ${kind}, %${proposal.payload.ownership_percent.toLocaleString("tr-TR")} pay`;
+  }
   const role = proposal.payload.role_title ? ` — ${String(proposal.payload.role_title)}` : "";
   const tckn = proposal.payload.national_id
     ? ` (TCKN ${String(proposal.payload.national_id)})`

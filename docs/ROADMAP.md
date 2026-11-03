@@ -453,7 +453,7 @@ value justifies it) → E2.5 last, time-boxed.
 - [x] Unresolvable-chain handling (foreign parent, missing data): report "UBO not determinable — reason", never silently absorb (a MASAK-relevant signal in itself)
 - [x] UBO computation snapshots persisted with inputs + timestamp (audit: "what did we know when we decided")
 - [x] Interactive graph UI (React Flow or Cytoscape): pan/explore, UBO paths highlighted, % on edges, click-through to person entities + their screening status
-- [ ] Docling extension: extract shareholding tables from ortaklık yapısı documents → proposed ownership edges w/ confirmation
+- [x] Docling extension: extract shareholding tables from ortaklık yapısı documents → proposed ownership edges w/ confirmation — 2026-11-03: new document type, percent as written, low confidence when the total is not 100; validation on real pilot documents still open
 - [~] Auto-trigger screening for newly identified UBOs (M2→M3 integration) — *2026-10-31: unscreened UBOs are flagged in the response and screened with one click; queue-based auto-run deliberately not built (ADR-0009)*
 - [x] Test fixtures: layered structures, cross-holdings, circular ownership, exact-25% boundary
 

@@ -46,6 +46,8 @@ class DocumentType(StrEnum):
 
     IMZA_SIRKULERI = "imza_sirkuleri"
     FAALIYET_BELGESI = "faaliyet_belgesi"
+    ORTAKLIK_YAPISI = "ortaklik_yapisi"
+    """Pay defteri dökümü, ortaklık tablosu: pay oranlı hissedar önerisi üretir (E2.1)."""
     TICARET_SICIL_GAZETESI = "ticaret_sicil_gazetesi"
     """Kılavuzlu manuel ekleme (R1): kullanıcı gazete PDF'ini ve kaynak referansını verir."""
 

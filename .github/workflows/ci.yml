@@ -8,6 +8,8 @@ on:
   pull_request:
     branches: [main]
     paths-ignore: ["**.md", "docs/**", ".claude/**"]
+  # Yalnız docs/openapi.json değişen commit süzgece takılır; sözleşme kapısı elle koşturulabilsin.
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}

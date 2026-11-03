@@ -94,14 +94,14 @@ export function DiscrepancyReview({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Gerekçe (zorunlu)"
-              className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-fg"
+              className="field"
             />
             <div className="flex gap-2">
               <button
                 type="button"
                 disabled={busy}
                 onClick={() => decide("accepted")}
-                className="rounded-md border border-border px-3 py-1.5 text-sm text-fg disabled:opacity-50"
+                className="btn-quiet"
               >
                 Açıklandı, kabul et
               </button>
@@ -109,7 +109,7 @@ export function DiscrepancyReview({
                 type="button"
                 disabled={busy}
                 onClick={() => decide("resolved")}
-                className="rounded-md border border-border px-3 py-1.5 text-sm text-muted disabled:opacity-50"
+                className="btn-quiet"
               >
                 Düzeltildi
               </button>

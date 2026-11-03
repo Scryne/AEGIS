@@ -331,7 +331,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
           ← ŞİB taslakları
         </Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">
-          <h1 className="font-mono text-2xl font-semibold text-fg">{detay.reference_no}</h1>
+          <h1 className="font-mono page-title">{detay.reference_no}</h1>
           <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${SIB_STATUS_TONE[durum]}`}>
             {SIB_STATUS_LABELS[durum]}
           </span>
@@ -344,20 +344,20 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
         </p>
       </div>
 
-      <div className="space-y-2 rounded-card border border-danger bg-surface p-4 text-sm">
+      <div className="space-y-2 rounded-card border border-danger/40 bg-danger-soft p-4 text-sm">
         <p className="font-semibold text-danger">Gizli · Taslak</p>
         <p className="text-danger">{GIZLILIK_NOTU}</p>
         <p className="text-fg">{SORUMLULUK_NOTU}</p>
       </div>
 
       {kilitli && (
-        <div className="rounded-card border border-border bg-surface p-4 text-sm text-muted">
+        <div className="panel p-4 text-sm text-muted">
           Bu taslak iptal edildi{detay.cancel_reason ? `: ${detay.cancel_reason}` : "."} Kayıt saklama süresi
           boyunca silinmez.
         </div>
       )}
 
-      <section aria-labelledby="denetim" className="rounded-card border border-border bg-surface p-5">
+      <section aria-labelledby="denetim" className="panel p-5">
         <h2 id="denetim" className="text-sm font-semibold text-fg">
           Rehber denetimi
         </h2>
@@ -382,7 +382,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
         )}
       </section>
 
-      <fieldset className="space-y-4 rounded-card border border-border bg-surface p-5" disabled={kilitli}>
+      <fieldset className="space-y-4 panel p-5" disabled={kilitli}>
         <legend className="px-1 text-sm font-semibold text-fg">(A) Formu düzenleyen yükümlü</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <Alan yol={["yukumlu", "ad_unvan"]} etiket="Ad soyad veya unvan" />
@@ -392,7 +392,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
         </div>
       </fieldset>
 
-      <fieldset className="space-y-4 rounded-card border border-border bg-surface p-5" disabled={kilitli}>
+      <fieldset className="space-y-4 panel p-5" disabled={kilitli}>
         <legend className="px-1 text-sm font-semibold text-fg">(B) Bildirime ilişkin bilgiler</legend>
         <div className="grid gap-4 sm:grid-cols-2">
           <Alan yol={["bildirim", "tur"]} etiket="Yeni veya ek" tur="secim" secenekler={{ yeni: "Yeni", ek: "Ek" }} />
@@ -422,7 +422,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
         </div>
       </fieldset>
 
-      <fieldset className="space-y-4 rounded-card border border-border bg-surface p-5" disabled={kilitli}>
+      <fieldset className="space-y-4 panel p-5" disabled={kilitli}>
         <legend className="px-1 text-sm font-semibold text-fg">(C) Gerçek kişiler</legend>
         {form.gercek_kisiler.map((_, i) => (
           <div key={`g-${i}`} className="space-y-4 rounded-md border border-border p-4">
@@ -462,14 +462,14 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
         ))}
         <button
           type="button"
-          className="rounded-md border border-border px-3 py-1.5 text-sm text-fg"
+          className="btn-quiet"
           onClick={() => set(["gercek_kisiler"], [...form.gercek_kisiler, structuredClone(BOS_GERCEK)])}
         >
           Gerçek kişi ekle
         </button>
       </fieldset>
 
-      <fieldset className="space-y-4 rounded-card border border-border bg-surface p-5" disabled={kilitli}>
+      <fieldset className="space-y-4 panel p-5" disabled={kilitli}>
         <legend className="px-1 text-sm font-semibold text-fg">(D) Tüzel / diğer kişiler</legend>
         {form.tuzel_kisiler.map((_, i) => (
           <div key={`t-${i}`} className="space-y-4 rounded-md border border-border p-4">
@@ -508,7 +508,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
         ))}
         <button
           type="button"
-          className="rounded-md border border-border px-3 py-1.5 text-sm text-fg"
+          className="btn-quiet"
           onClick={() => set(["tuzel_kisiler"], [...form.tuzel_kisiler, structuredClone(BOS_TUZEL)])}
         >
           Tüzel/diğer kişi ekle
@@ -516,7 +516,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
         {hataHaritasi.get("kisiler") && <p className="text-xs text-danger">{hataHaritasi.get("kisiler")}</p>}
       </fieldset>
 
-      <fieldset className="space-y-4 rounded-card border border-border bg-surface p-5" disabled={kilitli}>
+      <fieldset className="space-y-4 panel p-5" disabled={kilitli}>
         <legend className="px-1 text-sm font-semibold text-fg">(E) Şüpheli işlemler</legend>
         <p className="text-xs text-muted">
           Yalnız parasal tutar içeren ve şüphe duyulan işlemler. Tutar yoksa (hesap açılışı, vekâlet gibi)
@@ -555,14 +555,14 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
         ))}
         <button
           type="button"
-          className="rounded-md border border-border px-3 py-1.5 text-sm text-fg"
+          className="btn-quiet"
           onClick={() => set(["islemler"], [...form.islemler, structuredClone(BOS_ISLEM)])}
         >
           Şüpheli işlem ekle
         </button>
       </fieldset>
 
-      <fieldset className="space-y-3 rounded-card border border-border bg-surface p-5" disabled={kilitli}>
+      <fieldset className="space-y-3 panel p-5" disabled={kilitli}>
         <legend className="px-1 text-sm font-semibold text-fg">(F) Şüphe kategorisi</legend>
         <p className="text-xs text-muted">
           En az {kodlar.sk_en_az}, en fazla {kodlar.sk_en_cok} kod. Seçim bir suç hükmü değildir.
@@ -591,7 +591,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
           {skListesi.map(([kod, ad]) => {
             const secili = sk.includes(kod);
             return (
-              <label key={kod} className="flex items-start gap-2 rounded px-1 py-1 text-sm text-fg hover:bg-bg">
+              <label key={kod} className="flex items-start gap-2 rounded px-1 py-1 text-sm text-fg hover:bg-subtle">
                 <input
                   type="checkbox"
                   className="mt-0.5"
@@ -611,7 +611,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
         {hataHaritasi.get("sk_kodlari") && <p className="text-xs text-danger">{hataHaritasi.get("sk_kodlari")}</p>}
       </fieldset>
 
-      <fieldset className="space-y-2 rounded-card border border-border bg-surface p-5" disabled={kilitli}>
+      <fieldset className="space-y-2 panel p-5" disabled={kilitli}>
         <legend className="px-1 text-sm font-semibold text-fg">(G) Açıklama</legend>
         <p className="text-xs text-muted">
           Şüphe duyulan eylem, yapılan tüm araştırma ve sonuçları, fonların kaynağı. Açıklamada adı geçen
@@ -637,7 +637,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
       </fieldset>
 
       {!kilitli && (
-        <details className="rounded-card border border-border bg-surface p-5">
+        <details className="panel p-5">
           <summary className="cursor-pointer text-sm font-medium text-fg">Taslağı iptal et</summary>
           <div className="mt-3 space-y-2">
             <label htmlFor="iptal-neden" className="block text-xs font-medium text-muted">
@@ -672,7 +672,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
               type="button"
               onClick={kaydet}
               disabled={mesgul !== null || !degisti}
-              className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-fg disabled:opacity-50"
+              className="btn-quiet"
             >
               {mesgul === "kaydet" ? "Kaydediliyor…" : "Kaydet"}
             </button>
@@ -681,7 +681,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
               onClick={disaAktar}
               disabled={mesgul !== null || !disaAktarilabilir}
               title={degisti ? "Önce kaydedin" : hatalar.length ? "Eksikler giderilmeli" : undefined}
-              className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-fg disabled:opacity-50"
+              className="btn-primary"
             >
               {mesgul === "aktar" ? "Hazırlanıyor…" : "Word olarak dışa aktar"}
             </button>

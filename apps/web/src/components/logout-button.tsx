@@ -12,7 +12,7 @@ export function LogoutButton() {
   return (
     <button
       onClick={logout}
-      className="rounded-md border border-border px-3 py-1.5 text-sm text-muted hover:text-fg"
+      className="btn-quiet"
     >
       Çıkış
     </button>

@@ -105,7 +105,7 @@ export function ScreeningForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Örn. Yıldız İnşaat San. ve Tic. Ltd. Şti."
-            className="w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg"
+            className="field"
           />
         </label>
         <label className="block">
@@ -113,7 +113,7 @@ export function ScreeningForm() {
           <select
             value={subjectType}
             onChange={(e) => setSubjectType(e.target.value as "company" | "person")}
-            className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg"
+            className="field w-auto"
           >
             <option value="company">Tüzel kişi</option>
             <option value="person">Gerçek kişi</option>
@@ -129,7 +129,7 @@ export function ScreeningForm() {
           value={taxNumber}
           onChange={(e) => setTaxNumber(e.target.value)}
           inputMode="numeric"
-          className="w-full rounded-md border border-border bg-bg px-3 py-2 font-mono text-sm text-fg"
+          className="field font-mono"
         />
         <span className="mt-1 block text-xs text-muted">
           Numara yalnız sorguda kullanılır; kayıtta maskeli saklanır.
@@ -155,14 +155,14 @@ export function ScreeningForm() {
               value={item.name}
               onChange={(e) => updateRelated(index, { name: e.target.value })}
               placeholder="Ad soyad"
-              className="flex-1 rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg"
+              className="flex-1 field w-auto"
             />
             <select
               value={item.role}
               onChange={(e) =>
                 updateRelated(index, { role: e.target.value as RelatedSubject["role"] })
               }
-              className="rounded-md border border-border bg-bg px-2 py-2 text-sm text-fg"
+              className="field w-auto"
             >
               {ROLE_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -191,7 +191,7 @@ export function ScreeningForm() {
       <button
         type="submit"
         disabled={busy || !name.trim()}
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-fg disabled:opacity-50"
+        className="btn-primary"
       >
         {busy ? "Taranıyor…" : "Taramayı başlat"}
       </button>

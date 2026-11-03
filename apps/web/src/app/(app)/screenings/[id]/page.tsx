@@ -36,12 +36,12 @@ function CandidateCard({
   const features = Object.entries(candidate.features).sort((a, b) => b[1] - a[1]);
   const decisionTone =
     candidate.decision === "confirmed"
-      ? "border-danger text-danger"
+      ? "border-danger/40 bg-danger-soft text-danger"
       : candidate.decision === "dismissed"
         ? "border-border text-muted"
         : candidate.flagged
-          ? "border-danger text-danger"
-          : "border-warning text-warning";
+          ? "border-danger/40 bg-danger-soft text-danger"
+          : "border-warning/40 bg-warning-soft text-warning";
 
   return (
     <li className="rounded-card border border-border bg-bg p-4">
@@ -142,12 +142,12 @@ export default async function ScreeningDetailPage({
   const decided = screening.candidates.filter((c) => c.decision !== "pending");
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="page space-y-6">
       <div>
         <Link href="/screenings" className="text-xs text-muted hover:text-fg">
           ← Taramalar
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold text-fg">{screening.subject_name}</h1>
+        <h1 className="page-title mt-1">{screening.subject_name}</h1>
         <p className="text-sm text-muted">
           {formatDate(screening.created_at)} · {STATUS_LABELS[screening.status]}
           {screening.duration_ms !== null && ` · ${(screening.duration_ms / 1000).toFixed(1)} sn`}
@@ -172,15 +172,15 @@ export default async function ScreeningDetailPage({
           ["Onaylı", screening.summary.confirmed],
           ["Elenen", screening.summary.dismissed],
         ].map(([label, value]) => (
-          <div key={String(label)} className="rounded-card border border-border bg-surface p-3">
+          <div key={String(label)} className="panel p-3">
             <div className="text-xs text-muted">{label}</div>
             <div className="text-xl font-semibold text-fg">{value}</div>
           </div>
         ))}
       </section>
 
-      <section className="rounded-card border border-border bg-surface p-5">
-        <h2 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
+      <section className="panel p-5">
+        <h2 className="mb-3 eyebrow">
           Taranan özneler
         </h2>
         <ul className="divide-y divide-border">
@@ -203,7 +203,7 @@ export default async function ScreeningDetailPage({
 
       {pending.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold tracking-wide text-muted uppercase">
+          <h2 className="eyebrow">
             İnceleme bekleyen eşleşmeler
           </h2>
           <ul className="space-y-3">
@@ -221,7 +221,7 @@ export default async function ScreeningDetailPage({
 
       {decided.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-sm font-semibold tracking-wide text-muted uppercase">
+          <h2 className="eyebrow">
             Karara bağlanmış eşleşmeler
           </h2>
           {/* Elenen adaylar da gösterilir: dosya raporu (E1.5) "gerekçesiyle elenen
@@ -239,7 +239,7 @@ export default async function ScreeningDetailPage({
         </section>
       )}
 
-      <section className="rounded-card border border-border bg-surface p-5 text-xs text-muted">
+      <section className="panel p-5 text-xs text-muted">
         <h2 className="mb-2 text-sm font-semibold tracking-wide uppercase">Koşu bilgisi</h2>
         <dl className="grid gap-1 sm:grid-cols-2">
           <div>

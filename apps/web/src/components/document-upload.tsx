@@ -70,7 +70,7 @@ export function DocumentUpload({ entityId }: { entityId: string }) {
           <select
             value={docType}
             onChange={(e) => setDocType(e.target.value)}
-            className="w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg"
+            className="field"
           >
             {DOC_TYPES.map((item) => (
               <option key={item.value} value={item.value}>
@@ -98,7 +98,7 @@ export function DocumentUpload({ entityId }: { entityId: string }) {
             <input
               value={issueNumber}
               onChange={(e) => setIssueNumber(e.target.value)}
-              className="w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg"
+              className="field"
             />
           </label>
           <label className="block">
@@ -107,7 +107,7 @@ export function DocumentUpload({ entityId }: { entityId: string }) {
               type="date"
               value={issueDate}
               onChange={(e) => setIssueDate(e.target.value)}
-              className="w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg"
+              className="field"
             />
           </label>
           <label className="block">
@@ -116,7 +116,7 @@ export function DocumentUpload({ entityId }: { entityId: string }) {
               value={gazetteUrl}
               onChange={(e) => setGazetteUrl(e.target.value)}
               placeholder="https://www.ticaretsicil.gov.tr/..."
-              className="w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg"
+              className="field"
             />
           </label>
         </div>
@@ -131,7 +131,7 @@ export function DocumentUpload({ entityId }: { entityId: string }) {
       <button
         type="submit"
         disabled={busy || file === null}
-        className="rounded-md border border-border px-3 py-1.5 text-sm text-fg disabled:opacity-50"
+        className="btn-quiet"
       >
         {busy ? "Yükleniyor…" : "Belgeyi yükle"}
       </button>

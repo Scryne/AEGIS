@@ -1,5 +1,6 @@
 "use client";
 
+import { Wordmark } from "@/components/nav-links";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
@@ -39,10 +40,27 @@ function LoginForm() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-6 p-8">
-      <div className="w-full rounded-card border border-border bg-surface p-6 shadow-sm">
-        <div className="mb-1 font-mono text-xs tracking-widest text-muted uppercase">AEGIS</div>
-        <h1 className="mb-4 text-xl font-semibold text-fg">Giriş yap</h1>
+    <main className="grid min-h-dvh md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+      <section className="flex flex-col justify-between gap-8 bg-ink p-6 text-ink-fg md:p-12">
+        <Wordmark inverse />
+        <div className="hidden md:block">
+          <p className="max-w-md text-2xl leading-snug font-semibold text-balance">
+            Kararı siz verirsiniz. AEGIS her kararı kanıtıyla belgeler.
+          </p>
+          <ul className="mt-6 max-w-md space-y-2.5 text-sm text-ink-muted">
+            <li>Sonuç vermeyen tarama hiçbir zaman temiz görünmez.</li>
+            <li>Her eşleşme skoru, nedeni ve kaynağıyla gelir.</li>
+            <li>Her eylem değiştirilemez denetim izine yazılır.</li>
+          </ul>
+        </div>
+        <p className="hidden text-xs text-ink-muted md:block">
+          MASAK yükümlüleri için kurum doğrulama ve tarama çalışma alanı.
+        </p>
+      </section>
+      <div className="flex items-center justify-center p-6 md:p-12">
+      <div className="w-full max-w-sm">
+        <h1 className="page-title mb-1">Giriş yap</h1>
+        <p className="mb-6 text-sm text-muted">Kurum hesabınızla devam edin.</p>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <label htmlFor="email" className="text-sm font-medium text-fg">
@@ -54,7 +72,7 @@ function LoginForm() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="h-9 w-full rounded-md border border-border bg-surface px-3 text-sm text-fg outline-none focus:border-primary"
+              className="field"
             />
           </div>
           <div className="space-y-1.5">
@@ -67,18 +85,23 @@ function LoginForm() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-9 w-full rounded-md border border-border bg-surface px-3 text-sm text-fg outline-none focus:border-primary"
+              className="field"
             />
           </div>
-          {error !== null && <p className="text-sm text-danger">{error}</p>}
+          {error !== null && (
+            <p role="alert" className="text-sm text-danger">
+              {error}
+            </p>
+          )}
           <button
             type="submit"
             disabled={pending}
-            className="h-9 w-full rounded-card bg-primary text-sm font-medium text-primary-fg disabled:opacity-60"
+            className="btn-primary w-full"
           >
             {pending ? "Giriş yapılıyor…" : "Giriş yap"}
           </button>
         </form>
+      </div>
       </div>
     </main>
   );

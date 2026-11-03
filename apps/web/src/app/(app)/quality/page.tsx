@@ -7,6 +7,8 @@ import { QualitySweep } from "@/components/quality-sweep";
 import { serverFetch } from "@/lib/server/backend";
 import { getCurrentUser } from "@/lib/server/user";
 
+export const metadata = { title: "Eşleşme Kalitesi" };
+
 export const dynamic = "force-dynamic";
 
 interface Matching {
@@ -52,8 +54,8 @@ export default async function QualityPage() {
   const user = await getCurrentUser();
   if (user.role === "analyst") {
     return (
-      <div className="mx-auto max-w-4xl">
-        <h1 className="text-2xl font-semibold text-fg">Eşleşme kalitesi</h1>
+      <div className="page">
+        <h1 className="page-title">Eşleşme kalitesi</h1>
         <p className="mt-2 text-sm text-muted">Bu sayfa sahip, uyum uzmanı ve denetçiye açıktır.</p>
       </div>
     );
@@ -73,10 +75,10 @@ export default async function QualityPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="page space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-fg">Eşleşme kalitesi</h1>
+          <h1 className="page-title">Eşleşme kalitesi</h1>
           <p className="mt-1 max-w-prose text-sm text-muted">
             Ölçüm, analistlerinizin eşleşme kararlarından çıkar: onaylanan gerçek eşleşme, elenen yanlış
             pozitiftir. Motorun kendiliğinden elediği adayların doğrusu bilinmez, ölçüme girmez. Her yeni karar
@@ -88,7 +90,7 @@ export default async function QualityPage() {
 
       <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {tiles.map(([label, value, hint]) => (
-          <div key={label} className="rounded-card border border-border bg-surface px-4 py-3">
+          <div key={label} className="panel px-4 py-3">
             <dt className="text-xs text-muted">{label}</dt>
             <dd className="mt-1 font-mono text-2xl text-fg tabular-nums">{value}</dd>
             <dd className="mt-0.5 text-xs text-muted">{hint}</dd>
@@ -101,9 +103,9 @@ export default async function QualityPage() {
         <span className="font-mono">{m.auto_dismissed}</span> · toplam aday <span className="font-mono">{m.total}</span>
       </p>
 
-      <section aria-labelledby="esik-baslik" className="space-y-4 rounded-card border border-border bg-surface p-5">
+      <section aria-labelledby="esik-baslik" className="space-y-4 panel p-5">
         <div>
-          <h2 id="esik-baslik" className="text-sm font-semibold tracking-wide text-muted uppercase">
+          <h2 id="esik-baslik" className="eyebrow">
             Otomatik eleme eşiği
           </h2>
           <p className="mt-1 text-xs text-muted">
@@ -126,8 +128,8 @@ export default async function QualityPage() {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section aria-labelledby="trend-baslik" className="space-y-3 rounded-card border border-border bg-surface p-5">
-          <h2 id="trend-baslik" className="text-sm font-semibold tracking-wide text-muted uppercase">
+        <section aria-labelledby="trend-baslik" className="space-y-3 panel p-5">
+          <h2 id="trend-baslik" className="eyebrow">
             Eğilim
           </h2>
           {q.history.length === 0 ? (
@@ -160,8 +162,8 @@ export default async function QualityPage() {
           )}
         </section>
 
-        <section aria-labelledby="haber-baslik" className="space-y-3 rounded-card border border-border bg-surface p-5">
-          <h2 id="haber-baslik" className="text-sm font-semibold tracking-wide text-muted uppercase">
+        <section aria-labelledby="haber-baslik" className="space-y-3 panel p-5">
+          <h2 id="haber-baslik" className="eyebrow">
             Olumsuz haber (beta) isabeti
           </h2>
           <dl className="grid grid-cols-3 gap-3 text-sm">

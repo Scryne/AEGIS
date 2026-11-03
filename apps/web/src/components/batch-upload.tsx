@@ -145,7 +145,7 @@ export function BatchUpload() {
                 <select
                   value={mapping[f] ?? ""}
                   onChange={(e) => changeMapping(f, e.target.value)}
-                  className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-fg"
+                  className="field"
                 >
                   <option value="">— eşleme yok —</option>
                   {preview.headers
@@ -167,7 +167,7 @@ export function BatchUpload() {
               ["Geçersiz", preview.invalid_rows, preview.invalid_rows ? "text-danger" : "text-fg"],
               ["Dosyada tekrar", preview.duplicate_rows, "text-fg"],
             ].map(([label, value, tone]) => (
-              <div key={String(label)} className="rounded-card border border-border bg-surface px-4 py-3">
+              <div key={String(label)} className="panel px-4 py-3">
                 <dt className="text-xs text-muted">{label}</dt>
                 <dd className={`mt-1 font-mono text-xl tabular-nums ${tone}`}>{value}</dd>
               </div>
@@ -214,7 +214,7 @@ export function BatchUpload() {
             type="button"
             onClick={create}
             disabled={busy || !mapping.name || preview.valid_rows === 0}
-            className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-fg disabled:opacity-50"
+            className="btn-primary"
           >
             {busy ? "Kaydediliyor…" : `Taslak olarak kaydet (${preview.valid_rows} satır)`}
           </button>

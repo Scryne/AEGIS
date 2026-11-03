@@ -75,7 +75,7 @@ function Karar({ item, onDone }: { item: AdverseMediaItem; onDone: () => void })
         value={not}
         onChange={(e) => setNot(e.target.value)}
         placeholder="Ör. Haberdeki kişi şirketin genel müdürü; adı ve görevi birebir geçiyor."
-        className="w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg"
+        className="field"
       />
       {error && (
         <p role="alert" className="text-xs text-danger">
@@ -147,7 +147,7 @@ export function AdverseMediaPanel({
   const liste = data.items.filter((i) => i.status === sekme);
 
   return (
-    <section aria-labelledby="haber-baslik" className="space-y-4 rounded-card border border-border bg-surface p-5">
+    <section aria-labelledby="haber-baslik" className="space-y-4 panel p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 id="haber-baslik" className="text-sm font-semibold text-fg">

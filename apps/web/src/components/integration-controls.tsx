@@ -105,7 +105,7 @@ export function ApiKeyCreate() {
           required
           minLength={2}
           placeholder="ör. ERP müşteri kabul"
-          className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-fg"
+          className="field"
         />
       </label>
       <label htmlFor={roleId} className="space-y-1 text-xs text-muted">
@@ -114,7 +114,7 @@ export function ApiKeyCreate() {
           id={roleId}
           value={role}
           onChange={(e) => setRole(e.target.value)}
-          className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-fg"
+          className="field"
         >
           <option value="analyst">Analist (tarar, okur)</option>
           <option value="auditor">Denetçi (yalnız okur)</option>
@@ -130,13 +130,13 @@ export function ApiKeyCreate() {
           value={days}
           onChange={(e) => setDays(e.target.value)}
           placeholder="süresiz"
-          className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-fg"
+          className="field"
         />
       </label>
       <button
         type="submit"
         disabled={busy}
-        className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-fg disabled:opacity-50"
+        className="btn-primary"
       >
         {busy ? "Açılıyor…" : "Anahtar aç"}
       </button>
@@ -231,7 +231,7 @@ export function WebhookCreate({ events }: { events: string[] }) {
           onChange={(e) => setUrl(e.target.value)}
           required
           placeholder="https://erp.kurumunuz.com.tr/aegis/webhook"
-          className="w-full rounded-md border border-border bg-surface px-3 py-1.5 font-mono text-sm text-fg"
+          className="field font-mono"
         />
       </label>
       <fieldset className="flex flex-wrap gap-x-4 gap-y-2">
@@ -253,7 +253,7 @@ export function WebhookCreate({ events }: { events: string[] }) {
       <button
         type="submit"
         disabled={busy || picked.length === 0}
-        className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-fg disabled:opacity-50"
+        className="btn-primary"
       >
         {busy ? "Ekleniyor…" : "Webhook ekle"}
       </button>

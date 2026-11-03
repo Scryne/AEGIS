@@ -72,7 +72,7 @@ export function MatchReview({
         placeholder={
           decided ? "Değişiklik gerekçesi (eleme için zorunlu)" : "Karar gerekçesi (eleme için zorunlu)"
         }
-        className="w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg"
+        className="field"
       />
       <div className="flex flex-wrap gap-2">
         {candidate.decision !== "confirmed" && (
@@ -90,7 +90,7 @@ export function MatchReview({
             type="button"
             disabled={busy}
             onClick={() => decide("dismissed")}
-            className="rounded-md border border-border px-3 py-1.5 text-sm text-muted hover:text-fg disabled:opacity-50"
+            className="btn-quiet"
           >
             Gerekçesiyle ele
           </button>

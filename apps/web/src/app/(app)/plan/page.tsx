@@ -7,6 +7,8 @@ import { AdverseMediaBetaToggle } from "@/components/adverse-media-beta-toggle";
 import { serverFetch } from "@/lib/server/backend";
 import { getCurrentUser } from "@/lib/server/user";
 
+export const metadata = { title: "Plan ve Kullanım" };
+
 export const dynamic = "force-dynamic";
 
 interface Usage {
@@ -83,9 +85,9 @@ export default async function PlanPage() {
 
   if (u === null) {
     return (
-      <div className="mx-auto max-w-3xl">
-        <h1 className="text-2xl font-semibold text-fg">Plan ve kullanım</h1>
-        <p className="mt-4 rounded-card border border-danger bg-surface p-4 text-sm text-danger">
+      <div className="page">
+        <h1 className="page-title">Plan ve kullanım</h1>
+        <p className="mt-4 rounded-card border border-danger/40 bg-danger-soft p-4 text-sm text-danger">
           Kullanım bilgisi yüklenemedi. Sayfayı yenileyin; sorun sürerse API&apos;nin çalıştığını
           kontrol edin.
         </p>
@@ -98,9 +100,9 @@ export default async function PlanPage() {
   const izlemeDolu = u.monitored_entities >= u.plan.monitored_entity_limit;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="page space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-fg">Plan ve kullanım</h1>
+        <h1 className="page-title">Plan ve kullanım</h1>
         <p className="mt-1 max-w-prose text-sm text-muted">
           Kota taranan özne başına sayılır: bir şirket ve iki yöneticisi üç sorgudur. Gece izlemesinin
           kendi koşuları kotadan düşmez. Dönem {gun(u.period_start)} – {gun(sonGun)} (Türkiye saati).
@@ -108,7 +110,7 @@ export default async function PlanPage() {
       </div>
 
       {u.blocked && (
-        <p role="alert" className="rounded-card border border-danger bg-surface p-4 text-sm text-danger">
+        <p role="alert" className="rounded-card border border-danger/40 bg-danger-soft p-4 text-sm text-danger">
           Bu ayın sorgu hakkı doldu; yeni tarama başlatılamıyor. Planınızı yükseltmek için hesap
           yöneticinizle görüşün. Mevcut kayıtlar ve raporlar erişilebilir kalır.
         </p>
@@ -123,7 +125,7 @@ export default async function PlanPage() {
         </p>
       )}
 
-      <section className="rounded-card border border-border bg-surface p-5">
+      <section className="panel p-5">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="text-base font-medium text-fg">{u.plan.name} planı</h2>
           <span className="rounded-full border border-border px-2 py-0.5 text-xs text-muted">
@@ -182,7 +184,7 @@ export default async function PlanPage() {
       </section>
 
       {canStatements && (
-        <section aria-labelledby="donem-baslik" className="rounded-card border border-border bg-surface p-5">
+        <section aria-labelledby="donem-baslik" className="panel p-5">
           <h2 id="donem-baslik" className="text-base font-medium text-fg">
             Kapanmış dönemler
           </h2>
@@ -225,7 +227,7 @@ export default async function PlanPage() {
       )}
 
       {user.role === "owner" && (
-        <section aria-label="Beta özellikler" className="rounded-card border border-border bg-surface p-5">
+        <section aria-label="Beta özellikler" className="panel p-5">
           <AdverseMediaBetaToggle enabled={beta} />
         </section>
       )}

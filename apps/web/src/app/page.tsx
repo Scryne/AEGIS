@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { Wordmark } from "@/components/nav-links";
+
 // Tanıtım sayfası. Ürün iddiası tek cümle: AEGIS kararı belgeler ve destekler, vermez.
 // Akış numaralı adımlarla, güvenceler CLAUDE.md'deki değişmezlerle (Invariant 1-4) birebir.
 
@@ -31,31 +33,33 @@ const GUARANTEES = [
 
 export default function LandingPage() {
   return (
-    <main className="mx-auto max-w-5xl px-4 py-10 md:px-8 md:py-16">
+    <main>
+      <div className="bg-ink text-ink-fg">
+      <div className="mx-auto max-w-6xl px-4 pt-6 pb-14 md:px-8 md:pb-20">
       <header className="flex items-center justify-between">
-        <span className="font-mono text-sm tracking-widest text-muted uppercase">AEGIS</span>
+        <Wordmark inverse />
         <Link
           href="/login"
-          className="rounded-card border border-border bg-surface px-4 py-2 text-sm font-medium text-fg hover:bg-bg"
+          className="inline-flex min-h-10 items-center rounded-md border border-ink-line px-4 text-sm font-medium text-ink-fg hover:bg-ink-raised"
         >
           Giriş yap
         </Link>
       </header>
 
-      <section className="mt-14 grid items-start gap-10 md:mt-20 md:grid-cols-[1.2fr_1fr]">
+      <section className="mt-14 grid items-center gap-10 md:mt-20 md:grid-cols-[1.2fr_1fr]">
         <div>
-          <p className="text-sm font-medium text-primary">MASAK yükümlüleri için KYB</p>
-          <h1 className="mt-3 text-3xl leading-tight font-semibold text-balance text-fg md:text-4xl">
+          <p className="text-sm font-medium text-seal">MASAK yükümlüleri için KYB</p>
+          <h1 className="mt-3 text-3xl leading-tight font-semibold tracking-tight text-balance md:text-[2.75rem]">
             Müşteri şirketinizi tanıyın, kararınızı kanıtıyla belgeleyin.
           </h1>
-          <p className="mt-4 max-w-xl text-muted">
+          <p className="mt-4 max-w-xl text-ink-muted">
             AEGIS kurum doğrulama, yaptırım ve PEP taraması ile denetime dayanıklı dosyayı tek
             çalışma alanında toplar. Uyum kararını belgeler ve destekler; kararı vermez.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-7 flex flex-wrap gap-3">
             <Link
               href="/login"
-              className="rounded-card bg-primary px-5 py-2.5 text-sm font-medium text-primary-fg"
+              className="inline-flex min-h-11 items-center rounded-md bg-seal px-5 text-sm font-semibold text-ink hover:opacity-90"
             >
               Çalışma alanına gir
             </Link>
@@ -65,11 +69,11 @@ export default function LandingPage() {
         {/* Ürünün ana mesajı: sonuç önce, gerekçe sonra. Örnek veri kurgusaldır. */}
         <figure
           aria-label="Örnek tarama sonucu"
-          className="rounded-card border border-border bg-surface p-5 text-sm"
+          className="panel p-5 text-sm text-fg"
         >
           <div className="text-xs text-muted">Örnek tarama · kurgusal veri</div>
           <div className="mt-2 font-medium text-fg">ABC Yapı Sanayi A.Ş.</div>
-          <div className="mt-3 rounded border border-danger px-3 py-2 text-danger">
+          <div className="mt-3 rounded border border-danger/40 bg-danger-soft px-3 py-2 text-danger">
             Onaylanmış eşleşme var
           </div>
           <dl className="mt-4 space-y-2 text-xs">
@@ -95,9 +99,12 @@ export default function LandingPage() {
           </figcaption>
         </figure>
       </section>
+      </div>
+      </div>
 
-      <section className="mt-20">
-        <h2 className="text-sm font-semibold tracking-wide text-muted uppercase">Nasıl çalışır</h2>
+      <div className="mx-auto max-w-6xl px-4 pb-14 md:px-8">
+      <section className="mt-16">
+        <h2 className="eyebrow">Nasıl çalışır</h2>
         <ol className="mt-5 grid gap-6 md:grid-cols-2">
           {STEPS.map((step, index) => (
             <li key={step.title} className="flex gap-4">
@@ -111,8 +118,8 @@ export default function LandingPage() {
         </ol>
       </section>
 
-      <section className="mt-16 rounded-card border border-border bg-surface p-6">
-        <h2 className="text-sm font-semibold tracking-wide text-muted uppercase">
+      <section className="mt-16 panel p-6">
+        <h2 className="eyebrow">
           Pazarlık konusu olmayanlar
         </h2>
         <dl className="mt-4 grid gap-x-8 gap-y-4 md:grid-cols-2">
@@ -129,6 +136,7 @@ export default function LandingPage() {
         AEGIS bir karar destek aracıdır; şüpheli işlem bildirimi ve müşteri kabulü yükümlünün
         sorumluluğundadır.
       </footer>
+      </div>
     </main>
   );
 }

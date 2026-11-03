@@ -75,10 +75,10 @@ export interface ChainVerification {
 
 /** Risk seviyesinin kenarlık/metin sınıfı — renkler tasarım belirteçlerinden (R7). */
 export const RISK_CLASSES: Record<RiskLevel, string> = {
-  high: "border-danger text-danger",
-  elevated: "border-warning text-warning",
+  high: "border-danger/40 bg-danger-soft text-danger",
+  elevated: "border-warning/40 bg-warning-soft text-warning",
   unknown: "border-border text-muted",
-  standard: "border-success text-success",
+  standard: "border-success/40 bg-success-soft text-success",
 };
 
 export const FORMAT_LABELS: Record<string, string> = {

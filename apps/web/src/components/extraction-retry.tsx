@@ -38,7 +38,7 @@ export function ExtractionRetry({ documentId }: { documentId: string }) {
         type="button"
         onClick={retry}
         disabled={busy}
-        className="rounded border border-border px-2 py-0.5 text-xs text-fg hover:bg-bg disabled:opacity-50"
+        className="rounded border border-border px-2 py-0.5 text-xs text-fg hover:bg-subtle disabled:opacity-50"
       >
         {busy ? "Kuyruğa alınıyor…" : "Çıkarımı yeniden dene"}
       </button>

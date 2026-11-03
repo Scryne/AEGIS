@@ -11,6 +11,8 @@ import { getCurrentUser } from "@/lib/server/user";
 import type { AuditEventPage, ChainVerification } from "@/lib/reports";
 import { actionLabel, objectTypeLabel } from "@/lib/reports";
 
+export const metadata = { title: "Denetim İzi" };
+
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 50;
@@ -44,8 +46,8 @@ export default async function AuditPage({
 
   if (page === null) {
     return (
-      <div className="mx-auto max-w-5xl">
-        <h1 className="text-2xl font-semibold text-fg">Denetim İzi</h1>
+      <div className="page">
+        <h1 className="page-title">Denetim İzi</h1>
         <p className="mt-2 text-sm text-danger">
           Denetim izi görüntülenemedi. Bu sayfa yalnızca sahip, uyum uzmanı ve denetçi
           rollerine açıktır.
@@ -66,9 +68,9 @@ export default async function AuditPage({
   };
 
   return (
-    <div className="mx-auto max-w-5xl space-y-5">
+    <div className="page space-y-5">
       <div>
-        <h1 className="text-2xl font-semibold text-fg">Denetim İzi</h1>
+        <h1 className="page-title">Denetim İzi</h1>
         <p className="text-sm text-muted">
           Risk etkileyen her eylem tam olarak bir olay yazar. Kayıtlar değiştirilemez;
           {user.role === "auditor" && " denetçi rolü salt-okunurdur ve"} bu sayfada hiçbir
@@ -80,7 +82,7 @@ export default async function AuditPage({
       {chain !== null && (
         <div
           className={`rounded-card border bg-surface p-4 text-sm ${
-            chain.ok ? "border-success text-success" : "border-danger text-danger"
+            chain.ok ? "border-success/40 bg-success-soft text-success" : "border-danger/40 bg-danger-soft text-danger"
           }`}
         >
           {chain.ok ? (
@@ -98,9 +100,9 @@ export default async function AuditPage({
         </div>
       )}
 
-      <div className="rounded-card border border-border bg-surface p-5">
+      <div className="panel p-5">
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="text-sm font-semibold tracking-wide text-muted uppercase">
+          <h2 className="eyebrow">
             Olaylar
           </h2>
           <span className="text-xs text-muted">

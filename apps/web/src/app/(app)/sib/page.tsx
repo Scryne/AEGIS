@@ -16,13 +16,15 @@ import {
   type SibOzet,
 } from "@/lib/sib";
 
+export const metadata = { title: "ŞİB Taslakları" };
+
 export const dynamic = "force-dynamic";
 
 export default async function SibListPage() {
   const user = await getCurrentUser();
   if (!(SIB_ROLES as readonly string[]).includes(user.role)) {
     return (
-      <div className="mx-auto max-w-2xl rounded-card border border-border bg-surface p-6 text-sm text-muted">
+      <div className="page panel p-6 text-sm text-muted">
         Bu sayfa yalnız sahip ve uyum görevlisi rolüne açıktır.
       </div>
     );
@@ -31,22 +33,22 @@ export default async function SibListPage() {
   const data = res.ok ? ((await res.json()) as { items: SibOzet[] }) : null;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="page space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-fg">Şüpheli işlem bildirimi taslakları</h1>
+        <h1 className="page-title">Şüpheli işlem bildirimi taslakları</h1>
         <p className="mt-1 max-w-prose text-sm text-muted">{SORUMLULUK_NOTU}</p>
       </div>
 
-      <div role="note" className="rounded-card border border-danger bg-surface p-4 text-sm text-danger">
+      <div role="note" className="rounded-card border border-danger/40 bg-danger-soft p-4 text-sm text-danger">
         <strong className="font-semibold">Gizli.</strong> {GIZLILIK_NOTU}
       </div>
 
       {data === null ? (
-        <p className="rounded-card border border-danger bg-surface p-4 text-sm text-danger">
+        <p className="rounded-card border border-danger/40 bg-danger-soft p-4 text-sm text-danger">
           Taslaklar yüklenemedi. Sayfayı yenileyin; sorun sürerse API&apos;nin çalıştığını kontrol edin.
         </p>
       ) : data.items.length === 0 ? (
-        <div className="rounded-card border border-border bg-surface p-8 text-center">
+        <div className="panel p-8 text-center">
           <p className="text-sm font-medium text-fg">Henüz taslak yok.</p>
           <p className="mt-1 text-xs text-muted">
             Taslak, varlık sayfasındaki &quot;ŞİB taslağı hazırla&quot; düğmesiyle dosyadan ön
@@ -54,7 +56,7 @@ export default async function SibListPage() {
           </p>
         </div>
       ) : (
-        <ul className="divide-y divide-border rounded-card border border-border bg-surface">
+        <ul className="divide-y divide-border panel">
           {data.items.map((t) => (
             <li key={t.id} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
@@ -68,6 +70,7 @@ export default async function SibListPage() {
                 </p>
               </div>
               <div className="flex shrink-0 flex-wrap items-center gap-2">
+                {t.unreadable && <span className="text-xs text-danger">Bu anahtarla okunamıyor</span>}
                 {t.status !== "iptal" && t.errors > 0 && (
                   <span className="text-xs text-danger">{t.errors} eksik</span>
                 )}

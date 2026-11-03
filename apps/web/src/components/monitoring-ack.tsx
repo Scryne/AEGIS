@@ -48,12 +48,12 @@ export function MonitoringAck({ alertId }: { alertId: string }) {
         value={note}
         onChange={(e) => setNote(e.target.value)}
         placeholder="Ne yapıldı? (ör. eşleşme incelemeye alındı)"
-        className="min-w-0 flex-1 rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-fg"
+        className="field min-w-0 flex-1"
       />
       <button
         type="submit"
         disabled={busy}
-        className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-fg disabled:opacity-60"
+        className="btn-primary"
       >
         {busy ? "Kaydediliyor…" : "Görüldü olarak işaretle"}
       </button>

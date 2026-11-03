@@ -129,7 +129,7 @@ export function CaseActions({
             required
             minLength={10}
             placeholder="Ne incelendi, hangi kanıta dayanıyor? (en az 10 karakter)"
-            className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-fg"
+            className="field"
           />
           {(pending === "approve" || pending === "close") && eddOpen && (
             <p className="text-xs text-warning">
@@ -140,7 +140,7 @@ export function CaseActions({
             <button
               type="submit"
               disabled={busy}
-              className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-fg disabled:opacity-50"
+              className="btn-primary"
             >
               {busy ? "Kaydediliyor…" : "Kaydet"}
             </button>
@@ -194,7 +194,7 @@ export function CaseAssign({
           onChange={(e) =>
             void run(`/api/v1/cases/${caseId}/assignee`, "PUT", { user_id: e.target.value || null })
           }
-          className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-fg"
+          className="field"
         >
           <option value="">Atanmadı</option>
           {members.map((m) => (
@@ -221,12 +221,12 @@ export function CaseAssign({
               type="date"
               value={due}
               onChange={(e) => setDue(e.target.value)}
-              className="min-w-0 flex-1 rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-fg"
+              className="field min-w-0 flex-1"
             />
             <button
               type="submit"
               disabled={busy || !due}
-              className="rounded-md border border-border px-3 py-1.5 text-sm text-fg disabled:opacity-50"
+              className="btn-quiet"
             >
               Değiştir
             </button>
@@ -296,12 +296,12 @@ function EddRow({ caseId, item, editable }: { caseId: string; item: ChecklistIte
             onChange={(e) => setNote(e.target.value)}
             required
             placeholder="Ne yapıldı, kanıt nerede?"
-            className="min-w-0 flex-1 rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-fg"
+            className="field min-w-0 flex-1"
           />
           <button
             type="submit"
             disabled={busy}
-            className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-fg disabled:opacity-50"
+            className="btn-primary"
           >
             Kaydet
           </button>
@@ -357,12 +357,12 @@ export function CaseCommentForm({ caseId }: { caseId: string }) {
         required
         minLength={2}
         placeholder="Not ekleyin (silinmez, düzenlenmez)"
-        className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-fg"
+        className="field"
       />
       <button
         type="submit"
         disabled={busy || body.trim().length < 2}
-        className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-fg disabled:opacity-50"
+        className="btn-quiet"
       >
         {busy ? "Ekleniyor…" : "Yorum ekle"}
       </button>
@@ -392,7 +392,7 @@ export function CaseCreate({ entityId }: { entityId: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-fg"
+        className="btn-quiet"
       >
         Vaka aç
       </button>
@@ -437,7 +437,7 @@ export function CaseCreate({ entityId }: { entityId: string }) {
             minLength={3}
             maxLength={200}
             placeholder="ör. Ortaklık yapısı değişti"
-            className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-fg"
+            className="field"
           />
         </div>
         <div className="space-y-1">
@@ -448,7 +448,7 @@ export function CaseCreate({ entityId }: { entityId: string }) {
             id={sevId}
             value={severity}
             onChange={(e) => setSeverity(e.target.value)}
-            className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-fg"
+            className="field"
           >
             <option value="info">Bilgi</option>
             <option value="high">Yüksek</option>
@@ -465,14 +465,14 @@ export function CaseCreate({ entityId }: { entityId: string }) {
           value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={2}
-          className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm text-fg"
+          className="field"
         />
       </div>
       <div className="flex gap-2">
         <button
           type="submit"
           disabled={busy}
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-fg disabled:opacity-50"
+          className="btn-primary"
         >
           {busy ? "Açılıyor…" : "Vakayı aç"}
         </button>

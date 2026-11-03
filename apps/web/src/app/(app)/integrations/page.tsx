@@ -5,6 +5,8 @@ import { ApiKeyCreate, ApiKeyRevoke, Redeliver, WebhookActions, WebhookCreate } 
 import { serverFetch } from "@/lib/server/backend";
 import { getCurrentUser } from "@/lib/server/user";
 
+export const metadata = { title: "Entegrasyonlar" };
+
 export const dynamic = "force-dynamic";
 
 interface ApiKey {
@@ -42,8 +44,8 @@ interface Delivery {
 const ROLE = { analyst: "Analist", auditor: "Denetçi" } as const;
 const DELIVERY = {
   pending: { label: "Bekliyor", tone: "border-border text-muted" },
-  delivered: { label: "Teslim edildi", tone: "border-success text-fg" },
-  dead: { label: "Teslim edilemedi", tone: "border-danger text-danger" },
+  delivered: { label: "Teslim edildi", tone: "border-success/40 bg-success-soft text-success" },
+  dead: { label: "Teslim edilemedi", tone: "border-danger/40 bg-danger-soft text-danger" },
   skipped: { label: "Atlandı", tone: "border-border text-muted" },
 } as const;
 
@@ -64,8 +66,8 @@ export default async function IntegrationsPage() {
 
   if (!canRead) {
     return (
-      <div className="mx-auto max-w-4xl">
-        <h1 className="text-2xl font-semibold text-fg">Entegrasyonlar</h1>
+      <div className="page">
+        <h1 className="page-title">Entegrasyonlar</h1>
         <p className="mt-2 text-sm text-muted">Bu sayfa sahip, uyum uzmanı ve denetçiye açıktır.</p>
       </div>
     );
@@ -81,9 +83,9 @@ export default async function IntegrationsPage() {
   );
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
+    <div className="page space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-fg">Entegrasyonlar</h1>
+        <h1 className="page-title">Entegrasyonlar</h1>
         <p className="mt-1 max-w-prose text-sm text-muted">
           Kendi sisteminizden tarama başlatmak için API anahtarı, sonuçları beklemeden almak için
           webhook kullanın. Olaylar kişisel veri taşımaz; ayrıntıyı API&apos;den kimlikle çekersiniz.
@@ -91,9 +93,9 @@ export default async function IntegrationsPage() {
         </p>
       </div>
 
-      <section aria-labelledby="anahtar-baslik" className="space-y-4 rounded-card border border-border bg-surface p-5">
+      <section aria-labelledby="anahtar-baslik" className="space-y-4 panel p-5">
         <div>
-          <h2 id="anahtar-baslik" className="text-sm font-semibold tracking-wide text-muted uppercase">
+          <h2 id="anahtar-baslik" className="eyebrow">
             API anahtarları
           </h2>
           <p className="mt-1 text-xs text-muted">
@@ -128,9 +130,9 @@ export default async function IntegrationsPage() {
         )}
       </section>
 
-      <section aria-labelledby="webhook-baslik" className="space-y-4 rounded-card border border-border bg-surface p-5">
+      <section aria-labelledby="webhook-baslik" className="space-y-4 panel p-5">
         <div>
-          <h2 id="webhook-baslik" className="text-sm font-semibold tracking-wide text-muted uppercase">
+          <h2 id="webhook-baslik" className="eyebrow">
             Webhook&apos;lar
           </h2>
           <p className="mt-1 text-xs text-muted">

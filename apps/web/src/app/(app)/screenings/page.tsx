@@ -8,6 +8,8 @@ import { getCurrentUser } from "@/lib/server/user";
 import type { DatasetFreshness, ScreeningList } from "@/lib/screening";
 import { STATUS_LABELS, TONE_CLASSES, riskHeadline } from "@/lib/screening";
 
+export const metadata = { title: "Taramalar" };
+
 export const dynamic = "force-dynamic";
 
 async function safeJson<T>(path: string): Promise<T | null> {
@@ -29,9 +31,9 @@ export default async function ScreeningsPage() {
   const canRun = user.role !== "auditor";
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="page space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-fg">Taramalar</h1>
+        <h1 className="page-title">Taramalar</h1>
         <p className="text-sm text-muted">
           Yaptırım, PEP ve MASAK dondurma listelerine karşı tarama.
         </p>
@@ -40,7 +42,7 @@ export default async function ScreeningsPage() {
       {/* Bayat veriyle yapılan tarama "temiz" görünür ama güvenilmezdir — uyarı
           sonuçlardan ÖNCE gösterilir. */}
       {freshness?.any_stale === true && (
-        <div className="rounded-card border border-warning bg-surface p-4 text-sm text-warning">
+        <div className="rounded-card border border-warning/40 bg-warning-soft p-4 text-sm text-warning">
           <strong className="font-semibold">Yaptırım verisi güncel değil.</strong>{" "}
           {freshness.datasets.length === 0
             ? "Veri kümesi senkronu henüz çalışmadı."
@@ -49,17 +51,18 @@ export default async function ScreeningsPage() {
         </div>
       )}
 
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       {canRun && (
-        <section className="rounded-card border border-border bg-surface p-5">
-          <h2 className="mb-4 text-sm font-semibold tracking-wide text-muted uppercase">
+        <section className="panel p-5">
+          <h2 className="mb-4 eyebrow">
             Yeni tarama
           </h2>
           <ScreeningForm />
         </section>
       )}
 
-      <section className="rounded-card border border-border bg-surface p-5">
-        <h2 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
+      <section className="panel p-5">
+        <h2 className="mb-3 eyebrow">
           Geçmiş taramalar {list !== null && `(${list.total})`}
         </h2>
         {list === null || list.items.length === 0 ? (
@@ -92,6 +95,7 @@ export default async function ScreeningsPage() {
           </ul>
         )}
       </section>
+      </div>
     </div>
   );
 }

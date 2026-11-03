@@ -9,6 +9,8 @@ import { MonitoringAck } from "@/components/monitoring-ack";
 import { serverFetch } from "@/lib/server/backend";
 import { getCurrentUser } from "@/lib/server/user";
 
+export const metadata = { title: "İzleme" };
+
 export const dynamic = "force-dynamic";
 
 interface AlertItem {
@@ -49,15 +51,15 @@ const KIND_LABELS: Record<AlertItem["kind"], string> = {
 };
 
 const SEVERITY_TONE: Record<Alert["severity"], string> = {
-  critical: "border-danger bg-danger/10 text-danger",
-  high: "border-warning bg-warning/10 text-fg",
+  critical: "border-danger/40 bg-danger-soft text-danger",
+  high: "border-warning/40 bg-warning-soft text-warning",
   info: "border-border text-muted",
 };
 
 const KIND_TONE: Record<AlertItem["kind"], string> = {
-  new_match: "border-danger text-danger",
-  removed_confirmed: "border-warning text-warning",
-  topics_changed: "border-warning text-warning",
+  new_match: "border-danger/40 bg-danger-soft text-danger",
+  removed_confirmed: "border-warning/40 bg-warning-soft text-warning",
+  topics_changed: "border-warning/40 bg-warning-soft text-warning",
 };
 
 export default async function MonitoringPage({
@@ -82,9 +84,9 @@ export default async function MonitoringPage({
   const current = status || "all";
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="page space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-fg">İzleme</h1>
+        <h1 className="page-title">İzleme</h1>
         <p className="mt-1 max-w-prose text-sm text-muted">
           İzlemeye alınan varlıklar her gece yaptırım verisi güncellendikten sonra yeniden taranır.
           Önceki koşuya göre yeni bir eşleşme, onaylı bir eşleşmenin listeden çıkması ya da liste
@@ -110,11 +112,11 @@ export default async function MonitoringPage({
       </nav>
 
       {data === null ? (
-        <p className="rounded-card border border-danger bg-surface p-4 text-sm text-danger">
+        <p className="rounded-card border border-danger/40 bg-danger-soft p-4 text-sm text-danger">
           Alarmlar yüklenemedi. Sayfayı yenileyin; sorun sürerse API'nin çalıştığını kontrol edin.
         </p>
       ) : data.items.length === 0 ? (
-        <div className="rounded-card border border-border bg-surface p-8 text-center">
+        <div className="panel p-8 text-center">
           <p className="text-sm font-medium text-fg">
             {current === "open" ? "Açık alarm yok." : "Bu görünümde alarm yok."}
           </p>
@@ -125,7 +127,7 @@ export default async function MonitoringPage({
       ) : (
         <ul className="space-y-3">
           {data.items.map((alert) => (
-            <li key={alert.id} className="space-y-3 rounded-card border border-border bg-surface p-5">
+            <li key={alert.id} className="space-y-3 panel p-5">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <div className="flex min-w-0 flex-wrap items-center gap-2">
                   <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${SEVERITY_TONE[alert.severity]}`}>

@@ -20,7 +20,7 @@ export default async function SibDraftPage({ params }: { params: Promise<{ id: s
   const kodlar = (await kodlarRes.json()) as SibKodlar;
 
   return (
-    <div className="mx-auto max-w-4xl">
+    <div className="page">
       <SibEditor key={detay.id} detay={detay} kodlar={kodlar} />
     </div>
   );

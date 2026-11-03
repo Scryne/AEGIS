@@ -15,9 +15,9 @@ import type { UboComputation } from "@/lib/ubo";
 import { BASIS_LABELS, NODE_H, NODE_W, STATUS_LABELS, layout } from "@/lib/ubo";
 
 const STATUS_TONE: Record<UboComputation["status"], string> = {
-  determined: "border-success text-success",
-  not_determinable: "border-danger text-danger",
-  none_found: "border-warning text-warning",
+  determined: "border-success/40 bg-success-soft text-success",
+  not_determinable: "border-danger/40 bg-danger-soft text-danger",
+  none_found: "border-warning/40 bg-warning-soft text-warning",
 };
 
 function clip(text: string, max = 22): string {
@@ -217,10 +217,10 @@ export function UboPanel({
     : "%25'ten fazla";
 
   return (
-    <section className="space-y-4 rounded-card border border-border bg-surface p-5" aria-labelledby="ubo-baslik">
+    <section className="space-y-4 panel p-5" aria-labelledby="ubo-baslik">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 id="ubo-baslik" className="text-sm font-semibold tracking-wide text-muted uppercase">
+          <h2 id="ubo-baslik" className="eyebrow">
             Gerçek faydalanıcı
           </h2>
           <p className="mt-1 text-xs text-muted">
@@ -233,7 +233,7 @@ export function UboPanel({
             type="button"
             onClick={compute}
             disabled={busy !== null}
-            className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-fg disabled:opacity-60"
+            className="btn-primary"
           >
             {busy === "compute" ? "Hesaplanıyor…" : computation ? "Yeniden hesapla" : "UBO'yu hesapla"}
           </button>

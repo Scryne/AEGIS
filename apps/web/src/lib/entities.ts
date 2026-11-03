@@ -183,8 +183,8 @@ export const SEVERITY_LABELS: Record<string, string> = {
 
 export const SEVERITY_CLASSES: Record<string, string> = {
   info: "border-border text-muted",
-  warning: "border-warning text-warning",
-  critical: "border-danger text-danger",
+  warning: "border-warning/40 bg-warning-soft text-warning",
+  critical: "border-danger/40 bg-danger-soft text-danger",
 };
 
 export function attributeLabel(name: string): string {

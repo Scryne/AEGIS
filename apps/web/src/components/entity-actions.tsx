@@ -70,7 +70,7 @@ export function EntityActions({ entityId, hasLei }: { entityId: string; hasLei: 
           type="button"
           disabled={busy !== null}
           onClick={screen}
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-fg disabled:opacity-50"
+          className="btn-primary"
         >
           {busy === "screen" ? "Taranıyor…" : "Dosyayı tara"}
         </button>
@@ -79,7 +79,7 @@ export function EntityActions({ entityId, hasLei }: { entityId: string; hasLei: 
             type="button"
             disabled={busy !== null}
             onClick={enrich}
-            className="rounded-md border border-border px-3 py-1.5 text-sm text-fg disabled:opacity-50"
+            className="btn-quiet"
           >
             {busy === "gleif" ? "Sorgulanıyor…" : "GLEIF ile doğrula"}
           </button>

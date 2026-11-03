@@ -93,10 +93,10 @@ export function RiskScorePanel({ score, canWrite }: { score: RiskScore; canWrite
   }
 
   return (
-    <section className="space-y-4 rounded-card border border-border bg-surface p-5" aria-labelledby="puan-baslik">
+    <section className="space-y-4 panel p-5" aria-labelledby="puan-baslik">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 id="puan-baslik" className="text-sm font-semibold tracking-wide text-muted uppercase">
+          <h2 id="puan-baslik" className="eyebrow">
             Risk puanı
           </h2>
           <p className="mt-1 max-w-prose text-xs text-muted">
@@ -163,7 +163,7 @@ export function RiskScorePanel({ score, canWrite }: { score: RiskScore; canWrite
             type="button"
             onClick={record}
             disabled={busy}
-            className="rounded-md border border-border px-3 py-1.5 text-sm text-fg hover:border-primary disabled:opacity-60"
+            className="btn-quiet hover:border-primary disabled:opacity-60"
           >
             {busy ? "Kaydediliyor…" : "Puanı kayda geçir"}
           </button>

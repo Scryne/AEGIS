@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { LogoutButton } from "@/components/logout-button";
-import { NavLinks } from "@/components/nav-links";
+import { AppShell, type NavItem } from "@/components/nav-links";
 import { getCurrentUser, ROLE_LABELS } from "@/lib/server/user";
 import type { Role } from "@/lib/server/user";
 
@@ -11,105 +11,48 @@ import type { Role } from "@/lib/server/user";
 // Denetçi (auditor) taramaları GÖRÜR ama çalıştıramaz; menü görünürlüğü okuma
 // yetkisine göredir, yazma yetkisi sayfa içinde ayrıca kapılıdır. Denetim izi
 // analiste kapalıdır (backend'deki RequireAuditRead ile aynı rol kümesi).
-const NAV: { label: string; href: string; roles: Role[]; enabled: boolean }[] = [
-  {
-    label: "Panel",
-    href: "/dashboard",
-    roles: ["owner", "compliance_officer", "analyst", "auditor"],
-    enabled: true,
-  },
-  {
-    label: "Taramalar",
-    href: "/screenings",
-    roles: ["owner", "compliance_officer", "analyst", "auditor"],
-    enabled: true,
-  },
-  {
-    // E3.3: denetçi sonuçları görür, yükleyemez (sayfa içinde kapılı).
-    label: "Toplu Tarama",
-    href: "/batches",
-    roles: ["owner", "compliance_officer", "analyst", "auditor"],
-    enabled: true,
-  },
-  {
-    label: "Varlıklar",
-    href: "/entities",
-    roles: ["owner", "compliance_officer", "analyst", "auditor"],
-    enabled: true,
-  },
-  {
-    label: "İzleme",
-    href: "/monitoring",
-    roles: ["owner", "compliance_officer", "analyst", "auditor"],
-    enabled: true,
-  },
-  {
-    // E3.2: denetçi vaka geçmişini görür, değiştiremez (sayfa içinde kapılı).
-    label: "Vakalar",
-    href: "/cases",
-    roles: ["owner", "compliance_officer", "analyst", "auditor"],
-    enabled: true,
-  },
-  {
-    // E2.2: bildirimin varlığı bile gizli (5549 s.K. m.4/2) → yalnız sahip ve uyum görevlisi.
-    label: "ŞİB Taslakları",
-    href: "/sib",
-    roles: ["owner", "compliance_officer"],
-    enabled: true,
-  },
-  {
-    label: "Denetim İzi",
-    href: "/audit",
-    roles: ["owner", "compliance_officer", "auditor"],
-    enabled: true,
-  },
-  {
-    // E3.6: insan kararlarından ölçüm; analist göremez (backend ile aynı rol kümesi).
-    label: "Eşleşme Kalitesi",
-    href: "/quality",
-    roles: ["owner", "compliance_officer", "auditor"],
-    enabled: true,
-  },
-  {
-    // E3.4: anahtar/webhook yönetimi; analist göremez (backend ile aynı rol kümesi).
-    label: "Entegrasyonlar",
-    href: "/integrations",
-    roles: ["owner", "compliance_officer", "auditor"],
-    enabled: true,
-  },
-  {
-    label: "Plan ve Kullanım",
-    href: "/plan",
-    roles: ["owner", "compliance_officer", "auditor"],
-    enabled: true,
-  },
+const ALL_ROLES: Role[] = ["owner", "compliance_officer", "analyst", "auditor"];
+const OVERSIGHT_ROLES: Role[] = ["owner", "compliance_officer", "auditor"];
+
+const NAV: (NavItem & { roles: Role[] })[] = [
+  { label: "Panel", href: "/dashboard", group: "Çalışma", roles: ALL_ROLES },
+  { label: "Taramalar", href: "/screenings", group: "Çalışma", roles: ALL_ROLES },
+  // E3.3: denetçi sonuçları görür, yükleyemez (sayfa içinde kapılı).
+  { label: "Toplu Tarama", href: "/batches", group: "Çalışma", roles: ALL_ROLES },
+  { label: "Varlıklar", href: "/entities", group: "Çalışma", roles: ALL_ROLES },
+  { label: "İzleme", href: "/monitoring", group: "Çalışma", roles: ALL_ROLES },
+  // E3.2: denetçi vaka geçmişini görür, değiştiremez (sayfa içinde kapılı).
+  { label: "Vakalar", href: "/cases", group: "Çalışma", roles: ALL_ROLES },
+  // E2.2: bildirimin varlığı bile gizli (5549 s.K. m.4/2) → yalnız sahip ve uyum görevlisi.
+  { label: "ŞİB Taslakları", href: "/sib", group: "Bildirim ve denetim", roles: ["owner", "compliance_officer"] },
+  { label: "Denetim İzi", href: "/audit", group: "Bildirim ve denetim", roles: OVERSIGHT_ROLES },
+  // E3.6: insan kararlarından ölçüm; analist göremez (backend ile aynı rol kümesi).
+  { label: "Eşleşme Kalitesi", href: "/quality", group: "Bildirim ve denetim", roles: OVERSIGHT_ROLES },
+  // E3.4: anahtar/webhook yönetimi; analist göremez (backend ile aynı rol kümesi).
+  { label: "Entegrasyonlar", href: "/integrations", group: "Hesap", roles: OVERSIGHT_ROLES },
+  { label: "Plan ve Kullanım", href: "/plan", group: "Hesap", roles: OVERSIGHT_ROLES },
 ];
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const user = await getCurrentUser();
-  const visibleNav = NAV.filter((item) => item.roles.includes(user.role));
+  const items = NAV.filter((item) => item.roles.includes(user.role)).map(
+    ({ label, href, group }) => ({ label, href, group }),
+  );
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
-      <aside className="flex flex-col gap-3 border-b border-border bg-surface p-3 md:w-60 md:shrink-0 md:gap-0 md:border-r md:border-b-0 md:p-4">
-        <div className="font-mono text-sm tracking-widest text-muted uppercase md:mb-6">AEGIS</div>
-        <NavLinks
-          items={visibleNav
-            .filter((item) => item.enabled)
-            .map(({ label, href }) => ({ label, href }))}
-        />
-      </aside>
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center justify-between gap-3 border-b border-border bg-surface px-4 py-3 md:px-6">
-          <div className="min-w-0 truncate text-sm text-muted">
-            <span className="text-fg">{user.email}</span>
-            <span className="mx-2">·</span>
-            {ROLE_LABELS[user.role]}
+    <AppShell
+      items={items}
+      account={
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="hidden min-w-0 text-right sm:block">
+            <div className="truncate text-sm font-medium text-fg">{user.email}</div>
+            <div className="text-xs text-muted">{ROLE_LABELS[user.role]}</div>
           </div>
           <LogoutButton />
-        </header>
-        <main className="min-w-0 flex-1 p-4 md:p-6">{children}</main>
-      </div>
-    </div>
+        </div>
+      }
+    >
+      {children}
+    </AppShell>
   );
 }

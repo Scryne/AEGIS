@@ -27,7 +27,7 @@ export function QualitySnapshotButton() {
             setBusy(false);
           }
         }}
-        className="rounded-md border border-border bg-surface px-3 py-1.5 text-sm font-medium text-fg disabled:opacity-50"
+        className="field w-auto font-medium text-fg disabled:opacity-50"
       >
         {busy ? "Kaydediliyor…" : "Ölçümü kayda geçir"}
       </button>

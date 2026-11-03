@@ -101,12 +101,12 @@ export default async function EntityDetailPage({
   const closedDiscrepancies = (discrepancies ?? []).filter((item) => item.status !== "open");
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="page space-y-6">
       <div>
         <Link href="/entities" className="text-xs text-muted hover:text-fg">
           ← Varlıklar
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold text-fg">{entity.name}</h1>
+        <h1 className="page-title mt-1">{entity.name}</h1>
         <p className="text-sm text-muted">
           {entity.schema_type === "Person" ? "Gerçek kişi" : "Tüzel kişi"} ·{" "}
           <span className="font-mono">{entity.name_normalized}</span>
@@ -114,7 +114,7 @@ export default async function EntityDetailPage({
       </div>
 
       {entity.status === "merged" && entity.merged_into_id !== null && (
-        <div className="rounded-card border border-warning bg-surface p-4 text-sm text-warning">
+        <div className="rounded-card border border-warning/40 bg-warning-soft p-4 text-sm text-warning">
           Bu kayıt başka bir kayda birleştirildi.{" "}
           <Link href={`/entities/${entity.merged_into_id}`} className="underline">
             Güncel kaydı aç
@@ -123,7 +123,7 @@ export default async function EntityDetailPage({
       )}
 
       {openDiscrepancies.length > 0 && (
-        <div className="rounded-card border border-danger bg-surface p-4 text-sm text-danger">
+        <div className="rounded-card border border-danger/40 bg-danger-soft p-4 text-sm text-danger">
           <strong className="font-semibold">
             {openDiscrepancies.length} açık tutarsızlık.
           </strong>{" "}
@@ -141,7 +141,7 @@ export default async function EntityDetailPage({
       {isCompany && <UboPanel entityId={entity.id} computation={ubo} canWrite={canWrite} />}
 
       {canWrite && (
-        <section className="space-y-3 rounded-card border border-border bg-surface p-5">
+        <section className="space-y-3 panel p-5">
           <EntityActions entityId={entity.id} hasLei={entity.lei_code !== null} />
           <div className="border-t border-border pt-3">
             <MonitoringToggle entityId={entity.id} monitored={entity.monitored} />
@@ -154,8 +154,8 @@ export default async function EntityDetailPage({
 
       {/* Vakalar (E3.2): bu varlık hakkında karar bekleyen ya da verilmiş konular. */}
       {(canWrite || cases.length > 0) && (
-        <section aria-labelledby="vaka-baslik" className="space-y-3 rounded-card border border-border bg-surface p-5">
-          <h2 id="vaka-baslik" className="text-sm font-semibold tracking-wide text-muted uppercase">
+        <section aria-labelledby="vaka-baslik" className="space-y-3 panel p-5">
+          <h2 id="vaka-baslik" className="eyebrow">
             Vakalar
           </h2>
           {cases.length > 0 ? (
@@ -187,7 +187,7 @@ export default async function EntityDetailPage({
       )}
 
       {canSib && (
-        <section aria-labelledby="sib-baslik" className="space-y-3 rounded-card border border-border bg-surface p-5">
+        <section aria-labelledby="sib-baslik" className="space-y-3 panel p-5">
           <h2 id="sib-baslik" className="text-sm font-semibold text-fg">
             Şüpheli işlem bildirimi
           </h2>
@@ -211,8 +211,8 @@ export default async function EntityDetailPage({
 
       {/* Üretilmiş raporlar: her biri saklama süresine tabi ve özetiyle kanıtlanabilir. */}
       {reports !== null && reports.length > 0 && (
-        <section className="rounded-card border border-border bg-surface p-5">
-          <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted uppercase">
+        <section className="panel p-5">
+          <h2 className="mb-1 eyebrow">
             Üretilmiş raporlar
           </h2>
           <p className="mb-3 text-xs text-muted">
@@ -241,8 +241,8 @@ export default async function EntityDetailPage({
         </section>
       )}
 
-      <section className="rounded-card border border-border bg-surface p-5">
-        <h2 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">Kimlik</h2>
+      <section className="panel p-5">
+        <h2 className="mb-3 eyebrow">Kimlik</h2>
         <dl className="grid gap-2 text-sm sm:grid-cols-2">
           {[
             ["Vergi no", entity.tax_number],
@@ -266,8 +266,8 @@ export default async function EntityDetailPage({
       </section>
 
       {/* Bağlar — kayıtlı ilişkiler; UBO hesabı yukarıdaki panelde bunlardan yapılır. */}
-      <section className="rounded-card border border-border bg-surface p-5">
-        <h2 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
+      <section className="panel p-5">
+        <h2 className="mb-3 eyebrow">
           Bağlı kişiler ve şirketler
         </h2>
         {relationships === null || relationships.length === 0 ? (
@@ -302,8 +302,8 @@ export default async function EntityDetailPage({
         )}
       </section>
 
-      <section className="rounded-card border border-border bg-surface p-5">
-        <h2 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">Belgeler</h2>
+      <section className="panel p-5">
+        <h2 className="mb-3 eyebrow">Belgeler</h2>
         {documents === null || documents.length === 0 ? (
           <p className="text-sm text-muted">Henüz belge yüklenmedi.</p>
         ) : (
@@ -337,8 +337,8 @@ export default async function EntityDetailPage({
       </section>
 
       {pendingProposals.length > 0 && (
-        <section className="rounded-card border border-border bg-surface p-5">
-          <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted uppercase">
+        <section className="panel p-5">
+          <h2 className="mb-1 eyebrow">
             Onay bekleyen öneriler
           </h2>
           <p className="mb-3 text-xs text-muted">
@@ -353,8 +353,8 @@ export default async function EntityDetailPage({
       )}
 
       {(openDiscrepancies.length > 0 || closedDiscrepancies.length > 0) && (
-        <section className="rounded-card border border-border bg-surface p-5">
-          <h2 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
+        <section className="panel p-5">
+          <h2 className="mb-3 eyebrow">
             Tutarsızlıklar
           </h2>
           <ul className="space-y-3">
@@ -370,8 +370,8 @@ export default async function EntityDetailPage({
       )}
 
       {/* Provenans: her değerin kim tarafından, ne zaman, nereden geldiği. */}
-      <section className="rounded-card border border-border bg-surface p-5">
-        <h2 className="mb-1 text-sm font-semibold tracking-wide text-muted uppercase">
+      <section className="panel p-5">
+        <h2 className="mb-1 eyebrow">
           Veri kaynakları
         </h2>
         <p className="mb-3 text-xs text-muted">

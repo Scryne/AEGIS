@@ -84,16 +84,16 @@ export interface Member {
 
 /** Derece rozeti: renk yalnız risk tonu taşır, metin her zaman yanında (DESIGN.md). */
 export const SEVERITY_TONE: Record<Severity, string> = {
-  critical: "border-danger bg-danger/10 text-danger",
-  high: "border-warning bg-warning/10 text-fg",
+  critical: "border-danger/40 bg-danger-soft text-danger",
+  high: "border-warning/40 bg-warning-soft text-warning",
   info: "border-border text-muted",
 };
 
 export const STATUS_TONE: Record<CaseStatus, string> = {
   new: "border-primary text-primary",
   in_review: "border-border text-fg",
-  escalated: "border-danger text-danger",
-  approved: "border-success text-fg",
+  escalated: "border-danger/40 bg-danger-soft text-danger",
+  approved: "border-success/40 bg-success-soft text-success",
   closed: "border-border text-muted",
 };
 

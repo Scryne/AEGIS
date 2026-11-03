@@ -169,9 +169,9 @@ export function riskHeadline(screening: Screening): {
 }
 
 export const TONE_CLASSES: Record<string, string> = {
-  danger: "border-danger text-danger",
-  warning: "border-warning text-warning",
-  success: "border-success text-success",
+  danger: "border-danger/40 bg-danger-soft text-danger",
+  warning: "border-warning/40 bg-warning-soft text-warning",
+  success: "border-success/40 bg-success-soft text-success",
   neutral: "border-border text-muted",
 };
 

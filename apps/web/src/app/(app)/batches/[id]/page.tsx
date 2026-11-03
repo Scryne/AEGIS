@@ -63,13 +63,13 @@ export default async function BatchDetailPage({
   ];
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="page space-y-6">
       <BatchAutoRefresh status={batch.status} />
       <div className="space-y-1">
         <Link href="/batches" className="text-xs text-muted underline">
           ← Toplu tarama
         </Link>
-        <h1 className="text-2xl font-semibold break-all text-fg">{batch.file_name}</h1>
+        <h1 className="page-title break-all">{batch.file_name}</h1>
         <p className="text-sm text-muted">
           {BATCH_STATUS_LABELS[batch.status]}
           {batch.status === "completed" && c.failed > 0 && (
@@ -80,7 +80,7 @@ export default async function BatchDetailPage({
         </p>
       </div>
 
-      <section aria-labelledby="ozet-baslik" className="space-y-4 rounded-card border border-border bg-surface p-5">
+      <section aria-labelledby="ozet-baslik" className="space-y-4 panel p-5">
         <h2 id="ozet-baslik" className="sr-only">
           İlerleme ve özet
         </h2>
@@ -127,7 +127,7 @@ export default async function BatchDetailPage({
 
       <section aria-labelledby="satir-baslik" className="space-y-3">
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <h2 id="satir-baslik" className="text-sm font-semibold tracking-wide text-muted uppercase">
+          <h2 id="satir-baslik" className="eyebrow">
             Satırlar {rows && <span className="font-mono normal-case">({rows.total})</span>}
           </h2>
           <nav aria-label="Sıralama" className="flex gap-1 text-xs">
@@ -164,7 +164,7 @@ export default async function BatchDetailPage({
             Satırlar yüklenemedi.
           </p>
         ) : rows.items.length === 0 ? (
-          <p className="rounded-card border border-border bg-surface p-6 text-center text-sm text-muted">
+          <p className="panel p-6 text-center text-sm text-muted">
             Bu süzgeçte satır yok.
           </p>
         ) : (

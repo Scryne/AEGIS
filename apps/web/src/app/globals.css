@@ -4,22 +4,37 @@
  * AEGIS tasarım token'ları (Revision R7): renk/aralık/tipografi CSS değişkenleriyle
  * tanımlanır — hiçbir marka değeri kod içine gömülmez. Beyaz etiket (özel alan/logo)
  * BU FAZDA yapılmaz; token'lar yalnızca ileride temayı bounded tutmak içindir.
+ *
+ * Kimlik: "denetim dosyası". Kâğıt zemin, mürekkep gezinme, pirinç mühür vurgusu; risk tonu
+ * her satırda sol kenardaki kanıt rayıyla okunur. Ayrıntı: DESIGN.md.
  */
 @theme {
-  --color-bg: oklch(0.99 0 0);
-  --color-surface: oklch(1 0 0);
-  --color-border: oklch(0.92 0.004 260);
-  --color-fg: oklch(0.22 0.02 260);
-  --color-muted: oklch(0.55 0.02 260);
-  --color-primary: oklch(0.52 0.13 245);
-  --color-primary-fg: oklch(0.99 0 0);
-  --color-danger: oklch(0.55 0.19 25);
-  --color-warning: oklch(0.72 0.15 75);
-  --color-success: oklch(0.6 0.13 150);
+  --color-bg: oklch(0.973 0.006 85);
+  --color-surface: oklch(0.997 0.002 85);
+  --color-subtle: oklch(0.955 0.007 85);
+  --color-border: oklch(0.897 0.009 85);
+  --color-border-strong: oklch(0.8 0.012 85);
+  --color-fg: oklch(0.245 0.03 255);
+  --color-muted: oklch(0.47 0.02 255);
+  --color-primary: oklch(0.42 0.1 240);
+  --color-primary-hover: oklch(0.36 0.1 240);
+  --color-primary-fg: oklch(0.985 0.003 85);
+  --color-danger: oklch(0.49 0.18 27);
+  --color-danger-soft: oklch(0.962 0.024 27);
+  --color-warning: oklch(0.5 0.11 70);
+  --color-warning-soft: oklch(0.962 0.04 85);
+  --color-success: oklch(0.46 0.11 155);
+  --color-success-soft: oklch(0.962 0.03 155);
+  --color-seal: oklch(0.7 0.11 80);
+  --color-ink: oklch(0.235 0.035 258);
+  --color-ink-raised: oklch(0.3 0.04 258);
+  --color-ink-line: oklch(0.34 0.035 258);
+  --color-ink-fg: oklch(0.95 0.006 85);
+  --color-ink-muted: oklch(0.76 0.018 258);
 
-  --radius-card: 0.625rem;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+  --radius-card: 0.5rem;
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 :root {
@@ -36,9 +51,149 @@ body {
   background: var(--color-bg);
   color: var(--color-fg);
   font-family: var(--font-sans);
-  min-height: 100vh;
+  min-height: 100dvh;
+  font-feature-settings: "tnum" 1;
+  -webkit-font-smoothing: antialiased;
 }
 
 * {
   box-sizing: border-box;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+@layer components {
+  /* İçerik genişliği her sayfada aynı; dar form sütunu sayfanın kendi ızgarasıyla kurulur. */
+  .page {
+    margin-inline: auto;
+    width: 100%;
+    max-width: 76rem;
+  }
+
+  .page-title {
+    font-size: 1.625rem;
+    line-height: 1.2;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    color: var(--color-fg);
+    text-wrap: balance;
+  }
+
+  .eyebrow {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 650;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .panel {
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: 0 1px 0 oklch(0.2 0.02 255 / 0.04);
+  }
+
+  /* Kanıt rayı: risk tonu satırın sol kenarında; metin tonu tek başına taşımaz. */
+  .rail {
+    position: relative;
+    padding-left: 0.875rem;
+  }
+  .rail::before {
+    content: "";
+    position: absolute;
+    inset-block: 0.2rem;
+    left: 0;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--rail-tone, var(--color-border-strong));
+  }
+  .rail-danger {
+    --rail-tone: var(--color-danger);
+  }
+  .rail-warning {
+    --rail-tone: var(--color-warning);
+  }
+  .rail-success {
+    --rail-tone: var(--color-success);
+  }
+  .rail-neutral {
+    --rail-tone: var(--color-border-strong);
+  }
+
+  .field {
+    width: 100%;
+    min-height: 2.375rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-surface);
+    padding: 0.4375rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--color-fg);
+  }
+  .field::placeholder {
+    color: var(--color-muted);
+  }
+  .field:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 0;
+    border-color: var(--color-primary);
+  }
+
+  .btn-primary,
+  .btn-quiet {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-height: 2.375rem;
+    border-radius: 0.375rem;
+    padding: 0.4375rem 0.875rem;
+    font-size: 0.875rem;
+    font-weight: 550;
+    white-space: nowrap;
+    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+  }
+  .btn-primary {
+    background: var(--color-primary);
+    color: var(--color-primary-fg);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: var(--color-primary-hover);
+  }
+  .btn-quiet {
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-fg);
+  }
+  .btn-quiet:hover:not(:disabled) {
+    background: var(--color-subtle);
+  }
+  .btn-primary:disabled,
+  .btn-quiet:disabled {
+    opacity: 0.55;
+  }
+
+  .row-link {
+    display: block;
+    transition: background-color 120ms ease;
+  }
+  .row-link:hover {
+    background: var(--color-subtle);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
 }

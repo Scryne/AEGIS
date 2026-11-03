@@ -17,6 +17,8 @@ import {
   type Member,
 } from "@/lib/cases";
 
+export const metadata = { title: "Vakalar" };
+
 export const dynamic = "force-dynamic";
 
 const VIEWS = [
@@ -70,9 +72,9 @@ export default async function CasesPage({
     : [];
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="page space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-fg">Vakalar</h1>
+        <h1 className="page-title">Vakalar</h1>
         <p className="mt-1 max-w-prose text-sm text-muted">
           Karar gerektiren her konu bir vakadır. Yaptırım alarmı vakayı kendisi açar ve
           sıkılaştırılmış inceleme (EDD) listesini ekler; diğer vakalar varlık sayfasından açılır.
@@ -86,7 +88,7 @@ export default async function CasesPage({
             <Link
               key={t.label}
               href={t.href}
-              className="rounded-card border border-border bg-surface px-4 py-3 hover:border-primary"
+              className="panel px-4 py-3 hover:border-primary"
             >
               <dt className="text-xs text-muted">{t.label}</dt>
               <dd className={`mt-1 font-mono text-2xl tabular-nums ${t.tone}`}>{t.value}</dd>
@@ -111,11 +113,11 @@ export default async function CasesPage({
       </nav>
 
       {data === null ? (
-        <p role="alert" className="rounded-card border border-danger bg-surface p-4 text-sm text-danger">
+        <p role="alert" className="rounded-card border border-danger/40 bg-danger-soft p-4 text-sm text-danger">
           Vakalar yüklenemedi. Sayfayı yenileyin; sorun sürerse API&apos;nin çalıştığını kontrol edin.
         </p>
       ) : data.items.length === 0 ? (
-        <div className="rounded-card border border-border bg-surface p-8 text-center">
+        <div className="panel p-8 text-center">
           <p className="text-sm font-medium text-fg">
             {view === "open" ? "Açık vaka yok." : "Bu görünümde vaka yok."}
           </p>
@@ -124,12 +126,12 @@ export default async function CasesPage({
           </p>
         </div>
       ) : (
-        <ul className="divide-y divide-border overflow-hidden rounded-card border border-border bg-surface">
+        <ul className="divide-y divide-border panel overflow-hidden">
           {data.items.map((c) => (
             <li key={c.id}>
               <Link
                 href={`/cases/${c.id}`}
-                className="grid gap-2 px-5 py-4 hover:bg-bg sm:grid-cols-[1fr_auto] sm:items-center"
+                className="grid gap-2 px-5 py-4 hover:bg-subtle sm:grid-cols-[1fr_auto] sm:items-center"
               >
                 <div className="min-w-0 space-y-1.5">
                   <div className="flex flex-wrap items-center gap-2">

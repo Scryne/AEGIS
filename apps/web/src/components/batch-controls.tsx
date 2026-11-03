@@ -86,7 +86,7 @@ export function BatchControls({
             type="button"
             disabled={busy}
             onClick={() => act("start", () => "Başlatıldı; satırlar arka planda işleniyor.")}
-            className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-fg disabled:opacity-50"
+            className="btn-primary"
           >
             Taramayı başlat ({pending} satır)
           </button>
@@ -101,7 +101,7 @@ export function BatchControls({
                 return `${r.processed} satır işlendi, ${r.remaining} kaldı.`;
               })
             }
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-fg disabled:opacity-50"
+            className="btn-quiet"
           >
             {busy ? "İşleniyor…" : "Şimdi işle (25 satır)"}
           </button>
@@ -111,7 +111,7 @@ export function BatchControls({
             type="button"
             disabled={busy}
             onClick={() => act("retry", () => "Başarısız satırlar yeniden sıraya alındı.")}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-fg disabled:opacity-50"
+            className="btn-quiet"
           >
             Başarısızları yeniden dene ({failed})
           </button>
@@ -129,7 +129,7 @@ export function BatchControls({
         {status !== "draft" && (
           <a
             href={`/api/v1/batches/${batchId}/export.csv`}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-fg"
+            className="btn-quiet"
           >
             Sonuç özetini indir (CSV)
           </a>
@@ -278,7 +278,7 @@ export function BatchRowsTable({
           {error}
         </p>
       )}
-      <div className="overflow-x-auto rounded-card border border-border bg-surface">
+      <div className="overflow-x-auto panel">
         <table className="w-full min-w-[44rem] text-left text-sm">
           <caption className="sr-only">Toplu tarama sonuçları</caption>
           <thead className="bg-bg text-xs text-muted">

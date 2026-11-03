@@ -79,7 +79,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
   const eddTotal = c.edd_checklist?.length ?? 0;
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="page space-y-6">
       <div className="space-y-2">
         <Link href="/cases" className="text-xs text-muted underline">
           ← Vakalar
@@ -95,7 +95,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
             </span>
           )}
         </div>
-        <h1 className="text-2xl font-semibold text-balance text-fg">{c.title}</h1>
+        <h1 className="page-title text-balance">{c.title}</h1>
         <p className="text-sm text-muted">
           <Link href={`/entities/${c.entity_id}`} className="text-fg underline">
             {c.entity_name ?? "(silinmiş kayıt)"}
@@ -120,7 +120,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
         </p>
       </div>
 
-      <section aria-labelledby="durum-baslik" className="space-y-4 rounded-card border border-border bg-surface p-5">
+      <section aria-labelledby="durum-baslik" className="space-y-4 panel p-5">
         <h2 id="durum-baslik" className="sr-only">
           Durum ve sorumluluk
         </h2>
@@ -169,8 +169,8 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
       </section>
 
       {canWrite && (
-        <section aria-labelledby="eylem-baslik" className="space-y-3 rounded-card border border-border bg-surface p-5">
-          <h2 id="eylem-baslik" className="text-sm font-semibold tracking-wide text-muted uppercase">
+        <section aria-labelledby="eylem-baslik" className="space-y-3 panel p-5">
+          <h2 id="eylem-baslik" className="eyebrow">
             Sıradaki adım
           </h2>
           <CaseActions caseId={c.id} actions={c.allowed_actions} eddOpen={c.edd && !c.edd_complete} />
@@ -181,9 +181,9 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
       )}
 
       {c.edd && c.edd_checklist && (
-        <section aria-labelledby="edd-baslik" className="rounded-card border border-border bg-surface p-5">
+        <section aria-labelledby="edd-baslik" className="panel p-5">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 id="edd-baslik" className="text-sm font-semibold tracking-wide text-muted uppercase">
+            <h2 id="edd-baslik" className="eyebrow">
               Sıkılaştırılmış inceleme listesi
             </h2>
             <span className="font-mono text-xs text-muted tabular-nums">
@@ -198,8 +198,8 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
         </section>
       )}
 
-      <section aria-labelledby="yorum-baslik" className="space-y-3 rounded-card border border-border bg-surface p-5">
-        <h2 id="yorum-baslik" className="text-sm font-semibold tracking-wide text-muted uppercase">
+      <section aria-labelledby="yorum-baslik" className="space-y-3 panel p-5">
+        <h2 id="yorum-baslik" className="eyebrow">
           Yorumlar
         </h2>
         {c.comments.length === 0 ? (
@@ -219,8 +219,8 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
         {canWrite && <CaseCommentForm caseId={c.id} />}
       </section>
 
-      <section aria-labelledby="gecmis-baslik" className="rounded-card border border-border bg-surface p-5">
-        <h2 id="gecmis-baslik" className="text-sm font-semibold tracking-wide text-muted uppercase">
+      <section aria-labelledby="gecmis-baslik" className="panel p-5">
+        <h2 id="gecmis-baslik" className="eyebrow">
           Geçmiş
         </h2>
         <p className="mt-1 text-xs text-muted">Değiştirilemez denetim izinden okunur.</p>

@@ -101,7 +101,7 @@ export function EntityForm() {
             onChange={(e) => setName(e.target.value)}
             onBlur={checkDuplicate}
             placeholder="Örn. Yıldız İnşaat San. ve Tic. Ltd. Şti."
-            className="w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg"
+            className="field"
           />
         </label>
         <label className="block">
@@ -109,7 +109,7 @@ export function EntityForm() {
           <select
             value={schemaType}
             onChange={(e) => setSchemaType(e.target.value as "Company" | "Person")}
-            className="rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg"
+            className="field w-auto"
           >
             <option value="Company">Tüzel kişi</option>
             <option value="Person">Gerçek kişi</option>
@@ -125,7 +125,7 @@ export function EntityForm() {
             onChange={(e) => setTaxNumber(e.target.value)}
             onBlur={checkDuplicate}
             inputMode="numeric"
-            className="w-full rounded-md border border-border bg-bg px-3 py-2 font-mono text-sm text-fg"
+            className="field font-mono"
           />
         </label>
       ) : (
@@ -136,7 +136,7 @@ export function EntityForm() {
             onChange={(e) => setNationalId(e.target.value)}
             onBlur={checkDuplicate}
             inputMode="numeric"
-            className="w-full rounded-md border border-border bg-bg px-3 py-2 font-mono text-sm text-fg"
+            className="field font-mono"
           />
           <span className="mt-1 block text-xs text-muted">
             Şifreli saklanır; ekranlarda yalnız son 4 hanesi görünür.
@@ -149,12 +149,12 @@ export function EntityForm() {
         <input
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          className="w-full rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg"
+          className="field"
         />
       </label>
 
       {duplicate !== null && (
-        <div className="rounded-card border border-warning bg-surface p-3 text-sm text-warning">
+        <div className="rounded-card border border-warning/40 bg-warning-soft p-3 text-sm text-warning">
           <strong className="font-semibold">Benzer kayıt(lar) bulundu.</strong>
           <ul className="mt-2 space-y-1">
             {duplicate.candidates.map((candidate) => (
@@ -173,7 +173,7 @@ export function EntityForm() {
       )}
 
       {warnings.length > 0 && (
-        <div className="rounded-card border border-warning bg-surface p-3 text-sm text-warning">
+        <div className="rounded-card border border-warning/40 bg-warning-soft p-3 text-sm text-warning">
           {warnings.map((warning) => (
             <p key={warning.field}>{warning.message}</p>
           ))}
@@ -189,7 +189,7 @@ export function EntityForm() {
       <button
         type="submit"
         disabled={busy || !name.trim()}
-        className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-fg disabled:opacity-50"
+        className="btn-primary"
       >
         {busy ? "Kaydediliyor…" : "Kaydı oluştur"}
       </button>

@@ -87,12 +87,12 @@ export const ROW_STATUS_LABELS: Record<RowStatus, string> = {
 };
 
 export const ROW_STATUS_TONE: Record<RowStatus, string> = {
-  invalid: "border-danger text-danger",
+  invalid: "border-danger/40 bg-danger-soft text-danger",
   duplicate: "border-border text-muted",
   pending: "border-border text-muted",
   done: "border-border text-fg",
-  needs_review: "border-warning text-fg",
-  failed: "border-danger text-danger",
+  needs_review: "border-warning/40 bg-warning-soft text-warning",
+  failed: "border-danger/40 bg-danger-soft text-danger",
   cancelled: "border-border text-muted",
 };
 
@@ -106,10 +106,10 @@ export const RESOLUTION_LABELS: Record<string, string> = {
 
 /** Satırın risk özeti: renk yalnız riski taşır, metin her zaman yanında. */
 export function rowRisk(row: BatchRow): { label: string; tone: string } {
-  if ((row.sanction_hits ?? 0) > 0) return { label: "Yaptırım adayı", tone: "border-danger bg-danger/10 text-danger" };
-  if ((row.pep_hits ?? 0) > 0) return { label: "PEP adayı", tone: "border-warning bg-warning/10 text-fg" };
-  if ((row.flagged_count ?? 0) > 0) return { label: "Yüksek skorlu aday", tone: "border-warning text-fg" };
+  if ((row.sanction_hits ?? 0) > 0) return { label: "Yaptırım adayı", tone: "border-danger/40 bg-danger-soft text-danger" };
+  if ((row.pep_hits ?? 0) > 0) return { label: "PEP adayı", tone: "border-warning/40 bg-warning-soft text-warning" };
+  if ((row.flagged_count ?? 0) > 0) return { label: "Yüksek skorlu aday", tone: "border-warning/40 bg-warning-soft text-warning" };
   if (row.status === "done" && (row.candidate_count ?? 0) > 0) return { label: "Düşük skorlu aday", tone: "border-border text-muted" };
-  if (row.status === "done") return { label: "Eşik üstü aday yok", tone: "border-success text-fg" };
+  if (row.status === "done") return { label: "Eşik üstü aday yok", tone: "border-success/40 bg-success-soft text-success" };
   return { label: "—", tone: "border-transparent text-muted" };
 }

@@ -94,10 +94,10 @@ export function ProposalReview({ proposal }: { proposal: ExtractionProposal }) {
         <span
           className={`shrink-0 rounded border px-2 py-0.5 text-xs ${
             proposal.status === "accepted"
-              ? "border-success text-success"
+              ? "border-success/40 bg-success-soft text-success"
               : proposal.status === "rejected"
                 ? "border-border text-muted"
-                : "border-warning text-warning"
+                : "border-warning/40 bg-warning-soft text-warning"
           }`}
         >
           {proposal.status === "accepted"
@@ -146,14 +146,14 @@ export function ProposalReview({ proposal }: { proposal: ExtractionProposal }) {
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="Karar notu (isteğe bağlı)"
-            className="w-full rounded-md border border-border bg-surface px-3 py-1.5 text-sm text-fg"
+            className="field"
           />
           <div className="flex gap-2">
             <button
               type="button"
               disabled={busy}
               onClick={() => decide("accepted")}
-              className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-fg disabled:opacity-50"
+              className="btn-primary"
             >
               Kabul et
             </button>
@@ -161,7 +161,7 @@ export function ProposalReview({ proposal }: { proposal: ExtractionProposal }) {
               type="button"
               disabled={busy}
               onClick={() => decide("rejected")}
-              className="rounded-md border border-border px-3 py-1.5 text-sm text-muted hover:text-fg disabled:opacity-50"
+              className="btn-quiet"
             >
               Reddet
             </button>

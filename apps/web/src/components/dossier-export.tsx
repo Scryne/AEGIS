@@ -53,7 +53,7 @@ export function DossierExport({ entityId }: { entityId: string }) {
           type="button"
           disabled={busy !== null}
           onClick={() => exportDossier("pdf")}
-          className="rounded-md border border-border px-3 py-1.5 text-sm text-fg disabled:opacity-50"
+          className="btn-quiet"
         >
           {busy === "pdf" ? "Üretiliyor…" : "Dosyayı PDF olarak dışa aktar"}
         </button>
@@ -61,7 +61,7 @@ export function DossierExport({ entityId }: { entityId: string }) {
           type="button"
           disabled={busy !== null}
           onClick={() => exportDossier("docx")}
-          className="rounded-md border border-border px-3 py-1.5 text-sm text-fg disabled:opacity-50"
+          className="btn-quiet"
         >
           {busy === "docx" ? "Üretiliyor…" : "Word olarak dışa aktar"}
         </button>

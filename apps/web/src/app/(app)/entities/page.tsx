@@ -7,6 +7,8 @@ import { serverFetch } from "@/lib/server/backend";
 import { getCurrentUser } from "@/lib/server/user";
 import type { Discrepancy, EntityList } from "@/lib/entities";
 
+export const metadata = { title: "Varlıklar" };
+
 export const dynamic = "force-dynamic";
 
 async function safeJson<T>(path: string): Promise<T | null> {
@@ -31,9 +33,9 @@ export default async function EntitiesPage({
   const openDiscrepancies = discrepancies ?? [];
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
+    <div className="page space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-fg">Varlıklar</h1>
+        <h1 className="page-title">Varlıklar</h1>
         <p className="text-sm text-muted">
           Şirket ve kişi kayıtları; belgeler, bağlar ve kaynak referansları.
         </p>
@@ -44,7 +46,7 @@ export default async function EntitiesPage({
       {openDiscrepancies.length > 0 && (
         <Link
           href={`/entities/${openDiscrepancies[0].entity_id}`}
-          className="block rounded-card border border-warning bg-surface p-4 text-sm text-warning"
+          className="block rounded-card border border-warning/40 bg-warning-soft p-4 text-sm text-warning"
         >
           <strong className="font-semibold">
             {openDiscrepancies.length} açık tutarsızlık var.
@@ -53,13 +55,13 @@ export default async function EntitiesPage({
         </Link>
       )}
 
-      <section className="rounded-card border border-border bg-surface p-5">
+      <section className="panel p-5">
         <form method="get" className="flex gap-2">
           <input
             name="q"
             defaultValue={query}
             placeholder="Unvan ya da ad ile ara…"
-            className="flex-1 rounded-md border border-border bg-bg px-3 py-2 text-sm text-fg"
+            className="flex-1 field w-auto"
           />
           <button
             type="submit"
@@ -70,17 +72,18 @@ export default async function EntitiesPage({
         </form>
       </section>
 
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
       {canWrite && (
-        <section className="rounded-card border border-border bg-surface p-5">
-          <h2 className="mb-4 text-sm font-semibold tracking-wide text-muted uppercase">
+        <section className="panel p-5">
+          <h2 className="mb-4 eyebrow">
             Yeni kayıt
           </h2>
           <EntityForm />
         </section>
       )}
 
-      <section className="rounded-card border border-border bg-surface p-5">
-        <h2 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
+      <section className="panel p-5">
+        <h2 className="mb-3 eyebrow">
           Kayıtlı varlıklar {list !== null && `(${list.total})`}
         </h2>
         {list === null || list.items.length === 0 ? (
@@ -96,7 +99,9 @@ export default async function EntitiesPage({
                     <div>
                       <div className="text-sm font-medium text-fg">{entity.name}</div>
                       <div className="mt-0.5 font-mono text-xs text-muted">
-                        {entity.tax_number ?? entity.national_id_masked ?? "tanımlayıcı yok"}
+                        {entity.national_id_unreadable
+                          ? "kimlik numarası bu anahtarla okunamıyor"
+                          : (entity.tax_number ?? entity.national_id_masked ?? "tanımlayıcı yok")}
                       </div>
                     </div>
                     <span className="shrink-0 rounded border border-border px-2 py-0.5 text-xs text-muted">
@@ -109,6 +114,7 @@ export default async function EntitiesPage({
           </ul>
         )}
       </section>
+      </div>
     </div>
   );
 }

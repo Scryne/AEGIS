@@ -7,7 +7,7 @@ export default function NotFound() {
       <Wordmark />
       <div className="max-w-md">
         <h1 className="page-title mb-2">Sayfa bulunamadı</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted">
           Bağlantı eskimiş ya da kayıt kaldırılmış olabilir. Panelden devam edebilirsiniz.
         </p>
       </div>

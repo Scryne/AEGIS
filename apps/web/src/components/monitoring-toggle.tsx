@@ -60,7 +60,7 @@ export function MonitoringToggle({ entityId, monitored }: { entityId: string; mo
       >
         <span
           aria-hidden="true"
-          className={`absolute top-[2px] left-[2px] h-[18px] w-[18px] rounded-full border border-border bg-white shadow-sm transition-transform ${
+          className={`absolute top-[2px] left-[2px] h-[18px] w-[18px] rounded-full border border-border bg-surface shadow-sm transition-transform ${
             monitored ? "translate-x-[20px]" : "translate-x-0"
           }`}
         />

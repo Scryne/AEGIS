@@ -15,6 +15,7 @@ from typing import Any
 import httpx
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine, text
 
 from aegis_core.screening.yente import YenteClient
 from aegis_core.security.tokens import create_access_token
@@ -406,19 +407,75 @@ def test_kiraci_esikleri_uygulanir(screening_client: TestClient) -> None:
     assert created["thresholds"]["auto_dismiss_below"] == 0.8
 
 
-def test_bozuk_esik_ayari_taramayi_reddeder(screening_client: TestClient) -> None:
-    """Sessizce varsayılana düşmek gerçek bir eşleşmeyi eleyebilirdi — fail-closed."""
-    _tenant, token = _register_and_login(screening_client, slug="bozuk", email="b@bozuk.com")
-    screening_client.put(
-        "/api/v1/settings/screening.thresholds",
-        json={"value": {"auto_dismis_below": 0.8}},
-        headers=_auth(token),
-    )
+def test_bozuk_esik_ayari_taramayi_reddeder(
+    screening_client: TestClient, app_database_url: str
+) -> None:
+    """Sessizce varsayılana düşmek gerçek bir eşleşmeyi eleyebilirdi — fail-closed.
+
+    Ayar ucu bozuk değeri artık kabul etmez; bozuk satır (eski kayıt, elle müdahale)
+    doğrudan veritabanına yazılarak okuma tarafının koruması ayrıca sınanır.
+    """
+    tenant, token = _register_and_login(screening_client, slug="bozuk", email="b@bozuk.com")
+    engine = create_engine(app_database_url)
+    try:
+        with engine.begin() as conn:
+            conn.execute(text("SELECT set_config('app.current_tenant', :t, true)"), {"t": tenant})
+            conn.execute(
+                text(
+                    "INSERT INTO tenant_setting (tenant_id, key, value) "
+                    "VALUES (:t, 'screening.thresholds', CAST(:v AS jsonb))"
+                ),
+                {"t": tenant, "v": '{"auto_dismis_below": 0.8}'},
+            )
+    finally:
+        engine.dispose()
     response = screening_client.post(
         "/api/v1/screenings", json={"subject": {"name": "ABC"}}, headers=_auth(token)
     )
     assert response.status_code == 400
     assert "screening.thresholds" in response.json()["error"]["message"]
+
+
+def test_esik_ayari_yazilirken_dogrulanir(screening_client: TestClient) -> None:
+    """Bozuk bant kayda girmez (girseydi sonraki her tarama reddedilirdi); gerekçe izde kalır."""
+    _tenant, token = _register_and_login(screening_client, slug="esik-yaz", email="e@esik-yaz.com")
+    yol = "/api/v1/settings/screening.thresholds"
+    for bozuk in (
+        {"auto_dismis_below": 0.8},  # yazım hatası
+        {"auto_dismiss_below": 0.9, "auto_flag_at": 0.8},  # ters bant
+        {"auto_flag_at": 1.4},  # aralık dışı
+    ):
+        r = screening_client.put(yol, json={"value": bozuk}, headers=_auth(token))
+        assert r.status_code == 400, bozuk
+    assert screening_client.get(yol, headers=_auth(token)).status_code == 404
+
+    r = screening_client.put(
+        yol,
+        json={"value": {"auto_flag_at": 0.9}, "note": "Yanlış pozitif oranı yüksek"},
+        headers=_auth(token),
+    )
+    assert r.status_code == 200
+    # Kanonik biçim: eksik anahtarlar varsayılanla tamamlanır.
+    assert r.json()["value"] == {
+        "auto_dismiss_below": 0.65,
+        "auto_flag_at": 0.9,
+        "candidate_cutoff": 0.5,
+    }
+    olay = screening_client.get(
+        "/api/v1/audit/events?action=tenant_setting.update", headers=_auth(token)
+    ).json()["items"][0]
+    assert olay["payload"]["note"] == "Yanlış pozitif oranı yüksek"
+
+
+def test_ozel_uclu_ayar_genel_uctan_yazilamaz(screening_client: TestClient) -> None:
+    """Olumsuz haber betası yalnız sahibin kendi ucundan; genel uç onu atlatamaz."""
+    _tenant, token = _register_and_login(screening_client, slug="ozel-uc", email="o@ozel-uc.com")
+    for key in ("adverse_media_beta", "monitoring_notifications"):
+        r = screening_client.put(
+            f"/api/v1/settings/{key}", json={"value": {"enabled": True}}, headers=_auth(token)
+        )
+        assert r.status_code == 400, key
+        assert "kendi ucundan" in r.json()["error"]["message"]
 
 
 # ── Çok özneli koşu ──────────────────────────────────────────────────────────

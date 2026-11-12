@@ -10,11 +10,14 @@ from __future__ import annotations
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from aegis_api.dependencies import Principal, PrincipalDep, TenantSessionDep, require_role
-from aegis_api.errors import NotFoundError
+from aegis_api.errors import NotFoundError, ValidationFailedError
+from aegis_core.adverse_media.service import BETA_KEY as ADVERSE_MEDIA_BETA_KEY
 from aegis_core.models import AuditAction, Role
+from aegis_core.monitoring.notify import SETTING_KEY as MONITORING_NOTIFICATIONS_KEY
+from aegis_core.screening.thresholds import SCREENING_THRESHOLD_SETTING_KEY, ScreeningThresholds
 from aegis_core.services import audit as audit_service
 from aegis_core.services import tenant_settings as settings_service
 
@@ -37,6 +40,34 @@ class SettingUpsertRequest(BaseModel):
     """Ayar oluşturma/güncelleme gövdesi."""
 
     value: dict[str, Any]
+    note: str | None = Field(default=None, max_length=1000)
+    """Değişikliğin gerekçesi; denetim olayına yazılır (MASAK: "neden değişti")."""
+
+
+# Kendi ucu, yetkisi ve denetim eylemi olan ayarlar genel uçtan yazılmaz: olumsuz haber
+# betası yalnız sahibindir, bildirim tercihi kendi ayrıştırıcısından geçer.
+_OZEL_UCLU_AYARLAR = {
+    ADVERSE_MEDIA_BETA_KEY: "/api/v1/adverse-media/beta",
+    MONITORING_NOTIFICATIONS_KEY: "/api/v1/monitoring/notifications",
+}
+
+
+def _dogrula(key: str, value: dict[str, Any]) -> dict[str, Any]:
+    """Bilinen ayarı yazmadan önce doğrular ve kanonik biçimini döndürür.
+
+    Bozuk eşik bandı kaydedilseydi sonraki her tarama reddedilirdi (okuma tarafı kapalı
+    başarısızdır); yanlış değer daha kayıtta durdurulur.
+    """
+    if key in _OZEL_UCLU_AYARLAR:
+        raise ValidationFailedError(
+            f"'{key}' ayarı kendi ucundan değiştirilir: {_OZEL_UCLU_AYARLAR[key]}"
+        )
+    if key == SCREENING_THRESHOLD_SETTING_KEY:
+        try:
+            return dict(ScreeningThresholds.from_mapping(value).to_mapping())
+        except (ValueError, TypeError) as exc:
+            raise ValidationFailedError(f"Eşik bandı geçersiz: {exc}") from exc
+    return value
 
 
 @router.get("", response_model=list[SettingResponse])
@@ -71,8 +102,9 @@ async def upsert_setting(
     Risk eşiği gibi ayarlar risk-etkileyendir → aynı transaction içinde bir denetim
     olayı yayılır (Invariant 2); ayar değişikliği ve denetim izi atomik olarak commit olur.
     """
+    value = _dogrula(key, body.value)
     row = await settings_service.upsert_setting(
-        session, tenant_id=principal.tenant_id, key=key, value=body.value
+        session, tenant_id=principal.tenant_id, key=key, value=value
     )
     await audit_service.record_event(
         session,
@@ -82,6 +114,6 @@ async def upsert_setting(
         action=AuditAction.TENANT_SETTING_UPDATE,
         object_type="tenant_setting",
         object_id=key,
-        payload={"value": body.value},
+        payload={"value": value, **({"note": body.note} if body.note else {})},
     )
     return SettingResponse(key=row.key, value=row.value)

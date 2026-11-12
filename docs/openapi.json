@@ -5887,6 +5887,18 @@
       "SettingUpsertRequest": {
         "description": "Ayar oluşturma/güncelleme gövdesi.",
         "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
           "value": {
             "additionalProperties": true,
             "title": "Value",

@@ -156,8 +156,12 @@ def get_news_provider(request: Request) -> NewsProvider:
 
 
 # Sık kullanılan tip takma adları (router imzalarını sadeleştirir).
-SessionDep = Annotated[AsyncSession, Depends(get_session)]
-TenantSessionDep = Annotated[AsyncSession, Depends(get_tenant_session)]
+# scope="function": oturumun çıkış kodu (commit/rollback) yanıt GÖNDERİLMEDEN önce çalışır.
+# Varsayılan "request" kapsamında commit yanıttan sonra koşuyordu: istemci 201'i alıp hemen
+# sonraki isteği atınca yazıyı göremiyordu (demo betiğinde 404) ve commit düşerse istemci
+# yine de başarı görürdü — denetim olayıyla atomik iş için kabul edilemez.
+SessionDep = Annotated[AsyncSession, Depends(get_session, scope="function")]
+TenantSessionDep = Annotated[AsyncSession, Depends(get_tenant_session, scope="function")]
 PrincipalDep = Annotated[Principal, Depends(get_principal)]
 SettingsDep = Annotated[Settings, Depends(get_settings)]
 RedisDep = Annotated[Redis, Depends(get_redis)]

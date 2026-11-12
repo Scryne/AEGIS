@@ -133,6 +133,52 @@ async def record_event(
     return event
 
 
+async def record_unreadable(
+    session: AsyncSession,
+    *,
+    tenant_id: uuid.UUID,
+    object_type: str,
+    object_ids: list[str],
+    field: str,
+    actor_user_id: uuid.UUID | None = None,
+    actor_role: str | None = None,
+) -> int:
+    """Çözülemeyen şifreli kayıtları denetim izine **bir kez** düşer; yazılan olay sayısını döner.
+
+    Liste her açıldığında yeni olay yazmak zinciri gürültüyle doldururdu; kayıt başına ilk
+    tespit yeter (anahtar değişimi / bozulma o an fark edildi). Yük kişisel veri taşımaz:
+    yalnız alan adı ve neden.
+    """
+    if not object_ids:
+        return 0
+    zaten = set(
+        await session.scalars(
+            select(AuditEvent.object_id).where(
+                AuditEvent.action == AuditAction.DATA_UNREADABLE.value,
+                AuditEvent.object_type == object_type,
+                AuditEvent.object_id.in_(object_ids),
+            )
+        )
+    )
+    yazilan = 0
+    for object_id in object_ids:
+        if object_id in zaten:
+            continue
+        await record_event(
+            session,
+            tenant_id=tenant_id,
+            action=AuditAction.DATA_UNREADABLE,
+            object_type=object_type,
+            object_id=object_id,
+            actor_user_id=actor_user_id,
+            actor_role=actor_role,
+            source_ref="system:decryption",
+            payload={"field": field, "reason": "decryption_failed"},
+        )
+        yazilan += 1
+    return yazilan
+
+
 async def list_events(
     session: AsyncSession,
     *,

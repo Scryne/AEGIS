@@ -459,7 +459,7 @@ async def create_entity(
 
 @router.get("", response_model=EntityListResponse)
 async def list_entities(
-    _principal: PrincipalDep,
+    principal: PrincipalDep,
     session: TenantSessionDep,
     q: Annotated[str | None, Query(max_length=512)] = None,
     schema_type: Annotated[SchemaLiteral | None, Query()] = None,
@@ -476,6 +476,16 @@ async def list_entities(
     )
     total = await entity_service.count_entities(session)
     masks = await entity_service.national_id_masks(session, [entity.id for entity in entities])
+    # Çözülemeyen kayıt listeyi düşürmez; ilk tespit denetim izine bir kez düşer.
+    await audit_service.record_unreadable(
+        session,
+        tenant_id=principal.tenant_id,
+        object_type="entity",
+        object_ids=[str(entity_id) for entity_id, mask in masks.items() if mask.unreadable],
+        field="national_id",
+        actor_user_id=principal.user_id,
+        actor_role=principal.role.value,
+    )
     return EntityListResponse(
         total=total,
         items=[

@@ -286,6 +286,12 @@ def test_okunamayan_taslak_listeyi_dusurmez(api_client: TestClient, app_database
     durum = {o["id"]: o for o in liste.json()["items"]}
     assert durum[bozuk["id"]]["unreadable"] is True
     assert durum[saglam["id"]]["unreadable"] is False
+    # İlk tespit denetim izine bir kez düşer.
+    assert api_client.get("/api/v1/sib-drafts", headers=_auth(token)).status_code == 200
+    olaylar = api_client.get(
+        "/api/v1/audit/events?action=data.unreadable", headers=_auth(token)
+    ).json()["items"]
+    assert [(o["object_type"], o["object_id"]) for o in olaylar] == [("sib_draft", bozuk["id"])]
     # Detay kapalı başarısız kalır ve sebebini söyler.
     detay = api_client.get(f"/api/v1/sib-drafts/{bozuk['id']}", headers=_auth(token))
     assert detay.status_code == 503

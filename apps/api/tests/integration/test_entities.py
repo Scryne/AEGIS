@@ -534,6 +534,14 @@ def test_okunamayan_tckn_listeyi_dusurmez(api_client: TestClient, app_database_u
     assert durum[saglam["id"]]["national_id_masked"] == "*******0078"
     assert durum[saglam["id"]]["national_id_unreadable"] is False
     assert GECERLI_TCKN not in liste.text
+    # İlk tespit denetim izine düşer; liste yeniden açılınca ikinci olay yazılmaz.
+    assert api_client.get("/api/v1/entities", headers=_auth(token)).status_code == 200
+    olaylar = api_client.get(
+        "/api/v1/audit/events?action=data.unreadable", headers=_auth(token)
+    ).json()["items"]
+    assert [(o["object_type"], o["object_id"]) for o in olaylar] == [("entity", bozuk["id"])]
+    assert olaylar[0]["payload"] == {"field": "national_id", "reason": "decryption_failed"}
+    assert api_client.get("/api/v1/audit/verify", headers=_auth(token)).json()["ok"] is True
     # Tek kayıt detayı kapalı başarısız kalır ve sebebini söyler.
     detay = api_client.get(f"/api/v1/entities/{bozuk['id']}", headers=_auth(token))
     assert detay.status_code == 503

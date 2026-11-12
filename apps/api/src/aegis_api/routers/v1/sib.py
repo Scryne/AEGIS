@@ -19,6 +19,7 @@ from aegis_api.dependencies import Principal, SettingsDep, TenantSessionDep, req
 from aegis_api.errors import ConflictError, NotFoundError
 from aegis_core.entities import service as entity_service
 from aegis_core.models import Role, SibDraft
+from aegis_core.services import audit as audit_service
 from aegis_core.sib import kodlar
 from aegis_core.sib import service as sib_service
 from aegis_core.sib.form import Bulgu, SibFormu
@@ -147,13 +148,24 @@ async def olustur(
 
 @router.get("/sib-drafts", response_model=SibListe)
 async def listele(
-    _principal: RequireSib,
+    principal: RequireSib,
     session: TenantSessionDep,
     entity_id: uuid.UUID | None = None,
     limit: Annotated[int, Query(ge=1, le=200)] = 100,
 ) -> SibListe:
     satirlar = await sib_service.listele(session, entity_id=entity_id, limit=limit)
-    return SibListe(items=[SibOzet(**o) for o in await sib_service.ozetler(session, satirlar)])
+    ozetler = await sib_service.ozetler(session, satirlar)
+    # Çözülemeyen taslak listeyi düşürmez; ilk tespit denetim izine bir kez düşer.
+    await audit_service.record_unreadable(
+        session,
+        tenant_id=principal.tenant_id,
+        object_type="sib_draft",
+        object_ids=[str(o["id"]) for o in ozetler if o["unreadable"]],
+        field="form",
+        actor_user_id=principal.user_id,
+        actor_role=principal.role.value,
+    )
+    return SibListe(items=[SibOzet(**o) for o in ozetler])
 
 
 @router.get("/sib-drafts/{draft_id}", response_model=SibDetay)

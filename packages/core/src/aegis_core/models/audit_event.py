@@ -107,6 +107,9 @@ class AuditAction(StrEnum):
     # (sahibe parola belirleme bağlantısı) ayrı olaydır, teslim kanalıyla. E-posta olaya girmez.
     TENANT_PROVISION = "tenant.provision"
     TENANT_INVITE = "tenant.invite"
+    # Şifreli alan bu anahtarla çözülemedi (eski anahtar / bozulma). Kayıt başına bir kez yazılır;
+    # liste açılmaya devam eder, kayıt "okunamadı" diye işaretlenir. Yük kişisel veri taşımaz.
+    DATA_UNREADABLE = "data.unreadable"
 
 
 class AuditEvent(UUIDPKMixin, TenantMixin, Base):

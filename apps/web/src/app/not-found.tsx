@@ -1,6 +1,8 @@
 import { Wordmark } from "@/components/nav-links";
 import Link from "next/link";
 
+export const metadata = { title: "Sayfa bulunamadı" };
+
 export default function NotFound() {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-6 p-6 text-center">

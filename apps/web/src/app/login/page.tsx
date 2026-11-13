@@ -3,6 +3,7 @@
 import { Wordmark } from "@/components/nav-links";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
+import Link from "next/link";
 
 function LoginForm() {
   const router = useRouter();
@@ -40,8 +41,8 @@ function LoginForm() {
   }
 
   return (
-    <main className="grid min-h-dvh md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
-      <section className="flex flex-col justify-between gap-8 bg-ink p-6 text-ink-fg md:p-12">
+    <main className="grid min-h-dvh grid-rows-[auto_1fr] md:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] md:grid-rows-1">
+      <section className="flex flex-col justify-between gap-8 bg-ink px-6 py-5 text-ink-fg md:p-12">
         <Wordmark inverse />
         <div className="hidden md:block">
           <p className="max-w-md text-2xl leading-snug font-semibold text-balance">
@@ -69,6 +70,7 @@ function LoginForm() {
             <input
               id="email"
               type="email"
+              autoComplete="username"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -82,6 +84,7 @@ function LoginForm() {
             <input
               id="password"
               type="password"
+              autoComplete="current-password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -100,6 +103,9 @@ function LoginForm() {
           >
             {pending ? "Giriş yapılıyor…" : "Giriş yap"}
           </button>
+          <Link href="/reset-password" className="back-link">
+            Parolamı unuttum
+          </Link>
         </form>
       </div>
       </div>

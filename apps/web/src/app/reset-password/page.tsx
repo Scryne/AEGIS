@@ -11,6 +11,92 @@ import { Suspense, useState } from "react";
 
 const MIN_LENGTH = 8;
 
+/**
+ * Jetonsuz açılış: parola sıfırlama bağlantısı istenir. Sunucu adres kayıtlı olsun olmasın aynı
+ * cevabı verir (hesap varlığı sızdırılmaz); arayüz de aynı nötr cümleyi gösterir.
+ */
+function RequestLink() {
+  const [email, setEmail] = useState("");
+  const [pending, setPending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+    setPending(true);
+    try {
+      const response = await fetch("/api/v1/auth/password-reset/request", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      if (response.status === 429) {
+        setError("Çok fazla deneme yapıldı. Birkaç dakika sonra yeniden deneyin.");
+        return;
+      }
+      if (!response.ok) {
+        setError("İstek alınamadı. E-posta adresini denetleyip yeniden deneyin.");
+        return;
+      }
+      setSent(true);
+    } catch {
+      setError("Sunucuya ulaşılamadı; bağlantınızı denetleyip yeniden deneyin.");
+    } finally {
+      setPending(false);
+    }
+  }
+
+  if (sent) {
+    return (
+      <div className="space-y-4">
+        <p role="status" className="text-sm text-fg">
+          Bu adres bir AEGIS hesabına kayıtlıysa parola belirleme bağlantısı birkaç dakika içinde gelir.
+          Bağlantı sınırlı süre geçerlidir.
+        </p>
+        <Link href="/login" className="btn-quiet inline-flex w-full justify-center">
+          Giriş sayfasına dön
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <p className="mb-6 text-sm text-muted">
+        Hesabınızın e-posta adresini yazın; parola belirleme bağlantısı gönderelim.
+      </p>
+      <form onSubmit={onSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <label htmlFor="reset-email" className="text-sm font-medium text-fg">
+            E-posta
+          </label>
+          <input
+            id="reset-email"
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="field"
+          />
+        </div>
+        {error !== null && (
+          <p role="alert" className="text-sm text-danger">
+            {error}
+          </p>
+        )}
+        <button type="submit" disabled={pending} className="btn-primary w-full">
+          {pending ? "Gönderiliyor…" : "Bağlantı gönder"}
+        </button>
+        <Link href="/login" className="back-link">
+          ← Giriş sayfasına dön
+        </Link>
+      </form>
+    </>
+  );
+}
+
 function ResetForm() {
   const token = useSearchParams().get("token") ?? "";
   const [password, setPassword] = useState("");
@@ -58,7 +144,7 @@ function ResetForm() {
         <div className="mb-8">
           <Wordmark />
         </div>
-        <h1 className="page-title mb-1">Parola belirle</h1>
+        <h1 className="page-title mb-1">{token === "" && !done ? "Parolamı unuttum" : "Parola belirle"}</h1>
         {done ? (
           <div className="space-y-4">
             <p role="status" className="text-sm text-fg">
@@ -69,9 +155,7 @@ function ResetForm() {
             </Link>
           </div>
         ) : token === "" ? (
-          <p role="alert" className="text-sm text-danger">
-            Bağlantıda jeton yok. E-postadaki bağlantıyı eksiksiz açın.
-          </p>
+          <RequestLink />
         ) : (
           <>
             <p className="mb-6 text-sm text-muted">

@@ -16,6 +16,7 @@ import {
   Plug,
   ScanSearch,
   ScrollText,
+  Settings,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -41,6 +42,7 @@ const ICONS: Record<string, LucideIcon> = {
   "/quality": Gauge,
   "/integrations": Plug,
   "/plan": CreditCard,
+  "/settings": Settings,
 };
 
 export function Wordmark({ inverse = false }: { inverse?: boolean }) {

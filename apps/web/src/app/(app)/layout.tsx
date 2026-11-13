@@ -31,6 +31,8 @@ const NAV: (NavItem & { roles: Role[] })[] = [
   // E3.4: anahtar/webhook yönetimi; analist göremez (backend ile aynı rol kümesi).
   { label: "Entegrasyonlar", href: "/integrations", group: "Hesap", roles: OVERSIGHT_ROLES },
   { label: "Plan ve Kullanım", href: "/plan", group: "Hesap", roles: OVERSIGHT_ROLES },
+  // Eşik bandı ve ekip: herkes okur, yazma sahip + uyum uzmanı (API'de RequireSettingsWrite).
+  { label: "Ayarlar", href: "/settings", group: "Hesap", roles: ALL_ROLES },
 ];
 
 export default async function AppLayout({ children }: { children: ReactNode }) {

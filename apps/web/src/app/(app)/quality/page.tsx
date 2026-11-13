@@ -2,6 +2,8 @@
 // isabeti, eşik taraması ve önerisi, olumsuz haber isabeti, haftalık eğilim. Eşiği bu sayfa
 // değiştirmez; öneri uyum uzmanının kararıdır.
 
+import Link from "next/link";
+
 import { QualitySnapshotButton } from "@/components/quality-snapshot";
 import { QualitySweep } from "@/components/quality-sweep";
 import { serverFetch } from "@/lib/server/backend";
@@ -121,7 +123,15 @@ export default async function QualityPage() {
             }`}
           >
             {rec.message}
-            {rec.status === "raise" && canWrite && " Eşiği Ayarlar'dan siz değiştirirsiniz; değişiklik denetim izine yazılır."}
+            {rec.status === "raise" && canWrite && (
+              <>
+                {" "}Eşiği{" "}
+                <Link href="/settings" className="font-medium text-primary underline-offset-2 hover:underline">
+                  Ayarlar
+                </Link>
+                &apos;dan siz değiştirirsiniz; değişiklik gerekçesiyle denetim izine yazılır.
+              </>
+            )}
           </p>
         )}
         <QualitySweep rows={m.sweep} />

@@ -11,6 +11,7 @@ import { useState } from "react";
 
 import type { ExtractionProposal } from "@/lib/entities";
 import { attributeLabel } from "@/lib/entities";
+import { formatScore } from "@/lib/screening";
 
 interface Candidate {
   entity_id: string;
@@ -91,7 +92,7 @@ export function ProposalReview({ proposal }: { proposal: ExtractionProposal }) {
           <div className="text-sm text-fg">{describe(proposal)}</div>
           <div className="mt-0.5 text-xs text-muted">
             {proposal.kind === "attribute" ? "Öznitelik" : "Kişi bağı"} · güven{" "}
-            {proposal.confidence.toFixed(2)}
+            {formatScore(proposal.confidence)}
             {proposal.page_number !== null && ` · sayfa ${proposal.page_number}`}
           </div>
         </div>

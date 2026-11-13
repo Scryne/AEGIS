@@ -252,7 +252,7 @@ export default async function MonitoringPage({
               </div>
               <div>
                 <dt className="text-xs text-muted">Süre</dt>
-                <dd className="font-mono text-fg">{(lastRun.duration_ms / 1000).toFixed(1)} sn</dd>
+                <dd className="font-mono text-fg">{(lastRun.duration_ms / 1000).toLocaleString("tr-TR", { maximumFractionDigits: 1 })} sn</dd>
               </div>
             </dl>
           ) : (

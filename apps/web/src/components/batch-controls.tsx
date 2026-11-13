@@ -15,6 +15,7 @@ import {
   type BatchRow,
   type BatchStatus,
 } from "@/lib/batches";
+import { formatScore } from "@/lib/screening";
 
 async function post(url: string, body?: unknown): Promise<{ ok: boolean; data: unknown }> {
   try {
@@ -344,7 +345,7 @@ export function BatchRowsTable({
                   </td>
                   <td className="px-3 py-2 text-right font-mono text-xs tabular-nums">{r.candidate_count ?? "—"}</td>
                   <td className="px-3 py-2 text-right font-mono text-xs tabular-nums">
-                    {r.top_score != null ? r.top_score.toFixed(2) : "—"}
+                    {r.top_score != null ? formatScore(r.top_score) : "—"}
                   </td>
                   <td className="px-3 py-2">
                     <span className={`inline-block rounded-full border px-2 py-0.5 text-xs ${ROW_STATUS_TONE[r.status]}`}>

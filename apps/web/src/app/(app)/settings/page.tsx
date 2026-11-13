@@ -4,6 +4,7 @@
 
 import Link from "next/link";
 
+import { TeamManager, type TeamMember } from "@/components/team-manager";
 import { ThresholdSettings, type Thresholds } from "@/components/threshold-settings";
 import { serverFetch } from "@/lib/server/backend";
 import { getCurrentUser, ROLE_LABELS, type Role } from "@/lib/server/user";
@@ -21,12 +22,7 @@ interface Setting {
   value: Record<string, unknown>;
 }
 
-interface Member {
-  user_id: string;
-  email: string;
-  full_name: string | null;
-  role: Role;
-}
+type Member = TeamMember;
 
 interface AuditEvent {
   id: string;
@@ -150,27 +146,8 @@ export default async function SettingsPage() {
               Ekip listesi yüklenemedi. Sayfayı yenileyin; sürerse sunucu kaydına bakın.
             </p>
           ) : (
-            <ul className="mt-3 divide-y divide-border">
-              {sortedMembers.map((m) => (
-                <li key={m.user_id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2.5">
-                  <div className="min-w-0">
-                    <div className="truncate text-sm text-fg">
-                      {m.full_name ?? m.email}
-                      {m.user_id === user.id && <span className="ml-2 text-xs text-muted">(siz)</span>}
-                    </div>
-                    {m.full_name && <div className="truncate font-mono text-xs text-muted">{m.email}</div>}
-                  </div>
-                  <span className="rounded-full border border-border bg-subtle px-2.5 py-0.5 text-xs text-fg">
-                    {ROLE_LABELS[m.role]}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <TeamManager members={sortedMembers} currentUserId={user.id} canManage={user.role === "owner"} />
           )}
-          <p className="mt-3 text-xs text-muted">
-            Üye ekleme ve rol değişikliği bu sürümde ekrandan yapılmıyor; AEGIS hesap yöneticiniz kurar ve her
-            değişiklik denetim izine girer.
-          </p>
         </section>
 
         <section aria-labelledby="diger-baslik" className="panel p-5">

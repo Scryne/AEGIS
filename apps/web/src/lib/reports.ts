@@ -133,6 +133,8 @@ export const ACTION_LABELS: Record<string, string> = {
   "retention.dry_run": "Saklama süresi raporu",
   "tenant.provision": "Kurum hesabı açıldı",
   "tenant.invite": "Sahibe davet gönderildi",
+  "member.invite": "Ekibe üye davet edildi",
+  "member.role_change": "Üyenin rolü değişti",
   "data.unreadable": "Şifreli kayıt çözülemedi",
 };
 

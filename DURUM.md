@@ -3,9 +3,34 @@
 > **Ne bu dosya:** sertifika değil **envanter**. Ölçülen gerçek durum; "çalışmıyor" yazan satır
 > kusur değil, kayıt. Kapanış standardı: `ScryneOS/🎯 100-Command-Center/Kapanis-Standardi.md`
 
-**Ölçüm tarihi:** 2026-09-26 (önceki: 2026-08-27)
-**Tek cümle:** İlk kez uçtan uca çalıştırıldı (API + Celery worker + Docling + yente + web);
-259 birim + 79 izolasyon/entegrasyon + 36 uçtan uca recall testi yeşil, bağımlılık açığı 0.
+**Ölçüm tarihi:** 2026-11-13 (önceki: 2026-09-26)
+**Tek cümle:** Asıl akış (varlık → tarama → eşleşme kararı → vaka → denetim izi) gerçek arayüzden uçtan
+uca çalışıyor; sahip artık ekibini ekrandan kuruyor; 380 hızlı + 132 entegrasyon testi yeşil, açık 0.
+
+## 2026-11-12/13: bitirme denetimi (ön yüz turu, ekip yönetimi, dayanıklılık)
+
+- **Ekip yönetimi (yeni):** roller ürünün her yerinde kapılıydı ama sahip analist/denetçi ekleyemiyordu
+  (yalnız `GET /members` ve kiracı CLI'ı vardı). `POST /members` (parolasız hesap + üyelik + 72 saatlik
+  parola belirleme bağlantısı; SMTP varsa e-postayla, yoksa yanıtta bir kez), `POST /members/{id}/invite`
+  (yalnız etkinleşmemiş üye), `PATCH /members/{id}` (son sahip düşürülemez; yeni rol jeton yenilemede).
+  Yalnız sahip. Olaylar `member.invite` / `member.role_change`, yükte e-posta yok. Ekran: Ayarlar > Ekip
+  (davet formu, rol seçimi, "Davet bekliyor", "Daveti yenile"). 5 entegrasyon testi (yetki, kiracı
+  yalıtımı, çakışma, davet → parola → davet edilen rolle giriş, e-posta kanalı); sahip kapısı gevşetilince
+  düşüyor. Tarayıcıda uçtan uca sınandı. **Kapsam dışı:** üyeyi kurumdan çıkarma (karar bekliyor).
+- **Parolamı unuttum:** giriş ekranından bağlantı; jetonsuz `/reset-password` e-posta ister, cevap hesabın
+  varlığını ele vermez.
+- **Ayarlar ekranı:** eşik bandı gerekçe zorunlu, sunucuda doğrulanır; değişiklik geçmişi denetim izinden.
+- **Dayanıklılık:** çözülemeyen şifreli kayıt listeyi düşürmüyor (satır "okunamadı", denetim izine bir kez);
+  oturum commit'i yanıttan önce; aynı sunucuda ikinci test oturumu ilkinin veritabanını düşüremez
+  (danışma kilidi); sonraki göçlerin tabloları uygulama rolüne açılıyor (değişmez testi).
+- **Ön yüz turu:** 23 rota × 390/768/1280/1440 (açık tema; koyu tema yok) = 92 kare, taşma 0, konsol/5xx 0
+  (8 kare bilinçli 404). Düzeltilenler: denetim izi Türkçe + dar ekranda kart, entegrasyon formu taşması,
+  detay sekme başlıkları, eşleşme incelemesi kanıtı (skor ekseni, Türkçe özellikler), dokunma hedefleri,
+  UBO düğümünde dayanak (kontrol / üst düzey yönetici), ülke adı, tarama listesinde mobil rozet.
+- **Ölçüm (13 Kasım):** `uv sync --frozen`, ruff, ruff format, mypy (151 dosya) temiz; pytest hızlı 380,
+  entegrasyon 132 geçti; OpenAPI drift yok; web tsc/eslint/build temiz; `pnpm audit` açık yok. Son CI yeşil.
+- **Doğrulanmadı:** gerçek SMTP ile davet teslimi; koyu tema (ürün tasarımında yok); `-m screening`
+  kapısı (yente + Elasticsearch Docker ister, yerelde koşulmadı).
 
 ## 2026-11-03 (2): E1.6'nın sunucu gerektirmeyen kısmı + yol haritası dürüstlüğü
 

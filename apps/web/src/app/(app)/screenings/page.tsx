@@ -74,8 +74,8 @@ export default async function ScreeningsPage() {
               return (
                 <li key={screening.id} className="py-3">
                   <Link href={`/screenings/${screening.id}`} className="block hover:opacity-80">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
+                    <div className="flex flex-col items-start gap-1.5 sm:flex-row sm:justify-between sm:gap-4">
+                      <div className="min-w-0">
                         <div className="text-sm font-medium text-fg">{screening.subject_name}</div>
                         <div className="mt-0.5 text-xs text-muted">
                           {formatDate(screening.created_at)} · {screening.subjects.length} özne ·{" "}
@@ -83,7 +83,7 @@ export default async function ScreeningsPage() {
                         </div>
                       </div>
                       <span
-                        className={`shrink-0 rounded-md border px-2 py-1 text-xs ${TONE_CLASSES[headline.tone]}`}
+                        className={`rounded-md border px-2 py-1 text-xs sm:shrink-0 ${TONE_CLASSES[headline.tone]}`}
                       >
                         {headline.text}
                       </span>

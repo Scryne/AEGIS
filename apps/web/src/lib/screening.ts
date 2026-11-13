@@ -126,6 +126,63 @@ export const ROLE_LABELS: Record<string, string> = {
   shareholder: "Ortak",
 };
 
+/** FtM şema türünün Türkçesi (yente adayı ve taranan özne). */
+export const SCHEMA_LABELS: Record<string, string> = {
+  Company: "Şirket",
+  Organization: "Kuruluş",
+  LegalEntity: "Tüzel kişi",
+  Person: "Kişi",
+  Vessel: "Gemi",
+  Airplane: "Uçak",
+  PublicBody: "Kamu kurumu",
+};
+
+export function schemaLabel(schema: string): string {
+  return SCHEMA_LABELS[schema] ?? schema;
+}
+
+/**
+ * Eşleşme motorunun (yente logic-v1) skor özelliklerinin denetçi okuyabilir adı. Negatif
+ * ağırlıklı olanlar (uyuşmazlıklar) skoru düşürür. Bilinmeyen özellik kod adıyla görünür.
+ */
+const FEATURE_LABELS: Record<string, string> = {
+  name_literal_match: "Ad birebir aynı",
+  name_fuzzy_similarity: "Ad benzerliği",
+  person_name_jaro_winkler: "Kişi adı benzerliği",
+  person_name_phonetic_match: "Kişi adı sesçe eş",
+  name_fingerprint_levenshtein: "Ad parmak izi benzerliği",
+  name_metaphone_match: "Ad sesçe eş (metaphone)",
+  name_soundex_match: "Ad sesçe eş (soundex)",
+  jaro_name_parts: "Ad parçaları benzerliği",
+  soundex_name_parts: "Ad parçaları sesçe eş",
+  weak_alias_match: "Zayıf takma ad eşleşmesi",
+  address_entity_match: "Adres eşleşmesi",
+  identifier_match: "Kimlik numarası eşleşmesi",
+  lei_code_match: "LEI kodu eşleşmesi",
+  bic_code_match: "BIC kodu eşleşmesi",
+  isin_security_match: "ISIN eşleşmesi",
+  vessel_imo_mmsi_match: "IMO/MMSI eşleşmesi",
+  crypto_wallet_address: "Kripto cüzdan eşleşmesi",
+  country_mismatch: "Ülke uyuşmuyor",
+  nationality_mismatch: "Uyruk uyuşmuyor",
+  position_country_mismatch: "Görev ülkesi uyuşmuyor",
+  last_name_mismatch: "Soyadı uyuşmuyor",
+  dob_year_disjoint: "Doğum yılı farklı",
+  dob_day_disjoint: "Doğum günü farklı",
+  gender_mismatch: "Cinsiyet uyuşmuyor",
+  orgid_disjoint: "Şirket sicil no farklı",
+  numbers_mismatch: "Addaki sayılar farklı",
+};
+
+export function featureLabel(feature: string): string {
+  return FEATURE_LABELS[feature] ?? feature.replaceAll("_", " ");
+}
+
+/** Skor ve ağırlıkları Türkçe ondalıkla, iki basamak yazar (denetçi karşılaştırması için sabit). */
+export function formatScore(value: number): string {
+  return value.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 /** FtM konu etiketlerini okunur Türkçeye çevirir (bilinmeyen etiket olduğu gibi kalır). */
 export function topicLabel(topic: string): string {
   if (topic.startsWith("sanction")) return "Yaptırım";

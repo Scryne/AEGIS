@@ -100,6 +100,15 @@ function statusLine(input: {
   };
 }
 
+/** Eşik bandı özeti: alt sınır · eleme · işaretleme; kiracı ayarı yoksa motor varsayılanı. */
+function thresholdSummary(settings: Setting[] | null): string {
+  const raw = (settings?.find((s) => s.key === "screening.thresholds")?.value ?? {}) as Record<string, unknown>;
+  const band = { candidate_cutoff: 0.5, auto_dismiss_below: 0.65, auto_flag_at: 0.85, ...raw };
+  const f = (v: unknown) => (typeof v === "number" ? v.toFixed(2).replace(".", ",") : "—");
+  const text = `${f(band.candidate_cutoff)} · ${f(band.auto_dismiss_below)} · ${f(band.auto_flag_at)}`;
+  return raw && Object.keys(raw).length > 0 ? text : `${text} (varsayılan)`;
+}
+
 export default async function DashboardPage() {
   const user = await getCurrentUser();
   const canReadAudit = AUDIT_ROLES.includes(user.role);
@@ -315,24 +324,24 @@ export default async function DashboardPage() {
           </section>
 
           <section className="panel p-5">
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="eyebrow">Kiracı ayarları</h2>
-              <span className="text-xs text-muted">{canWriteSettings ? "Yazma yetkiniz var" : "Salt okunur"}</span>
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <h2 className="eyebrow">Kurum ayarları</h2>
+              <Link href="/settings" className="inline-flex min-h-8 items-center text-xs text-primary hover:underline">
+                {canWriteSettings ? "Düzenle" : "Görüntüle"}
+              </Link>
             </div>
-            {settings === null || settings.length === 0 ? (
-              <p className="text-sm text-muted">Varsayılan eşikler ve saklama süreleri kullanılıyor.</p>
-            ) : (
-              <ul className="divide-y divide-border">
-                {settings.map((s) => (
-                  <li key={s.key} className="py-2 text-sm">
-                    <span className="font-mono text-fg">{s.key}</span>
-                    <span className="mt-0.5 block font-mono text-xs break-all text-muted">
-                      {JSON.stringify(s.value)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
+            <dl className="space-y-2 text-sm">
+              <div className="flex items-baseline justify-between gap-3">
+                <dt className="text-muted">Tarama eşik bandı</dt>
+                <dd className="font-mono text-xs text-fg tabular-nums">{thresholdSummary(settings)}</dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-3">
+                <dt className="text-muted">Olumsuz haber (beta)</dt>
+                <dd className="text-fg">
+                  {settings?.find((s) => s.key === "adverse_media_beta")?.value?.enabled === true ? "Açık" : "Kapalı"}
+                </dd>
+              </div>
+            </dl>
           </section>
         </div>
       </div>

@@ -18,6 +18,8 @@ import {
   topicLabel,
 } from "@/lib/screening";
 
+export const metadata = { title: "Tarama sonucu" };
+
 export const dynamic = "force-dynamic";
 
 function formatDate(value: string | null): string {
@@ -144,7 +146,7 @@ export default async function ScreeningDetailPage({
   return (
     <div className="page space-y-6">
       <div>
-        <Link href="/screenings" className="text-xs text-muted hover:text-fg">
+        <Link href="/screenings" className="back-link">
           ← Taramalar
         </Link>
         <h1 className="page-title mt-1">{screening.subject_name}</h1>

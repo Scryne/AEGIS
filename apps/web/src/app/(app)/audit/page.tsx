@@ -9,7 +9,7 @@ import Link from "next/link";
 import { serverFetch } from "@/lib/server/backend";
 import { getCurrentUser } from "@/lib/server/user";
 import type { AuditEventPage, ChainVerification } from "@/lib/reports";
-import { actionLabel, objectTypeLabel } from "@/lib/reports";
+import { ACTION_LABELS, actionLabel, actorRoleLabel, objectTypeLabel } from "@/lib/reports";
 
 export const metadata = { title: "Denetim İzi" };
 
@@ -24,7 +24,15 @@ async function safeJson<T>(path: string): Promise<T | null> {
 }
 
 function formatDate(value: string): string {
-  return new Date(value).toLocaleString("tr-TR");
+  return new Date(value).toLocaleString("tr-TR", {
+    timeZone: "Europe/Istanbul",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 }
 
 export default async function AuditPage({
@@ -101,67 +109,114 @@ export default async function AuditPage({
       )}
 
       <div className="panel p-5">
-        <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="eyebrow">
-            Olaylar
-          </h2>
-          <span className="text-xs text-muted">
-            {page.total} kayıt · {offset + 1}–{offset + shown} arası
-          </span>
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="eyebrow">Olaylar</h2>
+            <p className="mt-1 text-xs text-muted">
+              <span className="font-mono tabular-nums">{page.total}</span> kayıt
+              {shown > 0 && (
+                <>
+                  {" "}
+                  · <span className="font-mono tabular-nums">{offset + 1}–{offset + shown}</span> arası
+                </>
+              )}
+              {params.action && <> · süzgeç: {actionLabel(params.action)}</>}
+            </p>
+          </div>
+          <form method="get" className="flex flex-wrap items-end gap-2">
+            <label className="space-y-1 text-xs text-muted">
+              <span className="block">Eylem</span>
+              <select name="action" defaultValue={params.action ?? ""} className="field w-auto max-w-full">
+                <option value="">Tüm eylemler</option>
+                {Object.entries(ACTION_LABELS)
+                  .sort(([, a], [, b]) => a.localeCompare(b, "tr"))
+                  .map(([code, label]) => (
+                    <option key={code} value={code}>
+                      {label}
+                    </option>
+                  ))}
+              </select>
+            </label>
+            <button type="submit" className="btn-quiet">
+              Süz
+            </button>
+            {params.action && (
+              <Link href="/audit" className="btn-quiet">
+                Temizle
+              </Link>
+            )}
+          </form>
         </div>
 
         {shown === 0 ? (
-          <p className="text-sm text-muted">Kayıt yok.</p>
+          <p className="text-sm text-muted">
+            {params.action ? "Bu eylem için kayıt yok." : "Henüz denetim olayı yok."}
+          </p>
         ) : (
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="text-muted">
-                <th className="pb-2 font-medium">Sıra</th>
-                <th className="pb-2 font-medium">Zaman</th>
-                <th className="pb-2 font-medium">Kim</th>
-                <th className="pb-2 font-medium">Ne</th>
-                <th className="pb-2 font-medium">Hedef</th>
-                <th className="pb-2 font-medium">Neye dayanarak</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {page.items.map((event) => (
-                <tr key={event.id}>
-                  <td className="py-1.5 font-mono text-muted">{event.seq}</td>
-                  <td className="py-1.5 text-muted">{formatDate(event.occurred_at)}</td>
-                  <td className="py-1.5 text-fg">
-                    {event.actor_label ?? event.actor_user_id ?? "sistem"}
-                    {event.actor_role !== null && (
-                      <span className="block text-[10px] text-muted">{event.actor_role}</span>
-                    )}
-                  </td>
-                  <td className="py-1.5 text-fg">{actionLabel(event.action)}</td>
-                  <td className="py-1.5 text-muted">
-                    {objectTypeLabel(event.object_type)}
-                    {event.object_id !== null && (
-                      <span className="block font-mono text-[10px]">{event.object_id}</span>
-                    )}
-                  </td>
-                  <td className="py-1.5 break-all text-muted">{event.source_ref ?? "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <ol className="divide-y divide-border text-xs" aria-label="Denetim olayları">
+            <li
+              aria-hidden="true"
+              className="hidden pb-2 font-medium text-muted lg:grid lg:grid-cols-[3.5rem_9.5rem_10rem_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-3"
+            >
+              <span>Sıra</span>
+              <span>Zaman</span>
+              <span>Kim</span>
+              <span>Ne</span>
+              <span>Hedef</span>
+              <span>Neye dayanarak</span>
+            </li>
+            {page.items.map((event) => (
+              <li
+                key={event.id}
+                className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 py-2.5 lg:grid-cols-[3.5rem_9.5rem_10rem_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start"
+              >
+                <span className="font-mono text-muted tabular-nums">#{event.seq}</span>
+                <span className="font-mono whitespace-nowrap text-muted tabular-nums">
+                  {formatDate(event.occurred_at)}
+                </span>
+                <span className="col-span-2 text-fg lg:col-span-1">
+                  {event.actor_label ?? (event.actor_user_id ? "Kullanıcı" : "Sistem")}
+                  {event.actor_role !== null && (
+                    <span className="ml-1.5 text-muted lg:ml-0 lg:block">{actorRoleLabel(event.actor_role)}</span>
+                  )}
+                </span>
+                <span className="col-span-2 text-sm font-medium text-fg lg:col-span-1 lg:text-xs lg:font-normal">
+                  {actionLabel(event.action)}
+                </span>
+                <span className="col-span-2 min-w-0 text-muted lg:col-span-1">
+                  {objectTypeLabel(event.object_type)}
+                  {event.object_id !== null && (
+                    <span className="ml-1.5 font-mono text-[11px] break-all lg:ml-0 lg:block">{event.object_id}</span>
+                  )}
+                </span>
+                <span className="col-span-2 min-w-0 font-mono text-[11px] break-all text-muted lg:col-span-1">
+                  {event.source_ref ? (
+                    <>
+                      <span className="font-sans text-xs lg:hidden">Dayanak: </span>
+                      {event.source_ref}
+                    </>
+                  ) : (
+                    <span className="hidden lg:inline">—</span>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ol>
         )}
 
         {(hasPrev || hasNext) && (
-          <div className="mt-4 flex gap-3 text-sm">
+          <nav aria-label="Sayfalar" className="mt-4 flex gap-3 text-sm">
             {hasPrev && (
-              <Link href={linkFor(Math.max(0, offset - PAGE_SIZE))} className="text-fg underline">
+              <Link href={linkFor(Math.max(0, offset - PAGE_SIZE))} className="btn-quiet">
                 ← Önceki
               </Link>
             )}
             {hasNext && (
-              <Link href={linkFor(offset + PAGE_SIZE)} className="text-fg underline">
+              <Link href={linkFor(offset + PAGE_SIZE)} className="btn-quiet">
                 Sonraki →
               </Link>
             )}
-          </div>
+          </nav>
         )}
       </div>
     </div>

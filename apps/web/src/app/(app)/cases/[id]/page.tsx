@@ -21,6 +21,8 @@ import {
   type Member,
 } from "@/lib/cases";
 
+export const metadata = { title: "Vaka" };
+
 export const dynamic = "force-dynamic";
 
 const STATUS_NAMES: Record<string, string> = {
@@ -81,7 +83,7 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
   return (
     <div className="page space-y-6">
       <div className="space-y-2">
-        <Link href="/cases" className="text-xs text-muted underline">
+        <Link href="/cases" className="back-link">
           ← Vakalar
         </Link>
         <div className="flex flex-wrap items-center gap-2">

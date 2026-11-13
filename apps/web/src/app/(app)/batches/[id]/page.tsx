@@ -9,6 +9,8 @@ import { BATCH_STATUS_LABELS, type Batch, type BatchRow } from "@/lib/batches";
 import { serverFetch } from "@/lib/server/backend";
 import { getCurrentUser } from "@/lib/server/user";
 
+export const metadata = { title: "Toplu tarama sonucu" };
+
 export const dynamic = "force-dynamic";
 
 const FILTERS = [
@@ -66,7 +68,7 @@ export default async function BatchDetailPage({
     <div className="page space-y-6">
       <BatchAutoRefresh status={batch.status} />
       <div className="space-y-1">
-        <Link href="/batches" className="text-xs text-muted underline">
+        <Link href="/batches" className="back-link">
           ← Toplu tarama
         </Link>
         <h1 className="page-title break-all">{batch.file_name}</h1>

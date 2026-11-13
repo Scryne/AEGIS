@@ -94,7 +94,7 @@ export function ApiKeyCreate() {
         setName("");
         setCreated(String((r.data as { key: string }).key));
       }}
-      className="grid gap-2 sm:grid-cols-[1fr_13rem_8rem_auto] sm:items-end"
+      className="grid gap-2 sm:grid-cols-2 sm:items-end xl:grid-cols-[1fr_13rem_8rem_auto]"
     >
       <label htmlFor={nameId} className="space-y-1 text-xs text-muted">
         <span className="block">Ad (nerede kullanılacak)</span>
@@ -141,7 +141,7 @@ export function ApiKeyCreate() {
         {busy ? "Açılıyor…" : "Anahtar aç"}
       </button>
       {error && (
-        <p role="alert" className="text-sm text-danger sm:col-span-4">
+        <p role="alert" className="text-sm text-danger sm:col-span-2 xl:col-span-4">
           {error}
         </p>
       )}

@@ -107,8 +107,33 @@ export const ACTION_LABELS: Record<string, string> = {
   "monitoring.toggle": "İzleme durumu değişti",
   "monitoring.alert": "İzleme alarmı üretildi",
   "monitoring.acknowledge": "İzleme alarmı görüldü",
+  "sib.create": "ŞİB taslağı açıldı",
+  "sib.update": "ŞİB taslağı düzenlendi",
+  "sib.export": "ŞİB taslağı dışa aktarıldı",
+  "sib.cancel": "ŞİB taslağı iptal edildi",
+  "adverse_media.scan": "Olumsuz haber tarandı",
+  "adverse_media.review": "Olumsuz haber incelendi",
+  "adverse_media.beta_toggle": "Olumsuz haber betası değişti",
+  "case.open": "Vaka açıldı",
+  "case.transition": "Vaka durumu değişti",
+  "case.assign": "Vaka atandı",
+  "case.due": "Vaka süresi değişti",
+  "case.edd_item": "Güçlendirilmiş inceleme adımı",
+  "case.comment": "Vakaya not eklendi",
+  "batch.create": "Toplu tarama yüklendi",
+  "batch.start": "Toplu tarama başladı",
+  "batch.row_resolve": "Toplu tarama satırı eşlendi",
+  "batch.cancel": "Toplu tarama iptal edildi",
+  "batch.complete": "Toplu tarama tamamlandı",
+  "api_key.create": "API anahtarı açıldı",
+  "api_key.revoke": "API anahtarı iptal edildi",
+  "webhook.create": "Webhook eklendi",
+  "webhook.update": "Webhook değişti",
+  "quality.snapshot": "Kalite ölçümü kaydedildi",
+  "retention.dry_run": "Saklama süresi raporu",
   "tenant.provision": "Kurum hesabı açıldı",
   "tenant.invite": "Sahibe davet gönderildi",
+  "data.unreadable": "Şifreli kayıt çözülemedi",
 };
 
 export const OBJECT_TYPE_LABELS: Record<string, string> = {
@@ -122,7 +147,36 @@ export const OBJECT_TYPE_LABELS: Record<string, string> = {
   discrepancy: "Tutarsızlık",
   report: "Rapor",
   organization: "Kurum",
+  api_key: "API anahtarı",
+  match_eval_run: "Kalite ölçümü",
+  monitoring_alert: "İzleme alarmı",
+  retention: "Saklama",
+  risk_score_snapshot: "Risk puanı",
+  sib_draft: "ŞİB taslağı",
+  ubo_computation: "Gerçek faydalanıcı hesabı",
+  user_account: "Kullanıcı",
+  webhook_endpoint: "Webhook",
+  screening_batch: "Toplu tarama",
+  compliance_case: "Vaka",
+  adverse_media: "Olumsuz haber",
 };
+
+/** Denetim olayını yazan aktörün rolü (insan rolleri + sistem süreçleri). */
+export const ACTOR_ROLE_LABELS: Record<string, string> = {
+  owner: "Sahip",
+  compliance_officer: "Uyum uzmanı",
+  analyst: "Analist",
+  auditor: "Denetçi",
+  monitoring: "Gece izlemesi",
+  worker: "Arka plan işi",
+  system: "Sistem",
+  api_key: "API anahtarı",
+  operator: "AEGIS operatörü",
+};
+
+export function actorRoleLabel(role: string): string {
+  return ACTOR_ROLE_LABELS[role] ?? role;
+}
 
 export function actionLabel(action: string): string {
   return ACTION_LABELS[action] ?? action;

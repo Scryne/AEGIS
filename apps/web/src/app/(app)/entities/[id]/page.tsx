@@ -41,6 +41,8 @@ import type { Report, RiskSummary } from "@/lib/reports";
 import type { UboComputation } from "@/lib/ubo";
 import { FORMAT_LABELS, formatBytes } from "@/lib/reports";
 
+export const metadata = { title: "Varlık dosyası" };
+
 export const dynamic = "force-dynamic";
 
 async function safeJson<T>(path: string): Promise<T | null> {
@@ -103,7 +105,7 @@ export default async function EntityDetailPage({
   return (
     <div className="page space-y-6">
       <div>
-        <Link href="/entities" className="text-xs text-muted hover:text-fg">
+        <Link href="/entities" className="back-link">
           ← Varlıklar
         </Link>
         <h1 className="page-title mt-1">{entity.name}</h1>

@@ -183,6 +183,19 @@ button:not(:disabled),
     opacity: 0.55;
   }
 
+  /* Liste ekranına dönüş: dokunma hedefi en az 32 px (WCAG 2.5.8 için 24 px yeter, rahat pay). */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: var(--color-muted);
+  }
+  .back-link:hover {
+    color: var(--color-fg);
+  }
+
   .row-link {
     display: block;
     transition: background-color 120ms ease;

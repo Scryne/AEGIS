@@ -7,6 +7,8 @@ import { serverFetch } from "@/lib/server/backend";
 import { getCurrentUser } from "@/lib/server/user";
 import { SIB_ROLES, type SibDetay, type SibKodlar } from "@/lib/sib";
 
+export const metadata = { title: "ŞİB taslağı" };
+
 export const dynamic = "force-dynamic";
 
 export default async function SibDraftPage({ params }: { params: Promise<{ id: string }> }) {

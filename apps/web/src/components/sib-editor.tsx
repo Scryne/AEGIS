@@ -327,7 +327,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
     <FormBaglami.Provider value={{ form, set, hataHaritasi, kilitli }}>
     <div className="space-y-6 pb-24">
       <div>
-        <Link href="/sib" className="text-xs text-muted hover:text-fg">
+        <Link href="/sib" className="back-link">
           ← ŞİB taslakları
         </Link>
         <div className="mt-1 flex flex-wrap items-center gap-3">

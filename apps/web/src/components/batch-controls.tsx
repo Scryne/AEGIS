@@ -338,7 +338,7 @@ export function BatchRowsTable({
                       {risk.label}
                     </span>
                     {r.screening_id && (
-                      <Link href={`/screenings/${r.screening_id}`} className="mt-1 block text-xs text-primary underline">
+                      <Link href={`/screenings/${r.screening_id}`} className="mt-1 inline-flex min-h-6 items-center text-xs text-primary underline">
                         Taramayı aç
                       </Link>
                     )}

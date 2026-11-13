@@ -87,7 +87,7 @@ export function DocumentUpload({ entityId }: { entityId: string }) {
             type="file"
             accept=".pdf,.png,.jpg,.jpeg,.tif,.tiff,.txt"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-            className="w-full text-sm text-fg"
+            className="block w-full text-sm text-muted file:mr-3 file:min-h-9 file:rounded-md file:border file:border-border-strong file:bg-surface file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-fg hover:file:bg-subtle"
           />
         </label>
       </div>

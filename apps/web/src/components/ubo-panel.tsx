@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
-import type { UboComputation } from "@/lib/ubo";
+import type { UboComputation, UboPerson } from "@/lib/ubo";
 import { BASIS_LABELS, NODE_H, NODE_W, STATUS_LABELS, layout } from "@/lib/ubo";
 
 const STATUS_TONE: Record<UboComputation["status"], string> = {
@@ -39,7 +39,7 @@ function UboGraph({ data, target }: { data: UboComputation; target: string }) {
   const cycleEdges = new Set<string>();
   for (const cycle of data.cycles)
     for (let i = 0; i + 1 < cycle.length; i++) cycleEdges.add(`${cycle[i]}>${cycle[i + 1]}`);
-  const share = new Map(data.ubos.map((u) => [u.entity_id, u.effective_percent]));
+  const uboById = new Map(data.ubos.map((u) => [u.entity_id, u]));
 
   const pad = 12;
   return (
@@ -129,9 +129,9 @@ function UboGraph({ data, target }: { data: UboComputation; target: string }) {
           const sub =
             node.schema === "Person"
               ? isUbo
-                ? `UBO · %${Number(share.get(node.id) ?? 0).toLocaleString("tr-TR", { maximumFractionDigits: 2 })}`
+                ? uboNodeLabel(uboById.get(node.id))
                 : "Gerçek kişi"
-              : `Şirket${node.country ? ` · ${node.country}` : ""}`;
+              : `Şirket${node.country ? ` · ${node.country.toUpperCase()}` : ""}`;
           return (
             <a key={node.id} href={`/entities/${node.id}`} aria-label={`${node.name} kaydını aç`}>
               <rect
@@ -158,6 +158,14 @@ function UboGraph({ data, target }: { data: UboComputation; target: string }) {
       </svg>
     </div>
   );
+}
+
+/** Graf düğümünde UBO'nun dayanağı: pay yoluyla ise etkin pay, değilse kontrol / üst düzey yönetici. */
+function uboNodeLabel(ubo: UboPerson | undefined): string {
+  if (!ubo) return "UBO";
+  if (ubo.basis === "control") return "UBO · kontrol";
+  if (ubo.basis === "senior_management") return "Üst düzey yönetici";
+  return `UBO · %${Number(ubo.effective_percent).toLocaleString("tr-TR", { maximumFractionDigits: 2 })}`;
 }
 
 export function UboPanel({

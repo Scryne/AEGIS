@@ -45,6 +45,10 @@ export function AdverseMediaBetaToggle({ enabled }: { enabled: boolean }) {
           </p>
         )}
       </div>
+      <div className="flex shrink-0 items-center gap-2.5">
+      <span className="text-sm text-muted" aria-hidden="true">
+        {enabled ? "Açık" : "Kapalı"}
+      </span>
       <button
         type="button"
         role="switch"
@@ -53,7 +57,7 @@ export function AdverseMediaBetaToggle({ enabled }: { enabled: boolean }) {
         onClick={toggle}
         disabled={busy}
         className={`relative h-6 w-11 shrink-0 rounded-full border transition-colors disabled:opacity-60 ${
-          enabled ? "border-primary bg-primary" : "border-border bg-bg"
+          enabled ? "border-primary bg-primary" : "border-border-strong bg-subtle"
         }`}
       >
         <span
@@ -63,6 +67,7 @@ export function AdverseMediaBetaToggle({ enabled }: { enabled: boolean }) {
           }`}
         />
       </button>
+      </div>
     </div>
   );
 }

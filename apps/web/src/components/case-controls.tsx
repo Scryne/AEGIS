@@ -271,7 +271,7 @@ function EddRow({ caseId, item, editable }: { caseId: string; item: ChecklistIte
             type="button"
             onClick={() => (item.done ? void run(`/api/v1/cases/${caseId}/edd/${item.key}`, "PUT", { done: false }) : setEditing(true))}
             disabled={busy}
-            className="shrink-0 text-xs text-primary underline disabled:opacity-50"
+            className="inline-flex min-h-6 shrink-0 items-center text-xs text-primary underline disabled:opacity-50"
           >
             {item.done ? "Geri al" : "Tamamla"}
           </button>

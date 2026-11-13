@@ -155,7 +155,7 @@ export function ApiKeyRevoke({ keyId, name }: { keyId: string; name: string }) {
   const [busy, setBusy] = useState(false);
   if (!confirm) {
     return (
-      <button type="button" onClick={() => setConfirm(true)} className="text-xs text-danger underline">
+      <button type="button" onClick={() => setConfirm(true)} className="inline-flex min-h-6 items-center text-xs text-danger underline">
         İptal et
       </button>
     );

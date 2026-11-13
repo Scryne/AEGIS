@@ -430,7 +430,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
               <h3 className="text-sm font-medium text-fg">Gerçek kişi {i + 1}</h3>
               <button
                 type="button"
-                className="text-xs text-danger underline"
+                className="inline-flex min-h-6 items-center text-xs text-danger underline"
                 onClick={() => set(["gercek_kisiler"], form.gercek_kisiler.filter((__, j) => j !== i))}
               >
                 Kaldır
@@ -477,7 +477,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
               <h3 className="text-sm font-medium text-fg">Tüzel/diğer kişi {i + 1}</h3>
               <button
                 type="button"
-                className="text-xs text-danger underline"
+                className="inline-flex min-h-6 items-center text-xs text-danger underline"
                 onClick={() => set(["tuzel_kisiler"], form.tuzel_kisiler.filter((__, j) => j !== i))}
               >
                 Kaldır
@@ -528,7 +528,7 @@ export function SibEditor({ detay, kodlar }: { detay: SibDetay; kodlar: SibKodla
               <h3 className="text-sm font-medium text-fg">Şüpheli işlem {i + 1}</h3>
               <button
                 type="button"
-                className="text-xs text-danger underline"
+                className="inline-flex min-h-6 items-center text-xs text-danger underline"
                 onClick={() => set(["islemler"], form.islemler.filter((__, j) => j !== i))}
               >
                 Kaldır

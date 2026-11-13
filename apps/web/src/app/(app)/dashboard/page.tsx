@@ -258,7 +258,7 @@ export default async function DashboardPage() {
             <section className="panel">
               <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
                 <h2 className="eyebrow">Son etkinlik</h2>
-                <Link href="/audit" className="text-xs font-medium text-primary underline-offset-2 hover:underline">
+                <Link href="/audit" className="inline-flex min-h-6 items-center text-xs font-medium text-primary underline-offset-2 hover:underline">
                   Denetim izinin tamamı
                 </Link>
               </div>

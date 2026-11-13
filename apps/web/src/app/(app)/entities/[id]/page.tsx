@@ -55,6 +55,17 @@ function formatDate(value: string | null): string {
   return value === null ? "—" : new Date(value).toLocaleString("tr-TR");
 }
 
+/** ISO ülke kodunu okunur ada çevirir ("tr" → "Türkiye (TR)"); tanınmayan kod olduğu gibi. */
+function countryName(code: string | null): string | null {
+  if (!code) return code;
+  try {
+    const name = new Intl.DisplayNames(["tr"], { type: "region" }).of(code.toUpperCase());
+    return name && name !== code.toUpperCase() ? `${name} (${code.toUpperCase()})` : code.toUpperCase();
+  } catch {
+    return code.toUpperCase();
+  }
+}
+
 export default async function EntityDetailPage({
   params,
 }: {
@@ -252,7 +263,7 @@ export default async function EntityDetailPage({
             ["Ticaret sicil no", entity.trade_registry_number],
             ["LEI", entity.lei_code],
             ["T.C. kimlik no", entity.national_id_masked],
-            ["Ülke", entity.country],
+            ["Ülke", countryName(entity.country)],
             ["Kuruluş tarihi", entity.incorporation_date],
             ["Doğum tarihi", entity.birth_date],
             ["Adres", entity.address],

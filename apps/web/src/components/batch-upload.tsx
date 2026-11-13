@@ -112,7 +112,7 @@ export function BatchUpload() {
             setPreview(null);
             if (f) void runPreview(f);
           }}
-          className="block w-full text-sm text-fg file:mr-3 file:rounded-md file:border file:border-border file:bg-surface file:px-3 file:py-1.5 file:text-sm"
+          className="block w-full text-sm text-muted file:mr-3 file:min-h-9 file:rounded-md file:border file:border-border-strong file:bg-surface file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-fg hover:file:bg-subtle"
         />
         <p className="text-xs text-muted">
           Excel&apos;den &quot;CSV (noktalı virgülle ayrılmış)&quot; olarak kaydedin. En çok 1.000 satır. TCKN

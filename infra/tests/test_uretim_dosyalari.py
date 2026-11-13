@@ -86,6 +86,24 @@ def test_app_connects_as_rls_role_and_only_migrate_is_privileged() -> None:
     assert migrate["DATABASE_ADMIN_URL"].startswith("postgresql+psycopg://aegis:")
 
 
+def test_tables_from_later_migrations_reach_the_app_role() -> None:
+    """Sonraki göçlerin açtığı tablolar (ör. ``monitoring_run``) uygulama rolüne de açılır.
+
+    initdb yalnız boş hacimde, göçlerden ÖNCE bir kez çalışır; ``ALL TABLES`` o anda boştur.
+    Yetkiyi geleceğe taşıyan ``ALTER DEFAULT PRIVILEGES FOR ROLE <göç rolü>``dür; rol adı göçü
+    koşan kullanıcıyla aynı değilse yeni tablo uygulamaya kapalı kalır ve ilk istekte 500 verir.
+    """
+    services = _compose()["services"]
+    migrate_user = _env(services["migrate"])["DATABASE_ADMIN_URL"].split("://", 1)[1].split(":")[0]
+    assert _env(services["postgres"])["POSTGRES_USER"] == migrate_user
+    script = (ROOT / "infra" / "compose" / "initdb-prod" / "10-app-role.sh").read_text("utf-8")
+    assert re.search(
+        rf"ALTER DEFAULT PRIVILEGES FOR ROLE {migrate_user} IN SCHEMA public\s+"
+        r"GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO aegis_app;",
+        script,
+    )
+
+
 def test_screening_stays_self_hosted() -> None:
     services = _compose()["services"]
     assert _env(services["api"])["YENTE_URL"] == "http://yente:8000"

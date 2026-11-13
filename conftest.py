@@ -31,6 +31,8 @@ TEST_AUTH_SECRET = "test-secret-please-change-in-prod-0123456789"
 # E1.4: TCKN kolonu şifrelidir (ADR-0005). Sabit test anahtarı, kör indeksin
 # (blind_index) koşular arasında kararlı kalmasını da sağlar.
 TEST_FIELD_ENCRYPTION_KEY = "YWVnaXMtdGVzdC1maWVsZC1rZXktMzJieXRlcyEhISE="
+# Docker'sız yolda sunucu başına tek test oturumu (pg_try_advisory_lock anahtarı; "AEGIS" ASCII).
+_OTURUM_KILIDI = 0x41454749
 
 
 def _hazirla(admin_url: str, host: str, port: int | str) -> Iterator[str]:
@@ -82,6 +84,22 @@ def _yerel_sunucu(server_url: str) -> Iterator[str]:
     from sqlalchemy.engine import make_url
 
     server = make_url(server_url)
+    # Aynı sunucuda ikinci bir test oturumu ``aegis`` veritabanını FORCE ile düşürür ve birincinin
+    # bağlantılarını koparır: birinci oturumda rastgele bir test düşer (2026-11-12'de UBO yalıtım
+    # testi böyle düştü). Oturum boyu tutulan danışma kilidi ikinciyi baştan, açık mesajla durdurur.
+    kilit = create_engine(server.set(database="postgres"), isolation_level="AUTOCOMMIT")
+    kilit_conn = kilit.connect()
+    kilit_alindi = kilit_conn.execute(
+        text("SELECT pg_try_advisory_lock(:k)"), {"k": _OTURUM_KILIDI}
+    ).scalar()
+    if not kilit_alindi:
+        kilit_conn.close()
+        kilit.dispose()
+        pytest.exit(
+            "Bu PostgreSQL sunucusunda başka bir AEGIS entegrasyon oturumu çalışıyor; "
+            "aynı anda ikinci oturum onun veritabanını düşürürdü. Bitmesini bekleyin.",
+            returncode=3,
+        )
     maint = create_engine(server.set(database="postgres"), isolation_level="AUTOCOMMIT")
     with maint.connect() as conn:
         conn.execute(text("DROP DATABASE IF EXISTS aegis WITH (FORCE)"))
@@ -105,6 +123,8 @@ def _yerel_sunucu(server_url: str) -> Iterator[str]:
             conn.execute(text("DROP DATABASE IF EXISTS aegis WITH (FORCE)"))
             conn.execute(text(f"DROP ROLE IF EXISTS {APP_ROLE}"))
         maint.dispose()
+        kilit_conn.close()  # bağlantı kapanınca danışma kilidi de bırakılır
+        kilit.dispose()
 
 
 @pytest.fixture(scope="session")

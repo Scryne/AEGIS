@@ -1,22 +1,52 @@
-"""/api/v1/members — kiracının kullanıcıları (kimlik/kontrol düzlemi).
+"""/api/v1/members — kiracının kullanıcıları ve ekip yönetimi (kimlik/kontrol düzlemi).
 
-membership/user_account RLS'siz kimlik tablolarıdır; bu uç kiracıyı **uygulama
+membership/user_account RLS'siz kimlik tablolarıdır; bu uçlar kiracıyı **uygulama
 katmanında** ``principal.tenant_id`` ile sınırlar (bkz. ADR-0002). Kiracılar-arası
 izolasyon testi bu sınırlamanın sızdırmadığını doğrular.
+
+Ekip yönetimi yalnız sahibindir (``Role.OWNER``, Ürün Planı §6.3 "kullanıcı yönetimi dahil"):
+
+- **Davet:** parolasız kullanıcı + üyelik açılır, kiracı açma CLI'ıyla aynı mekanizmayla
+  süreli parola belirleme bağlantısı üretilir. SMTP yapılandırılmışsa bağlantı e-postayla
+  gider; değilse (ya da gönderim düşerse) yanıtta döner ve sahip kendisi iletir. Denetim
+  olayına e-posta adresi yazılmaz (yalnız rol, kanal, teslim durumu).
+- **Rol değişikliği:** eski → yeni rol denetim izine düşer. Son sahip düşürülemez (kiracı
+  yönetilemez hâle gelirdi). Erişim jetonu rolü taşır; yeni rol, üyenin bir sonraki jeton
+  yenilemesinde (``/auth/refresh`` rolü veritabanından okur) geçerli olur.
+
+Phase 1: kullanıcı başına tek kurum. Başka kurumda hesabı olan adres davet edilemez.
 """
 
 from __future__ import annotations
 
 import uuid
+from typing import Annotated
 
-from fastapi import APIRouter
-from pydantic import BaseModel, EmailStr
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, status
+from pydantic import BaseModel, EmailStr, Field
+from sqlalchemy import func, select
 
-from aegis_api.dependencies import PrincipalDep, SessionDep
-from aegis_core.models import Membership, Role, User
+from aegis_api.dependencies import (
+    Principal,
+    PrincipalDep,
+    SessionDep,
+    SettingsDep,
+    TenantSessionDep,
+    require_role,
+)
+from aegis_api.errors import ConflictError, NotFoundError, UnauthorizedError, ValidationFailedError
+from aegis_core.logging import get_logger
+from aegis_core.models import AuditAction, Membership, Role, User
+from aegis_core.notifications.email import EmailSendError, OutgoingEmail, default_sender
+from aegis_core.provisioning import create_invite_link
+from aegis_core.services import audit as audit_service
 
+logger = get_logger("aegis.api.members")
 router = APIRouter(prefix="/members", tags=["members"])
+
+RequireOwner = Annotated[Principal, Depends(require_role(Role.OWNER))]
+
+INVITE_VALID_HOURS = 72
 
 
 class MemberResponse(BaseModel):
@@ -26,18 +56,209 @@ class MemberResponse(BaseModel):
     email: EmailStr
     full_name: str | None
     role: Role
+    # Parola henüz belirlenmemiş (davet bekliyor): giriş yapamaz.
+    pending: bool = False
+
+
+class MemberInviteRequest(BaseModel):
+    email: EmailStr
+    full_name: str | None = Field(default=None, max_length=255)
+    role: Role
+
+
+class MemberInviteResponse(BaseModel):
+    member: MemberResponse
+    channel: str  # "smtp" | "manual"
+    delivered: bool
+    valid_hours: int
+    # Yalnız e-postayla teslim edilmediyse döner: sahip bağlantıyı kendisi iletir.
+    invite_link: str | None = None
+
+
+class MemberRoleUpdate(BaseModel):
+    role: Role
+
+
+def _member(user: User, role: Role) -> MemberResponse:
+    return MemberResponse(
+        user_id=user.id,
+        email=user.email,
+        full_name=user.full_name,
+        role=role,
+        pending=user.hashed_password is None,
+    )
 
 
 @router.get("", response_model=list[MemberResponse])
 async def list_members(principal: PrincipalDep, session: SessionDep) -> list[MemberResponse]:
     """Çağıran kullanıcının kiracısındaki üyeleri listeler (yalnız kendi kiracısı)."""
     rows = await session.execute(
-        select(User.id, User.email, User.full_name, Membership.role)
+        select(User, Membership.role)
         .join(Membership, Membership.user_id == User.id)
         .where(Membership.organization_id == principal.tenant_id)
         .order_by(User.email)
     )
-    return [
-        MemberResponse(user_id=row.id, email=row.email, full_name=row.full_name, role=row.role)
-        for row in rows
-    ]
+    return [_member(user, role) for user, role in rows.tuples()]
+
+
+async def _deliver_invite(
+    settings: SettingsDep, *, user: User, link: str, inviter_email: str | None
+) -> tuple[str, bool]:
+    sender = default_sender(settings)
+    if not sender.configured:
+        return "manual", False
+    try:
+        await sender.send(
+            OutgoingEmail(
+                to=(user.email,),
+                subject="AEGIS ekibine davet edildiniz",
+                body=(
+                    "AEGIS'te bir uyum ekibine eklendiniz"
+                    + (f" (davet eden: {inviter_email})" if inviter_email else "")
+                    + ".\n\nParolanızı belirleyip giriş yapmak için bağlantıyı açın:\n\n"
+                    f"{link}\n\nBağlantı {INVITE_VALID_HOURS} saat geçerlidir."
+                ),
+            )
+        )
+    except EmailSendError as exc:
+        logger.error("uye_davet_epostasi_gitmedi", error=str(exc))
+        return "smtp", False
+    return "smtp", True
+
+
+async def _issue_invite(
+    session: TenantSessionDep,
+    settings: SettingsDep,
+    principal: Principal,
+    *,
+    user: User,
+    role: Role,
+) -> MemberInviteResponse:
+    if settings.auth_secret is None:
+        raise UnauthorizedError("Sunucu kimlik doğrulaması yapılandırılmamış (AUTH_SECRET).")
+    link = create_invite_link(
+        user_id=user.id,
+        secret=settings.auth_secret,
+        web_base_url=settings.web_base_url,
+        valid_hours=INVITE_VALID_HOURS,
+    )
+    inviter = await session.get(User, principal.user_id)
+    channel, delivered = await _deliver_invite(
+        settings, user=user, link=link, inviter_email=inviter.email if inviter else None
+    )
+    await audit_service.record_event(
+        session,
+        tenant_id=principal.tenant_id,
+        actor_user_id=principal.user_id,
+        actor_role=principal.role.value,
+        action=AuditAction.MEMBER_INVITE,
+        object_type="user_account",
+        object_id=str(user.id),
+        payload={
+            "role": role.value,
+            "channel": channel,
+            "delivered": delivered,
+            "valid_hours": INVITE_VALID_HOURS,
+        },
+    )
+    return MemberInviteResponse(
+        member=_member(user, role),
+        channel=channel,
+        delivered=delivered,
+        valid_hours=INVITE_VALID_HOURS,
+        invite_link=None if delivered else link,
+    )
+
+
+@router.post("", response_model=MemberInviteResponse, status_code=status.HTTP_201_CREATED)
+async def invite_member(
+    body: MemberInviteRequest,
+    principal: RequireOwner,
+    session: TenantSessionDep,
+    settings: SettingsDep,
+) -> MemberInviteResponse:
+    """Ekibe yeni üye davet eder (yalnız sahip). Üyelik, davet ve denetim olayı atomiktir."""
+    email = str(body.email)
+    if await session.scalar(select(User.id).where(func.lower(User.email) == email.lower())):
+        raise ConflictError(
+            "Bu e-postayla bir hesap zaten var. Ekibinizdeyse rolünü listeden değiştirin; "
+            "başka bir kurumdaysa farklı bir adres kullanın."
+        )
+    user = User(email=email, full_name=(body.full_name or "").strip() or None, hashed_password=None)
+    session.add(user)
+    await session.flush()
+    session.add(Membership(user_id=user.id, organization_id=principal.tenant_id, role=body.role))
+    await session.flush()
+    return await _issue_invite(session, settings, principal, user=user, role=body.role)
+
+
+async def _tenant_membership(
+    session: TenantSessionDep, principal: Principal, user_id: uuid.UUID
+) -> tuple[Membership, User]:
+    row = (
+        await session.execute(
+            select(Membership, User)
+            .join(User, User.id == Membership.user_id)
+            .where(
+                Membership.user_id == user_id,
+                Membership.organization_id == principal.tenant_id,
+            )
+        )
+    ).first()
+    if row is None:
+        # Başka kiracının üyesi de "yok" görünür: varlığı sızdırılmaz.
+        raise NotFoundError("Üye bulunamadı.")
+    return row[0], row[1]
+
+
+@router.post("/{user_id}/invite", response_model=MemberInviteResponse)
+async def resend_invite(
+    user_id: uuid.UUID,
+    principal: RequireOwner,
+    session: TenantSessionDep,
+    settings: SettingsDep,
+) -> MemberInviteResponse:
+    """Daveti yeniden üretir (bağlantı kaybolduysa / süresi dolduysa). Yalnız parolası
+    henüz belirlenmemiş üye için; etkin hesabın parolası bu yolla sıfırlanamaz."""
+    membership, user = await _tenant_membership(session, principal, user_id)
+    if user.hashed_password is not None:
+        raise ConflictError("Bu üye hesabını etkinleştirmiş; davet yeniden gönderilemez.")
+    return await _issue_invite(session, settings, principal, user=user, role=membership.role)
+
+
+@router.patch("/{user_id}", response_model=MemberResponse)
+async def change_member_role(
+    user_id: uuid.UUID,
+    body: MemberRoleUpdate,
+    principal: RequireOwner,
+    session: TenantSessionDep,
+) -> MemberResponse:
+    """Üyenin rolünü değiştirir (yalnız sahip). Son sahip düşürülemez."""
+    membership, user = await _tenant_membership(session, principal, user_id)
+    old = membership.role
+    if old == body.role:
+        return _member(user, old)
+    if old == Role.OWNER:
+        owners = await session.scalar(
+            select(func.count())
+            .select_from(Membership)
+            .where(
+                Membership.organization_id == principal.tenant_id,
+                Membership.role == Role.OWNER,
+            )
+        )
+        if (owners or 0) <= 1:
+            raise ValidationFailedError("Kurumun tek sahibi bu üye; önce başka birini sahip yapın.")
+    membership.role = body.role
+    await session.flush()
+    await audit_service.record_event(
+        session,
+        tenant_id=principal.tenant_id,
+        actor_user_id=principal.user_id,
+        actor_role=principal.role.value,
+        action=AuditAction.MEMBER_ROLE_CHANGE,
+        object_type="user_account",
+        object_id=str(user.id),
+        payload={"from": old.value, "to": body.role.value},
+    )
+    return _member(user, body.role)

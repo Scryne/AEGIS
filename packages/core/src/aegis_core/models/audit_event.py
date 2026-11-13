@@ -107,6 +107,11 @@ class AuditAction(StrEnum):
     # (sahibe parola belirleme bağlantısı) ayrı olaydır, teslim kanalıyla. E-posta olaya girmez.
     TENANT_PROVISION = "tenant.provision"
     TENANT_INVITE = "tenant.invite"
+    # Ekip yönetimi (sahip): yeni üye daveti (rol + teslim kanalı; e-posta olaya girmez) ve
+    # rol değişikliği (eski → yeni). Yetki değişikliği risk-etkileyendir: kimin neyi
+    # onaylayabileceğini belirler.
+    MEMBER_INVITE = "member.invite"
+    MEMBER_ROLE_CHANGE = "member.role_change"
     # Şifreli alan bu anahtarla çözülemedi (eski anahtar / bozulma). Kayıt başına bir kez yazılır;
     # liste açılmaya devam eder, kayıt "okunamadı" diye işaretlenir. Yük kişisel veri taşımaz.
     DATA_UNREADABLE = "data.unreadable"

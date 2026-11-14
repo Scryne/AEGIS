@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
 import type { UboComputation, UboPerson } from "@/lib/ubo";
-import { BASIS_LABELS, NODE_H, NODE_W, STATUS_LABELS, layout } from "@/lib/ubo";
+import { BASIS_LABELS, NODE_H, NODE_W, STATUS_LABELS, edgeKey, layout } from "@/lib/ubo";
 
 const STATUS_TONE: Record<UboComputation["status"], string> = {
   determined: "border-success/40 bg-success-soft text-success",
@@ -20,12 +20,12 @@ const STATUS_TONE: Record<UboComputation["status"], string> = {
   none_found: "border-warning/40 bg-warning-soft text-warning",
 };
 
-function clip(text: string, max = 22): string {
+function clip(text: string, max = 28): string {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }
 
 function UboGraph({ data, target }: { data: UboComputation; target: string }) {
-  const { placed, width, height } = useMemo(
+  const { placed, waypoints, width, height } = useMemo(
     () => layout(target, data.nodes, data.edges),
     [target, data.nodes, data.edges],
   );
@@ -85,11 +85,14 @@ function UboGraph({ data, target }: { data: UboComputation; target: string }) {
           // noktasına konur, yoksa aynı iki düğüm arasındaki düz okun etiketiyle çakışır.
           const c1 = { x: x1 + 70, y: y1 - 50 };
           const c2 = { x: x2 + 70, y: y2 + 50 };
-          const midX = upward ? (x1 + 3 * c1.x + 3 * c2.x + x2) / 8 : (x1 + x2) / 2;
-          const midY = upward ? (y1 + 3 * c1.y + 3 * c2.y + y2) / 8 : (y1 + y2) / 2;
+          // Katman atlayan ok ara katmanlardaki kendi yuvasından geçer; etiket ilk parçada.
+          const via = upward ? [] : (waypoints.get(edgeKey(edge)) ?? []);
+          const points = [{ x: x1, y: y1 }, ...via, { x: x2, y: y2 }];
+          const midX = upward ? (x1 + 3 * c1.x + 3 * c2.x + x2) / 8 : (points[0].x + points[1].x) / 2;
+          const midY = upward ? (y1 + 3 * c1.y + 3 * c2.y + y2) / 8 : (points[0].y + points[1].y) / 2;
           const d = upward
             ? `M${x1},${y1} C${c1.x},${c1.y} ${c2.x},${c2.y} ${x2},${y2}`
-            : `M${x1},${y1} L${x2},${y2}`;
+            : `M${points.map((p) => `${p.x},${p.y}`).join(" L")}`;
           const label =
             edge.kind === "ownership"
               ? edge.percent === null

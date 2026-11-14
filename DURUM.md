@@ -29,6 +29,11 @@ uca çalışıyor; sahip artık ekibini ekrandan kuruyor; 380 hızlı + 132 ente
   UBO düğümünde dayanak (kontrol / üst düzey yönetici), ülke adı, tarama listesinde mobil rozet.
 - **Ölçüm (13 Kasım):** `uv sync --frozen`, ruff, ruff format, mypy (151 dosya) temiz; pytest hızlı 380,
   entegrasyon 132 geçti; OpenAPI drift yok; web tsc/eslint/build temiz; `pnpm audit` açık yok. Son CI yeşil.
+- **UBO grafı (14 Kasım):** iki katmanlı yapıda katman atlayan oklar (holdinge de ortak kişinin doğrudan
+  payı, üst katmandaki yönetici) ara düğümlerin altından geçiyor, etiketleri görünmüyordu; ara katmanda
+  yol noktası yuvasıyla çözüldü, düğüm adları artık tam.
+- **Bağımlılık:** dnspython 2.9.0 → 2.9.2 (CVE-2026-128089; `pip-audit` CI'da yok, elle ölçüldü → açık 0).
+  Öneri: CI'a `pip-audit` adımı (TenderIQ'daki gibi) eklensin.
 - **Doğrulanmadı:** gerçek SMTP ile davet teslimi; koyu tema (ürün tasarımında yok); `-m screening`
   kapısı (yente + Elasticsearch Docker ister, yerelde koşulmadı).
 

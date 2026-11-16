@@ -23,6 +23,7 @@ from aegis_core.screening.yente import YenteClient
 from aegis_core.security.api_keys import PREFIX as API_KEY_PREFIX
 from aegis_core.security.tokens import TYPE_ACCESS, decode_token
 from aegis_core.services.rate_limit import RateLimitExceededError, check_rate_limit
+from aegis_core.services.session_revocation import is_token_revoked
 
 
 def _session_factory(request: Request) -> async_sessionmaker[AsyncSession]:
@@ -105,6 +106,9 @@ async def get_principal(
         # ValueError: imzası geçerli ama claim'i çözümsüz token (ör. UUID olmayan
         # sub veya artık tanımlı olmayan rol) 500 değil 401 üretmeli.
         raise UnauthorizedError("Geçersiz veya süresi dolmuş token.") from exc
+    # Ekipten çıkarılan kullanıcının elindeki jeton süresi dolmadan da geçersizdir.
+    if await is_token_revoked(request.app.state.redis, principal.user_id, payload.iat):
+        raise UnauthorizedError("Oturum sonlandırıldı; yeniden giriş yapın.")
     # Hata raporları kiracı/kullanıcı korelasyonu taşır (yalnız ID — PII değil).
     bind_sentry_tags(tenant_id=principal.tenant_id, user_id=principal.user_id)
     return principal

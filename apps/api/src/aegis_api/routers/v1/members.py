@@ -14,6 +14,9 @@ Ekip yönetimi yalnız sahibindir (``Role.OWNER``, Ürün Planı §6.3 "kullanı
   yönetilemez hâle gelirdi). Erişim jetonu rolü taşır; yeni rol, üyenin bir sonraki jeton
   yenilemesinde (``/auth/refresh`` rolü veritabanından okur) geçerli olur.
 
+- **Çıkarma:** üyelik silinir, hesap kalır (denetim izi ve kararlar kişiye bağlı); elindeki
+  jetonlar hemen geçersiz olur. Son sahip çıkarılamaz. Çıkarılan kişi yeniden davet edilebilir.
+
 Phase 1: kullanıcı başına tek kurum. Başka kurumda hesabı olan adres davet edilemez.
 """
 
@@ -29,6 +32,7 @@ from sqlalchemy import func, select
 from aegis_api.dependencies import (
     Principal,
     PrincipalDep,
+    RedisDep,
     SessionDep,
     SettingsDep,
     TenantSessionDep,
@@ -40,6 +44,7 @@ from aegis_core.models import AuditAction, Membership, Role, User
 from aegis_core.notifications.email import EmailSendError, OutgoingEmail, default_sender
 from aegis_core.provisioning import create_invite_link
 from aegis_core.services import audit as audit_service
+from aegis_core.services.session_revocation import revoke_user_sessions
 
 logger = get_logger("aegis.api.members")
 router = APIRouter(prefix="/members", tags=["members"])
@@ -179,13 +184,23 @@ async def invite_member(
 ) -> MemberInviteResponse:
     """Ekibe yeni üye davet eder (yalnız sahip). Üyelik, davet ve denetim olayı atomiktir."""
     email = str(body.email)
-    if await session.scalar(select(User.id).where(func.lower(User.email) == email.lower())):
-        raise ConflictError(
-            "Bu e-postayla bir hesap zaten var. Ekibinizdeyse rolünü listeden değiştirin; "
-            "başka bir kurumdaysa farklı bir adres kullanın."
+    user = await session.scalar(select(User).where(func.lower(User.email) == email.lower()))
+    if user is not None:
+        if await session.scalar(select(Membership.id).where(Membership.user_id == user.id)):
+            raise ConflictError(
+                "Bu e-postayla bir hesap zaten var. Ekibinizdeyse rolünü listeden değiştirin; "
+                "başka bir kurumdaysa farklı bir adres kullanın."
+            )
+        # Daha önce ekipten çıkarılmış (üyeliksiz) hesap: yeniden bağlanır. Eski parola
+        # geçmez; kişi yeni davet bağlantısıyla parola belirler.
+        user.hashed_password = None
+        if body.full_name and body.full_name.strip():
+            user.full_name = body.full_name.strip()
+    else:
+        user = User(
+            email=email, full_name=(body.full_name or "").strip() or None, hashed_password=None
         )
-    user = User(email=email, full_name=(body.full_name or "").strip() or None, hashed_password=None)
-    session.add(user)
+        session.add(user)
     await session.flush()
     session.add(Membership(user_id=user.id, organization_id=principal.tenant_id, role=body.role))
     await session.flush()
@@ -262,3 +277,48 @@ async def change_member_role(
         payload={"from": old.value, "to": body.role.value},
     )
     return _member(user, body.role)
+
+
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_member(
+    user_id: uuid.UUID,
+    principal: RequireOwner,
+    session: TenantSessionDep,
+    redis: RedisDep,
+    settings: SettingsDep,
+) -> None:
+    """Üyeyi kurumdan çıkarır (yalnız sahip). Son sahip çıkarılamaz.
+
+    Hesap silinmez: denetim izi, vaka ve karar kayıtları kişiye bağlı kalır. Üyelik silinir,
+    kişinin elindeki erişim/yenileme jetonları hemen geçersiz olur (``session_revocation``).
+    """
+    membership, user = await _tenant_membership(session, principal, user_id)
+    if membership.role == Role.OWNER:
+        owners = await session.scalar(
+            select(func.count())
+            .select_from(Membership)
+            .where(
+                Membership.organization_id == principal.tenant_id,
+                Membership.role == Role.OWNER,
+            )
+        )
+        if (owners or 0) <= 1:
+            raise ValidationFailedError(
+                "Kurumun tek sahibi çıkarılamaz; önce başka birini sahip yapın."
+            )
+    role = membership.role
+    await session.delete(membership)
+    await session.flush()
+    await audit_service.record_event(
+        session,
+        tenant_id=principal.tenant_id,
+        actor_user_id=principal.user_id,
+        actor_role=principal.role.value,
+        action=AuditAction.MEMBER_REMOVE,
+        object_type="user_account",
+        object_id=str(user.id),
+        payload={"role": role.value, "sessions_revoked": True},
+    )
+    await revoke_user_sessions(
+        redis, user.id, ttl_seconds=settings.refresh_token_expire_days * 24 * 3600
+    )

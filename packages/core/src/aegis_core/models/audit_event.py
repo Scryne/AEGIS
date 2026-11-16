@@ -112,6 +112,7 @@ class AuditAction(StrEnum):
     # onaylayabileceğini belirler.
     MEMBER_INVITE = "member.invite"
     MEMBER_ROLE_CHANGE = "member.role_change"
+    MEMBER_REMOVE = "member.remove"
     # Şifreli alan bu anahtarla çözülemedi (eski anahtar / bozulma). Kayıt başına bir kez yazılır;
     # liste açılmaya devam eder, kayıt "okunamadı" diye işaretlenir. Yük kişisel veri taşımaz.
     DATA_UNREADABLE = "data.unreadable"

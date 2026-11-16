@@ -12786,6 +12786,73 @@
       }
     },
     "/api/v1/members/{user_id}": {
+      "delete": {
+        "description": "Üyeyi kurumdan çıkarır (yalnız sahip). Son sahip çıkarılamaz.\n\nHesap silinmez: denetim izi, vaka ve karar kayıtları kişiye bağlı kalır. Üyelik silinir,\nkişinin elindeki erişim/yenileme jetonları hemen geçersiz olur (``session_revocation``).",
+        "operationId": "remove_member_api_v1_members__user_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "User Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-api-key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Remove Member",
+        "tags": [
+          "members"
+        ]
+      },
       "patch": {
         "description": "Üyenin rolünü değiştirir (yalnız sahip). Son sahip düşürülemez.",
         "operationId": "change_member_role_api_v1_members__user_id__patch",

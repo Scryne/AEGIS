@@ -135,6 +135,7 @@ export const ACTION_LABELS: Record<string, string> = {
   "tenant.invite": "Sahibe davet gönderildi",
   "member.invite": "Ekibe üye davet edildi",
   "member.role_change": "Üyenin rolü değişti",
+  "member.remove": "Üye kurumdan çıkarıldı",
   "data.unreadable": "Şifreli kayıt çözülemedi",
 };
 

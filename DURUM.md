@@ -16,7 +16,13 @@ uca çalışıyor; sahip artık ekibini ekrandan kuruyor; 380 hızlı + 132 ente
   Yalnız sahip. Olaylar `member.invite` / `member.role_change`, yükte e-posta yok. Ekran: Ayarlar > Ekip
   (davet formu, rol seçimi, "Davet bekliyor", "Daveti yenile"). 5 entegrasyon testi (yetki, kiracı
   yalıtımı, çakışma, davet → parola → davet edilen rolle giriş, e-posta kanalı); sahip kapısı gevşetilince
-  düşüyor. Tarayıcıda uçtan uca sınandı. **Kapsam dışı:** üyeyi kurumdan çıkarma (karar bekliyor).
+  düşüyor. Tarayıcıda uçtan uca sınandı.
+- **Üyeyi çıkarma (11-16):** `DELETE /members/{id}` (yalnız sahip; son sahip çıkarılamaz; hesap silinmez, karar
+  ve denetim izi kişiye bağlı kalır). Çıkarma anında Redis'e oturum iptal damgası yazılır
+  (`services/session_revocation.py`): damgadan önce verilmiş erişim/yenileme jetonları süreleri dolmadan 401 alır.
+  Çıkarılan adres yeniden davet edilebilir (aynı hesap, eski parola geçmez). Olay `member.remove`. Ekran: Ayarlar >
+  Ekip'te "Çıkar" + yerel `<dialog>` onayı. 5 birim + 3 entegrasyon testi; entegrasyon katmanı yerel PG/Redis'le
+  135/135 (11-16).
 - **Parolamı unuttum:** giriş ekranından bağlantı; jetonsuz `/reset-password` e-posta ister, cevap hesabın
   varlığını ele vermez.
 - **Ayarlar ekranı:** eşik bandı gerekçe zorunlu, sunucuda doğrulanır; değişiklik geçmişi denetim izinden.

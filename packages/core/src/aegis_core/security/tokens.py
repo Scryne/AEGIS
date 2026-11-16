@@ -27,6 +27,7 @@ class TokenPayload(BaseModel):
     role: str  # RBAC rolü
     typ: str  # token türü (access | refresh)
     exp: int  # sona erme (unix epoch)
+    iat: int | None = None  # verilme anı; oturum iptal damgasıyla karşılaştırılır
 
 
 class ResetTokenPayload(BaseModel):

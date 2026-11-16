@@ -5,7 +5,7 @@
 // kapılıdır. SMTP yoksa davet bağlantısı ekranda bir kez gösterilir; sahip kendisi iletir.
 
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 
 export type TeamRole = "owner" | "compliance_officer" | "analyst" | "auditor";
 
@@ -199,6 +199,80 @@ function InviteForm({ onDone }: { onDone: (r: InviteResult) => void }) {
   );
 }
 
+/** Çıkarma onayı: yerel <dialog> (odak tuzağı, Esc ve arka planın etkisizleşmesi tarayıcıdan). */
+function RemoveMember({ member, onRemoved }: { member: TeamMember; onRemoved: () => void }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const titleId = useId();
+  const who = member.full_name ?? member.email;
+
+  async function remove() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/v1/members/${member.user_id}`, { method: "DELETE" });
+      if (!res.ok) {
+        setError(await errorMessage(res, "Üye çıkarılamadı."));
+        return;
+      }
+      ref.current?.close();
+      onRemoved();
+    } catch {
+      setError("Sunucuya ulaşılamadı.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          setError(null);
+          ref.current?.showModal();
+        }}
+        className="inline-flex min-h-6 items-center text-xs text-danger underline"
+      >
+        Çıkar
+      </button>
+      <dialog
+        ref={ref}
+        aria-labelledby={titleId}
+        className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-card border border-border bg-surface p-5 text-fg shadow-lg backdrop:bg-fg/40"
+      >
+        <h2 id={titleId} className="text-base font-semibold text-fg">
+          {who} kurumdan çıkarılsın mı?
+        </h2>
+        <ul className="mt-3 list-disc space-y-1 pl-5 text-sm text-muted">
+          <li>Açık oturumları hemen kapanır; yeniden giriş yapamaz.</li>
+          <li>Hesabı silinmez: verdiği kararlar ve denetim izi kayıtları adıyla kalır.</li>
+          <li>Gerekirse aynı adresle yeniden davet edebilirsiniz.</li>
+        </ul>
+        {error !== null && (
+          <p role="alert" className="mt-3 text-sm text-danger">
+            {error}
+          </p>
+        )}
+        <div className="mt-5 flex flex-wrap justify-end gap-2">
+          <button type="button" onClick={() => ref.current?.close()} className="btn-quiet" disabled={busy}>
+            Vazgeç
+          </button>
+          <button
+            type="button"
+            onClick={() => void remove()}
+            disabled={busy}
+            className="btn-primary bg-danger text-primary-fg hover:bg-danger disabled:opacity-60"
+          >
+            {busy ? "Çıkarılıyor…" : "Üyeyi çıkar"}
+          </button>
+        </div>
+      </dialog>
+    </>
+  );
+}
+
 function MemberRow({
   member,
   isSelf,
@@ -298,6 +372,9 @@ function MemberRow({
                   Daveti yenile
                 </button>
               )}
+              {!isSelf && role === member.role && (
+                <RemoveMember member={member} onRemoved={() => router.refresh()} />
+              )}
             </>
           ) : (
             <span className="rounded-full border border-border bg-subtle px-2.5 py-0.5 text-xs text-fg">
@@ -344,7 +421,8 @@ export function TeamManager({
           <InviteForm onDone={setNotice} />
           <p className="text-xs text-muted">
             Davet edilen kişi bağlantıyla parolasını belirler. Rol değişikliği üyenin bir sonraki oturum yenilemesinde
-            geçerli olur; her davet ve rol değişikliği denetim izine girer.
+            geçerli olur; çıkarılan üyenin oturumları hemen kapanır. Her davet, rol değişikliği ve çıkarma denetim
+            izine girer.
           </p>
         </>
       ) : (

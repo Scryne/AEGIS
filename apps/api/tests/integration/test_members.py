@@ -12,6 +12,7 @@ Doğrulanan garantiler:
 from __future__ import annotations
 
 import os
+import time
 import uuid
 from urllib.parse import parse_qs, unquote, urlparse
 
@@ -264,3 +265,124 @@ def test_invite_by_email_hides_link_and_resend_works(
     yeniden = api_client.post(f"/api/v1/members/{uid}/invite", headers=_auth(owner))
     assert yeniden.status_code == 200, yeniden.text
     assert len(sender.sent) == 2
+
+
+def _invite_and_activate(
+    client: TestClient, owner: str, email: str, role: str, password: str
+) -> tuple[str, dict[str, str]]:
+    body = client.post(
+        "/api/v1/members", json={"email": email, "role": role}, headers=_auth(owner)
+    ).json()
+    confirm = client.post(
+        "/api/v1/auth/password-reset/confirm",
+        json={"token": _token_from_link(body["invite_link"]), "new_password": password},
+    )
+    assert confirm.status_code == 204, confirm.text
+    login = client.post("/api/v1/auth/login", json={"email": email, "password": password})
+    assert login.status_code == 200, login.text
+    return body["member"]["user_id"], login.json()
+
+
+def test_remove_member_revokes_sessions_and_is_audited(api_client: TestClient) -> None:
+    tenant, owner, _ = _register(api_client, "ekip-cikar", "sahip@ekip-cikar.example")
+    uid, tokens = _invite_and_activate(
+        api_client, owner, "analist@ekip-cikar.example", "analyst", "analist-parola-1"
+    )
+    assert (
+        api_client.get("/api/v1/auth/me", headers=_auth(tokens["access_token"])).status_code == 200
+    )
+
+    # Sahip olmayan çıkaramaz.
+    for role in ("compliance_officer", "analyst", "auditor"):
+        r = api_client.delete(f"/api/v1/members/{uid}", headers=_auth(_role_token(tenant, role)))
+        assert r.status_code == 403, role
+
+    sil = api_client.delete(f"/api/v1/members/{uid}", headers=_auth(owner))
+    assert sil.status_code == 204, sil.text
+    # Elindeki erişim jetonu süresi dolmadan geçersiz; yenileme ve giriş de reddedilir.
+    assert (
+        api_client.get("/api/v1/auth/me", headers=_auth(tokens["access_token"])).status_code == 401
+    )
+    yenile = api_client.post(
+        "/api/v1/auth/refresh", json={"refresh_token": tokens["refresh_token"]}
+    )
+    assert yenile.status_code == 401
+    giris = api_client.post(
+        "/api/v1/auth/login",
+        json={"email": "analist@ekip-cikar.example", "password": "analist-parola-1"},
+    )
+    assert giris.status_code == 401
+    liste = api_client.get("/api/v1/members", headers=_auth(owner)).json()
+    assert "analist@ekip-cikar.example" not in str(liste)
+    olay = api_client.get(
+        "/api/v1/audit/events",
+        params={"action": "member.remove", "object_id": uid},
+        headers=_auth(owner),
+    ).json()["items"]
+    assert len(olay) == 1
+    assert olay[0]["payload"] == {"role": "analyst", "sessions_revoked": True}
+    assert api_client.get("/api/v1/audit/verify", headers=_auth(owner)).json()["ok"] is True
+    # Sahibin kendi oturumu etkilenmez.
+    assert api_client.get("/api/v1/auth/me", headers=_auth(owner)).status_code == 200
+
+
+def test_removed_member_can_be_reinvited_with_new_role(api_client: TestClient) -> None:
+    _t, owner, _ = _register(api_client, "ekip-geri", "sahip@ekip-geri.example")
+    uid, _tokens = _invite_and_activate(
+        api_client, owner, "uzman@ekip-geri.example", "analyst", "uzman-parola-1"
+    )
+    assert api_client.delete(f"/api/v1/members/{uid}", headers=_auth(owner)).status_code == 204
+    time.sleep(
+        1.1
+    )  # JWT iat saniye çözünürlüklü: iptal damgasıyla aynı saniyede verilen jeton da düşer
+    davet = api_client.post(
+        "/api/v1/members",
+        json={"email": "uzman@ekip-geri.example", "role": "compliance_officer"},
+        headers=_auth(owner),
+    )
+    assert davet.status_code == 201, davet.text
+    assert davet.json()["member"]["user_id"] == uid  # aynı hesap, geçmiş kopmaz
+    assert davet.json()["member"]["pending"] is True  # eski parola geçmez
+    eski = api_client.post(
+        "/api/v1/auth/login",
+        json={"email": "uzman@ekip-geri.example", "password": "uzman-parola-1"},
+    )
+    assert eski.status_code == 401
+    api_client.post(
+        "/api/v1/auth/password-reset/confirm",
+        json={
+            "token": _token_from_link(davet.json()["invite_link"]),
+            "new_password": "uzman-parola-2",
+        },
+    )
+    yeni = api_client.post(
+        "/api/v1/auth/login",
+        json={"email": "uzman@ekip-geri.example", "password": "uzman-parola-2"},
+    )
+    assert yeni.status_code == 200, yeni.text
+    me = api_client.get("/api/v1/auth/me", headers=_auth(yeni.json()["access_token"])).json()
+    assert me["role"] == "compliance_officer"
+
+
+def test_remove_guards_last_owner_and_tenant(api_client: TestClient) -> None:
+    _ta, owner_a, _ = _register(api_client, "ekip-cg-a", "sahip@ekip-cg-a.example")
+    _tb, owner_b, _ = _register(api_client, "ekip-cg-b", "sahip@ekip-cg-b.example")
+    me_a = api_client.get("/api/v1/auth/me", headers=_auth(owner_a)).json()["id"]
+    tek = api_client.delete(f"/api/v1/members/{me_a}", headers=_auth(owner_a))
+    assert tek.status_code == 400  # son sahip
+    b_uye = api_client.post(
+        "/api/v1/members",
+        json={"email": "uye@ekip-cg-b.example", "role": "analyst"},
+        headers=_auth(owner_b),
+    ).json()["member"]["user_id"]
+    assert api_client.delete(f"/api/v1/members/{b_uye}", headers=_auth(owner_a)).status_code == 404
+    assert "uye@ekip-cg-b.example" in str(
+        api_client.get("/api/v1/members", headers=_auth(owner_b)).json()
+    )
+    # İkinci sahip varken sahip çıkarılabilir.
+    ikinci = api_client.post(
+        "/api/v1/members",
+        json={"email": "ikinci@ekip-cg-a.example", "role": "owner"},
+        headers=_auth(owner_a),
+    ).json()["member"]["user_id"]
+    assert api_client.delete(f"/api/v1/members/{ikinci}", headers=_auth(owner_a)).status_code == 204

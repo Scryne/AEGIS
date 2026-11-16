@@ -35,6 +35,7 @@ from aegis_core.services.rate_limit import (
     check_rate_limit,
     reset_rate_limit,
 )
+from aegis_core.services.session_revocation import is_token_revoked
 
 logger = get_logger("aegis.api.auth")
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -236,6 +237,7 @@ async def login(
 async def refresh(
     body: RefreshRequest,
     session: SessionDep,
+    redis: RedisDep,
     settings: SettingsDep,
 ) -> AccessTokenResponse:
     """Geçerli bir yenileme token'ından yeni bir erişim token'ı üretir.
@@ -251,6 +253,8 @@ async def refresh(
     except (jwt.PyJWTError, ValueError) as exc:
         raise UnauthorizedError("Geçersiz veya süresi dolmuş yenileme token'ı.") from exc
 
+    if await is_token_revoked(redis, user_id, payload.iat):
+        raise UnauthorizedError("Oturum sonlandırıldı; yeniden giriş yapın.")
     user: User | None = await session.get(User, user_id)
     if user is None or not user.is_active:
         raise UnauthorizedError("Kullanıcı bulunamadı veya pasif.")

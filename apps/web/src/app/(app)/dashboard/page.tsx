@@ -181,7 +181,11 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      <section aria-label="Özet" className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      {/* Beş kutucuk: dar ekranda iki sütun, beşincisi tek başına yarım satırda kalmasın diye satırı doldurur. */}
+      <section
+        aria-label="Özet"
+        className="grid grid-cols-2 gap-3 lg:grid-cols-5 max-lg:[&>*:last-child:nth-child(odd)]:col-span-2"
+      >
         <StatTile
           label="İnceleme bekleyen"
           value={pending}

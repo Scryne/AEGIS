@@ -3,7 +3,33 @@
 > **Ne bu dosya:** sertifika değil **envanter**. Ölçülen gerçek durum; "çalışmıyor" yazan satır
 > kusur değil, kayıt. Kapanış standardı: `ScryneOS/🎯 100-Command-Center/Kapanis-Standardi.md`
 
-**Ölçüm tarihi:** 2026-11-13 (önceki: 2026-09-26)
+**Ölçüm tarihi:** 2026-11-25 (yayına hazır turu; önceki: 2026-11-13)
+
+**Yayına hazır karnesi (2026-11-25):** Kod ✅ · Ürün ✅ (asıl akış 11-13'te arayüzden uçtan uca, bu turda kod değişmedi) ·
+Ön yüz ✅ (vitrin: cila) · Belge ✅ · Kapı ✅ (bulgular kasıtlı: sentetik `100000000xx` TCKN'leri, geliştirme varsayılan
+parolaları, uydurma test alan adları) · Dış: VPS + üretim Compose, fiyat, ödeme kanalı, sözleşme, pilotlar, LLM hattı kararı.
+Bundan sonra bulunan "v2 fikirleri"ne girer.
+
+## 2026-11-25: cila turu
+
+- **Kod:** 385 hızlı + 135 entegrasyon testi (yerel PG/Redis), ruff, ruff format, mypy (152 dosya), eslint, tsc, `next build`.
+  `pnpm audit --prod`: next 16.4.3'te 7 orta (16.4.5'te kapanan) → 16.4.6, 0.
+- **Cila (11-16 kareleri üzerinden, `_portfolyo/ekranlar/AEGIS/2026-11/`):**
+  - Risk puanı dökümünde çubuklar en büyük kaleme göre ölçekleniyordu: tek kalemli +10/100 "Düşük" bir varlıkta çubuk tam
+    doluydu. Artık puanın kendi ölçeği (100; kalemler aşarsa toplam).
+  - Panel: dar ekranda beş kutucuktan beşincisi yarım satırda tek kalıyordu → satırı dolduruyor (derlenmiş CSS'te doğrulandı).
+  - Vaka: özetteki "Son tarih" ile düzenleme alanı aynı etiketi taşıyordu → alan "Son tarihi değiştir".
+- **Görülmedi:** düzeltilen ekranlar canlı yığında yeniden çekilmedi (yerel çalıştırma RLS rolleri + Docker'daki yente
+  ister); değişiklikler küçük, derleme ve tip temiz.
+
+## v2 fikirleri
+
+- Panel "Son taramalar"da aynı varlığın art arda taramaları tek satırda gruplanabilir (Kaya Kardeşler üç kez).
+- Varlık sayfasında "Risk değerlendirmesi: Standart" ile "Risk puanı: Düşük" iki ayrı ölçek; tek sözlükte birleştirmek.
+
+---
+
+**Önceki ölçüm: 2026-11-13**
 **Tek cümle:** Asıl akış (varlık → tarama → eşleşme kararı → vaka → denetim izi) gerçek arayüzden uçtan
 uca çalışıyor; sahip artık ekibini ekrandan kuruyor; 380 hızlı + 132 entegrasyon testi yeşil, açık 0.
 

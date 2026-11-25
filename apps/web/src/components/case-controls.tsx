@@ -212,8 +212,9 @@ export function CaseAssign({
             if (due) void run(`/api/v1/cases/${caseId}/due`, "PUT", { due_at: `${due}T17:00:00+03:00` });
           }}
         >
+          {/* Özette zaten "Son tarih" var; bu alan onu değiştirmek için (2026-11-25: iki aynı etiket yan yanaydı). */}
           <label htmlFor={dueId} className="block text-xs text-muted">
-            Son tarih
+            Son tarihi değiştir
           </label>
           <div className="flex gap-2">
             <input

@@ -72,7 +72,9 @@ export function RiskScorePanel({ score, canWrite }: { score: RiskScore; canWrite
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const tone = BAND_TONE[score.band];
-  const max = Math.max(1, ...score.factors.map((f) => f.points));
+  // Çubuklar puanın kendi ölçeğinde (100): en büyük kaleme göre ölçeklenince tek kalemli +10/100 "Düşük" bir döküm
+  // tam dolu çubukla çiziliyordu (2026-11-25). Kalemler 100'ü aşarsa toplam esas alınır, oranlar korunur.
+  const max = Math.max(100, score.factors.reduce((sum, f) => sum + f.points, 0));
 
   async function record() {
     setBusy(true);
